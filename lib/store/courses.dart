@@ -34,7 +34,9 @@ class Courses {
   /// formatted.
   /// Throws a [DuplicateCourseCodeException] when the input file specifies a
   /// course code more than once.
+  ///
   /// Asynchronously returns the number of courses successfully read.
+  ///
   /// ```dart
   /// int numCourses = await courses.loadCourses('/path/to/file');
   /// ```
@@ -48,7 +50,7 @@ class Courses {
       var tokens = line.split('\t');
       if (tokens.length != 3) {
         _courses.clear();
-        throw MalformedCourseFileException(malformedLine: line);
+        throw MalformedCourseFileException(malformedLine: numLines + 1);
       }
       var code = tokens[0];
       var name = tokens[1];

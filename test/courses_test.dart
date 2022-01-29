@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 
@@ -19,8 +20,7 @@ void main() {
         () => courses.loadCourses("test/resources/malformed_course.txt"),
         throwsA(allOf([
           isA<MalformedCourseFileException>(),
-          hasMessage(
-              "The course file is malformed: COD\tCourse without reading")
+          hasMessage("The course file is malformed: line 1")
         ])));
   });
 
@@ -65,5 +65,12 @@ void main() {
           'FAC',
           'ILA'
         ]));
+    expect(
+        courses.getCourse('ILA'),
+        const Course(
+            code: 'ILA',
+            name: 'The Invention of Los Angeles',
+            reading:
+                'The Mirage Factory: Illusion, Imagination, and the . . . , by Gary Krist'));
   });
 }

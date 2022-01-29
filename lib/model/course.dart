@@ -1,13 +1,28 @@
 /// Course holds information about an Omnilore course
 class Course {
-  Course({required this.code, required this.name, required this.reading});
+  const Course({required this.code, required this.name, required this.reading});
 
   /// 3-digit course identifier
-  String code;
+  final String code;
 
   /// Full course name
-  String name;
+  final String name;
 
   /// Recommended reading material
-  String reading;
+  final String reading;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is Course) {
+      return (code == other.code) &&
+          (name == other.name) &&
+          (reading == other.reading);
+    }
+    return false;
+  }
+
+  // coverage:ignore-start
+  @override
+  int get hashCode => code.hashCode ^ name.hashCode ^ reading.hashCode;
+  // coverage:ignore-end
 }
