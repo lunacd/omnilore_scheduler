@@ -27,7 +27,7 @@ class Courses {
     return _courses.length;
   }
 
-  /// Loads courses
+  /// Loads courses from a text file
   ///
   /// Throws a [FileSystemException] when the given input file does not exist.
   /// Throws a [MalformedCourseFileException] when the input file is incorrectly

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 
@@ -23,7 +25,7 @@ class Scheduling {
     return _courses.getNumCourses();
   }
 
-  /// Loads courses
+  /// Loads courses from a text file
   ///
   /// Throws a [FileSystemException] when the given input file does not exist.
   /// Throws a [MalformedCourseFileException] when the input file is incorrectly
