@@ -24,16 +24,19 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-          
+
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Run tests
+        run: flutter test
+
       - name: Analyze project source
         run: flutter analyze
-        
+
       - name: Generate documentation
         run: dartdoc
-        
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
