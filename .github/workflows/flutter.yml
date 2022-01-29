@@ -21,9 +21,15 @@ jobs:
         with:
           flutter-version: '2.8.1'
           channel: 'stable'
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
 
       - name: Analyze project source
         run: flutter analyze
+        
+      - name: Check dartdoc
+        run: which dartdoc
         
       - name: Generate documentation
         run: dartdoc --exclude main
