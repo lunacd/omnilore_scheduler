@@ -1,0 +1,2 @@
+COD	Course without reading	Some reading material
+COD	A duplicate course code	Another reading material
