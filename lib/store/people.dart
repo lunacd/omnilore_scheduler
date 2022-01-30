@@ -34,8 +34,9 @@ class People {
         file.openRead().transform(utf8.decoder).transform(const LineSplitter());
     var numLines = 0;
     await for (var line in lines) {
+      if (line.isEmpty) continue;
       // Parse input
-      var tokens = line.split('\t');
+      var tokens = line.split('\t').map((e) => e.trim()).toList();
       if (tokens.length != 21) {
         people.clear();
         throw MalformedPeopleFileException(malformedLine: numLines + 1);

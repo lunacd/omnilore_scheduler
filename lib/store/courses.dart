@@ -47,7 +47,8 @@ class Courses {
         file.openRead().transform(utf8.decoder).transform(const LineSplitter());
     var numLines = 0;
     await for (var line in lines) {
-      var tokens = line.split('\t');
+      if (line.isEmpty) continue;
+      var tokens = line.split('\t').map((e) => e.trim()).toList();
       if (tokens.length != 3) {
         _courses.clear();
         throw MalformedCourseFileException(malformedLine: numLines + 1);

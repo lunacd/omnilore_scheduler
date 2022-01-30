@@ -93,4 +93,39 @@ void main() {
     expect(person2.classes, []);
     expect(person2.submissionOrder, 259);
   });
+
+  test("Load people: whitespace", () async {
+    var people = People();
+    expect(await people.loadPeople("test/resources/people_whitespace.txt"), 271);
+    var person1 = people.people[111];
+    expect(person1.lName, "Johnson");
+    expect(person1.fName, "Carol");
+    expect(person1.phone, "372-8535");
+    expect(person1.numClassWanted, 1);
+    expect(
+        person1.availability
+            .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
+        false);
+    expect(
+        person1.availability.get(
+            WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
+        true);
+    expect(person1.classes, ["CHK", "FAC", "IMP", "ILA", "PRF"]);
+    expect(person1.submissionOrder, 108);
+    var person2 = people.people[201];
+    expect(person2.lName, "Pleatman");
+    expect(person2.fName, "Stan");
+    expect(person2.phone, "709-2404");
+    expect(person2.numClassWanted, 0);
+    expect(
+        person2.availability
+            .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
+        true);
+    expect(
+        person2.availability.get(
+            WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
+        true);
+    expect(person2.classes, []);
+    expect(person2.submissionOrder, 259);
+  });
 }

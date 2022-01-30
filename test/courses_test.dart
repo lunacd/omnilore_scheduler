@@ -73,4 +73,44 @@ void main() {
             reading:
                 'The Mirage Factory: Illusion, Imagination, and the . . . , by Gary Krist'));
   });
+
+  test("Load courses: whitespace", () async {
+    var courses = Courses();
+    expect(await courses.loadCourses("test/resources/course_whitespace.txt"), 23);
+    expect(courses.getNumCourses(), 23);
+    expect(
+        courses.getCodes(),
+        equals([
+          'BAD',
+          'THK',
+          'BIG',
+          'BRX',
+          'SCH',
+          'CHK',
+          'ASA',
+          'RAH',
+          'OCN',
+          'IMP',
+          'REF',
+          'EVC',
+          'HCD',
+          'QUR',
+          'SAF',
+          'GOO',
+          'SHK',
+          'SIS',
+          'LES',
+          'RWD',
+          'PRF',
+          'FAC',
+          'ILA'
+        ]));
+    expect(
+        courses.getCourse('ILA'),
+        const Course(
+            code: 'ILA',
+            name: 'The Invention of Los Angeles',
+            reading:
+            'The Mirage Factory: Illusion, Imagination, and the . . . , by Gary Krist'));
+  });
 }
