@@ -60,7 +60,7 @@ class Screen extends StatefulWidget {
 class _ScreenState extends State<Screen> {
   final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
-  String _message = "Choose a MenuItem.";
+  String _message = 'Choose a MenuItem.';
 
   // String _drawerTitle = 'Tap a drawerItem';
   // IconData _drawerIcon = Icons.menu;
@@ -361,7 +361,7 @@ class _ScreenState extends State<Screen> {
             children: [
               Row(
                 children: const [
-                  Text("status: need to import",
+                  Text('status: need to import',
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
                 ],

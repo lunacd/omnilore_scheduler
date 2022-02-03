@@ -6,7 +6,7 @@ class DuplicateCourseCodeException implements Exception {
 
   @override
   String toString() {
-    return "The course file contains duplicate course codes: $duplicatedCode";
+    return 'The course file contains duplicate course codes: $duplicatedCode';
   }
 }
 
@@ -18,7 +18,7 @@ class MalformedCourseFileException implements Exception {
 
   @override
   String toString() {
-    return "The course file is malformed: line $malformedLine";
+    return 'The course file is malformed: line $malformedLine';
   }
 }
 
@@ -30,7 +30,7 @@ class MalformedPeopleFileException implements Exception {
 
   @override
   String toString() {
-    return "The people file is malformed: line $malformedLine";
+    return 'The people file is malformed: line $malformedLine';
   }
 }
 
@@ -44,7 +44,7 @@ class InvalidNumClassWantedException implements Exception {
 
   @override
   String toString() {
-    return "People file specifies invalid number of classes wanted: $numClassWanted at line $malformedLine";
+    return 'People file specifies invalid number of classes wanted: $numClassWanted at line $malformedLine';
   }
 }
 
@@ -58,7 +58,7 @@ class UnrecognizedAvailabilityException implements Exception {
 
   @override
   String toString() {
-    return "People file specifies unrecognized availability value: $availability at line $malformedLine";
+    return 'People file specifies unrecognized availability value: $availability at line $malformedLine';
   }
 }
 
@@ -72,6 +72,18 @@ class DuplicateClassSelectionException implements Exception {
 
   @override
   String toString() {
-    return "A class is chosen more than once: $classCode at line $malformedLine";
+    return 'A class is chosen more than once: $classCode at line $malformedLine';
+  }
+}
+
+/// Exception for having inconsistencies between courses and people
+class InconsistentCourseAndPeopleException implements Exception {
+  const InconsistentCourseAndPeopleException({required this.message});
+
+  final String message;
+
+  @override
+  String toString() {
+    return message;
   }
 }

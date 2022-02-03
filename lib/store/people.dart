@@ -56,19 +56,19 @@ class People {
       // Parse availability
       for (int i = 0; i < 10; i++) {
         var avail = tokens[i + 4];
-        if (avail == "1") {
+        if (avail == '1') {
           availability.set(
               WeekOfMonth.firstThird,
               DayOfWeek.values[(i / 2).floor()],
               TimeOfDay.values[i % 2],
               false);
-        } else if (avail == "2") {
+        } else if (avail == '2') {
           availability.set(
               WeekOfMonth.secondFourth,
               DayOfWeek.values[(i / 2).floor()],
               TimeOfDay.values[i % 2],
               false);
-        } else if (avail == "3") {
+        } else if (avail == '3') {
           availability.set(
               WeekOfMonth.firstThird,
               DayOfWeek.values[(i / 2).floor()],
@@ -79,7 +79,7 @@ class People {
               DayOfWeek.values[(i / 2).floor()],
               TimeOfDay.values[i % 2],
               false);
-        } else if (avail != "") {
+        } else if (avail != '') {
           people.clear();
           throw UnrecognizedAvailabilityException(
               availability: avail, malformedLine: numLines + 1);

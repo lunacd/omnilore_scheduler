@@ -22,6 +22,11 @@ class Courses {
     return _courses[code];
   }
 
+  /// Check whether a given course exists
+  bool hasCourse(String code) {
+    return _courses.containsKey(code);
+  }
+
   /// Get the total number of courses
   int getNumCourses() {
     return _courses.length;

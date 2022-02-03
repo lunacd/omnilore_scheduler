@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:omnilore_scheduler/analysis/validate.dart';
 import 'package:omnilore_scheduler/model/course.dart';
+import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/person.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
@@ -8,6 +10,7 @@ import 'package:omnilore_scheduler/store/people.dart';
 class Scheduling {
   final Courses _courses = Courses();
   final People _people = People();
+  bool _isValid = true;
 
   /// Get an iterable list of course codes
   ///
@@ -35,12 +38,25 @@ class Scheduling {
   /// formatted.
   /// Throws a [DuplicateCourseCodeException] when the input file specifies a
   /// course code more than once.
+  /// Throws a [InconsistentCourseAndPeopleException] when people and the course
+  /// schedule are inconsistent
   /// Asynchronously returns the number of courses successfully read.
   /// ```dart
   /// int numCourses = await scheduling.loadCourses('/path/to/file');
   /// ```
   Future<int> loadCourses(String inputFile) async {
-    return await _courses.loadCourses(inputFile);
+    _isValid = true;
+    int numCourses;
+    numCourses = await _courses.loadCourses(inputFile);
+    if (numCourses != 0 && _people.people.isNotEmpty) {
+      var result =
+          Validate.validatePeopleAgainstCourses(_people.people, _courses);
+      if (result != null) {
+        _isValid = false;
+        throw InconsistentCourseAndPeopleException(message: result);
+      }
+    }
+    return numCourses;
   }
 
   /// Get a list of people, ordered as is presented in the input file
@@ -66,16 +82,37 @@ class Scheduling {
   /// int numPeople = await people.loadPeople('/path/to/file');
   /// ```
   Future<int> loadPeople(String inputFile) async {
-    return await _people.loadPeople(inputFile);
+    _isValid = true;
+    var numPeople = await _people.loadPeople(inputFile);
+    if (numPeople != 0 && _courses.getNumCourses() != 0) {
+      var result =
+          Validate.validatePeopleAgainstCourses(_people.people, _courses);
+      if (result != null) {
+        _isValid = false;
+        throw InconsistentCourseAndPeopleException(message: result);
+      }
+    }
+    return numPeople;
   }
 
   /// Get a description of the current status of processing
-  String getStatusOfProcessing() {
-    if (_courses.getNumCourses() == 0) {
-      return 'Need to import courses';
-    } else if (_people.people.isEmpty) {
-      return 'Need to import member data';
+  StatusOfProcessing getStatusOfProcessing() {
+    if (!_isValid) {
+      return StatusOfProcessing.inconsistent;
     }
-    return 'Not yet implemented';
+    if (_courses.getNumCourses() == 0) {
+      return StatusOfProcessing.needCourses;
+    }
+    if (_people.people.isEmpty) {
+      return StatusOfProcessing.needPeople;
+    }
+    return StatusOfProcessing.notImplemented;
   }
+}
+
+enum StatusOfProcessing {
+  needCourses,
+  needPeople,
+  inconsistent,
+  notImplemented
 }

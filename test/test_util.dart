@@ -12,7 +12,7 @@ class _HasMessage extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description.add("has message $_message");
+    return description.add('has message $_message');
   }
 }
 

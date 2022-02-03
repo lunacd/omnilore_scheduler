@@ -8,35 +8,35 @@ import 'package:omnilore_scheduler/store/courses.dart';
 import 'test_util.dart';
 
 void main() {
-  test("Load courses: File not found", () {
+  test('Load courses: File not found', () {
     var courses = Courses();
-    expect(() => courses.loadCourses("nonexistent"),
+    expect(() => courses.loadCourses('nonexistent'),
         throwsA(isA<FileSystemException>()));
   });
 
-  test("Load courses: Malformed course file", () async {
+  test('Load courses: Malformed course file', () async {
     var courses = Courses();
     expect(
-        () => courses.loadCourses("test/resources/malformed_course.txt"),
+        () => courses.loadCourses('test/resources/malformed_course.txt'),
         throwsA(allOf([
           isA<MalformedCourseFileException>(),
-          hasMessage("The course file is malformed: line 1")
+          hasMessage('The course file is malformed: line 1')
         ])));
   });
 
-  test("Load courses: Duplicate course code", () {
+  test('Load courses: Duplicate course code', () {
     var courses = Courses();
     expect(
-        () => courses.loadCourses("test/resources/duplicate_course.txt"),
+        () => courses.loadCourses('test/resources/duplicate_course.txt'),
         throwsA(allOf([
           isA<DuplicateCourseCodeException>(),
-          hasMessage("The course file contains duplicate course codes: COD")
+          hasMessage('The course file contains duplicate course codes: COD')
         ])));
   });
 
-  test("Load courses", () async {
+  test('Load courses', () async {
     var courses = Courses();
-    expect(await courses.loadCourses("test/resources/course.txt"), 23);
+    expect(await courses.loadCourses('test/resources/course.txt'), 23);
     expect(courses.getNumCourses(), 23);
     expect(
         courses.getCodes(),
@@ -74,9 +74,10 @@ void main() {
                 'The Mirage Factory: Illusion, Imagination, and the . . . , by Gary Krist'));
   });
 
-  test("Load courses: whitespace", () async {
+  test('Load courses: whitespace', () async {
     var courses = Courses();
-    expect(await courses.loadCourses("test/resources/course_whitespace.txt"), 23);
+    expect(
+        await courses.loadCourses('test/resources/course_whitespace.txt'), 23);
     expect(courses.getNumCourses(), 23);
     expect(
         courses.getCodes(),
@@ -111,6 +112,8 @@ void main() {
             code: 'ILA',
             name: 'The Invention of Los Angeles',
             reading:
-            'The Mirage Factory: Illusion, Imagination, and the . . . , by Gary Krist'));
+                'The Mirage Factory: Illusion, Imagination, and the . . . , by Gary Krist'));
+    expect(courses.hasCourse('SIS'), true);
+    expect(courses.hasCourse('KLL'), false);
   });
 }
