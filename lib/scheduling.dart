@@ -68,4 +68,14 @@ class Scheduling {
   Future<int> loadPeople(String inputFile) async {
     return await _people.loadPeople(inputFile);
   }
+
+  /// Get a description of the current status of processing
+  String getStatusOfProcessing() {
+    if (_courses.getNumCourses() == 0) {
+      return 'Need to import courses';
+    } else if (_people.people.isEmpty) {
+      return 'Need to import member data';
+    }
+    return 'Not yet implemented';
+  }
 }
