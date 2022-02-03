@@ -15,12 +15,10 @@ const Map kColorMap = {
 };
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -45,14 +43,12 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: const Screen(),
+      home: Screen(),
     );
   }
 }
 
 class Screen extends StatefulWidget {
-  const Screen({Key? key}) : super(key: key);
-
   @override
   _ScreenState createState() => _ScreenState();
 }
@@ -60,10 +56,9 @@ class Screen extends StatefulWidget {
 class _ScreenState extends State<Screen> {
   final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
-  String _message = 'Choose a MenuItem.';
-
-  // String _drawerTitle = 'Tap a drawerItem';
-  // IconData _drawerIcon = Icons.menu;
+  String _message = "Choose a MenuItem.";
+  String _drawerTitle = 'Tap a drawerItem';
+  IconData _drawerIcon = Icons.menu;
 
   Color masterBackgroundColor = Colors.white;
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
@@ -173,7 +168,7 @@ class _ScreenState extends State<Screen> {
         ),
         onBreakpointChange: () {
           setState(() {
-            // print('Breakpoint change');
+            print('Breakpoint change');
           });
         },
         masterPaneMinWidth: 500,
@@ -221,10 +216,26 @@ class _ScreenState extends State<Screen> {
             leading: Icon(icon),
             title: Text(title),
             onTap: () {
-              // setState(() {
-              //   _drawerIcon = icon;
-              //   _drawerTitle = title;
-              // });
+              setState(() {
+                _drawerIcon = icon;
+                _drawerTitle = title;
+              });
+            },
+          )),
+    );
+  }
+
+  Widget auxButton({required String title}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+          elevation: 8,
+          child: ListTile(
+            title: Text(title),
+            onTap: () {
+              setState(() {
+                _drawerTitle = title;
+              });
             },
           )),
     );
@@ -239,10 +250,10 @@ class _ScreenState extends State<Screen> {
             height: 40,
             child: ElevatedButton(
               onPressed: () {
-                // setState(() {
-                //   _drawerIcon = icon;
-                //   _drawerTitle = title;
-                // });
+                setState(() {
+                  _drawerIcon = icon;
+                  _drawerTitle = title;
+                });
               },
               child: Center(child: Icon(icon, size: 30, color: Colors.black54)),
             ),
@@ -251,7 +262,6 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder detailPane() {
-    // print('BUILD: detailPane');
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -260,87 +270,85 @@ class _ScreenState extends State<Screen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
-                Card(
-                  elevation: 12,
-                  child: SizedBox(
-                    width: 300,
-                    height: 50,
-                    child: Container(
-                      color: Colors.amber,
-                      child: const Center(
-                          child:
-                              Text('DETAIL', style: TextStyle(fontSize: 20))),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
+                Text("Class Name display"),
+                Text(
+                    "Show people in a cell by clicking on a desired cell \nshowing: people assigned to DSC"),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        context.appScreen.closeMenu();
-                      },
-                      child: const Text('Close Menu'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                            onPressed: null, child: Text("Enter/Edit Ppl")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("New Curiculum")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Cont. Old Curric")),
+                      ],
                     ),
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        context.appScreen.hideMenu();
-                      },
-                      child: const Text('Hide Menu'),
+                    Column(
+                      children: [
+                        aux_data(),
+                      ],
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.appScreen.showMenu();
-                      },
-                      child: const Text('Show Menu'),
+                    Column(
+                      children: [
+                        Text("Select Process"),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Enter/Edit Crs")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Display Courses")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Enter/Edit Ppl")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("New Curiculum")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Cont. Old Curric")),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: 300,
-                  height: 300,
-                  child: Container(
-                    color: Colors.blueGrey,
-                    child: Center(
-                        child: Text(_message,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 40))),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Card(
-                  elevation: 12,
-                  child: SizedBox(
-                    width: 300,
-                    height: 50,
-                    child: Center(
-                      child: Text(
-                          'Pane height: ${context.appScreen.detailPaneDetails.height.toStringAsFixed(1)} width: ${context.appScreen.detailPaneDetails.width.toStringAsFixed(1)}',
-                          style: const TextStyle(fontSize: 20)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        Text("Names Display Mode"),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Show BU & CA")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Show Splits")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Imp. Splits")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Show Coord(s)")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Set C or CC2")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Set CC 1")),
+                      ],
                     ),
-                  ),
+                    Column(
+                      children: [
+                        Title(
+                            title: 'Auxilury Data',
+                            color: const Color(0xFFFFFFFF),
+                            child: aux_data()),
+                      ],
+                    )
+                  ],
                 ),
-                const SizedBox(height: 20),
-                Title(
-                    title: 'Auxiliary Data',
-                    color: const Color(0xFFFFFFFF),
-                    child: auxData()),
                 if (context.appScreen.isCompact())
                   ElevatedButton(
                     onPressed: () {
                       context.appScreen.showOnlyMaster();
                     },
-                    child: const Text('Show master'),
+                    child: Text('Show master'),
                   ),
               ],
             ),
@@ -351,7 +359,7 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder masterPane() {
-    // print('BUILD: masterPane');
+    print('BUILD: masterPane');
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -360,8 +368,8 @@ class _ScreenState extends State<Screen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                children: const [
-                  Text('status: need to import',
+                children: [
+                  Text("status: need to import",
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
                 ],
@@ -375,7 +383,7 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder appContextMenu() {
-    // print('BUILD: appContextMenu');
+    print('BUILD: appContextMenu');
     return Builder(
       builder: (BuildContext context) {
         return SizedBox(
@@ -383,7 +391,7 @@ class _ScreenState extends State<Screen> {
           width: 400,
           child: Container(
             color: Colors.yellow,
-            child: const Text('AppContextMenu'),
+            child: Text('AppContextMenu'),
           ),
         );
       },
@@ -550,12 +558,12 @@ Widget data() {
   );
 }
 
-Widget auxData() {
+Widget aux_data() {
   return DataTable(
     columns: const <DataColumn>[
       DataColumn(
         label: Text(
-          '',
+          'Auxilury Data',
           softWrap: true,
           style: TextStyle(fontStyle: FontStyle.italic),
         ),
