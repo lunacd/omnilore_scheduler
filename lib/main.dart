@@ -270,9 +270,22 @@ class _ScreenState extends State<Screen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Text("Class Name display"),
+                Text(
+                    "Show people in a cell by clicking on a desired cell \nshowing: people assigned to DSC"),
                 Row(
                   children: [
-                    Row(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                            onPressed: null, child: Text("Enter/Edit Ppl")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("New Curiculum")),
+                        ElevatedButton(
+                            onPressed: null, child: Text("Cont. Old Curric")),
+                      ],
+                    ),
                   ],
                 ),
                 Row(
