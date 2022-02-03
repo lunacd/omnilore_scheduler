@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
@@ -15,10 +16,12 @@ const Map kColorMap = {
 };
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -43,12 +46,14 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: Screen(),
+      home: const Screen(),
     );
   }
 }
 
 class Screen extends StatefulWidget {
+  const Screen({Key? key}) : super(key: key);
+
   @override
   _ScreenState createState() => _ScreenState();
 }
@@ -56,17 +61,18 @@ class Screen extends StatefulWidget {
 class _ScreenState extends State<Screen> {
   final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
-  String _message = "Choose a MenuItem.";
-  String _drawerTitle = 'Tap a drawerItem';
-  IconData _drawerIcon = Icons.menu;
+
+  // String _message = 'Choose a MenuItem.';
+  // String _drawerTitle = 'Tap a drawerItem';
+  // IconData _drawerIcon = Icons.menu;
 
   Color masterBackgroundColor = Colors.white;
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
 
   void _showMessage(String newMessage) {
-    setState(() {
-      _message = newMessage;
-    });
+    // setState(() {
+    //   _message = newMessage;
+    // });
   }
 
   void _masterSetBackgroundColor(String color) {
@@ -168,7 +174,9 @@ class _ScreenState extends State<Screen> {
         ),
         onBreakpointChange: () {
           setState(() {
-            print('Breakpoint change');
+            if (kDebugMode) {
+              print('Breakpoint change');
+            }
           });
         },
         masterPaneMinWidth: 500,
@@ -216,10 +224,10 @@ class _ScreenState extends State<Screen> {
             leading: Icon(icon),
             title: Text(title),
             onTap: () {
-              setState(() {
-                _drawerIcon = icon;
-                _drawerTitle = title;
-              });
+              // setState(() {
+              //   _drawerIcon = icon;
+              //   _drawerTitle = title;
+              // });
             },
           )),
     );
@@ -233,9 +241,9 @@ class _ScreenState extends State<Screen> {
           child: ListTile(
             title: Text(title),
             onTap: () {
-              setState(() {
-                _drawerTitle = title;
-              });
+              // setState(() {
+              //   _drawerTitle = title;
+              // });
             },
           )),
     );
@@ -250,10 +258,10 @@ class _ScreenState extends State<Screen> {
             height: 40,
             child: ElevatedButton(
               onPressed: () {
-                setState(() {
-                  _drawerIcon = icon;
-                  _drawerTitle = title;
-                });
+                // setState(() {
+                //   _drawerIcon = icon;
+                //   _drawerTitle = title;
+                // });
               },
               child: Center(child: Icon(icon, size: 30, color: Colors.black54)),
             ),
@@ -270,20 +278,20 @@ class _ScreenState extends State<Screen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text("Class Name display"),
-                Text(
-                    "Show people in a cell by clicking on a desired cell \nshowing: people assigned to DSC"),
+                const Text('Class Name display'),
+                const Text(
+                    'Show people in a cell by clicking on a desired cell \nshowing: people assigned to DSC'),
                 Row(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
+                      children: const [
                         ElevatedButton(
-                            onPressed: null, child: Text("Enter/Edit Ppl")),
+                            onPressed: null, child: Text('Enter/Edit Ppl')),
                         ElevatedButton(
-                            onPressed: null, child: Text("New Curiculum")),
+                            onPressed: null, child: Text('New Curriculum')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Cont. Old Curric")),
+                            onPressed: null, child: Text('Cont. Old Curric')),
                       ],
                     ),
                   ],
@@ -293,22 +301,22 @@ class _ScreenState extends State<Screen> {
                   children: [
                     Column(
                       children: [
-                        aux_data(),
+                        auxData(),
                       ],
                     ),
                     Column(
-                      children: [
-                        Text("Select Process"),
+                      children: const [
+                        Text('Select Process'),
                         ElevatedButton(
-                            onPressed: null, child: Text("Enter/Edit Crs")),
+                            onPressed: null, child: Text('Enter/Edit Crs')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Display Courses")),
+                            onPressed: null, child: Text('Display Courses')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Enter/Edit Ppl")),
+                            onPressed: null, child: Text('Enter/Edit Ppl')),
                         ElevatedButton(
-                            onPressed: null, child: Text("New Curiculum")),
+                            onPressed: null, child: Text('New Curriculum')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Cont. Old Curric")),
+                            onPressed: null, child: Text('Cont. Old Curric')),
                       ],
                     ),
                   ],
@@ -317,28 +325,28 @@ class _ScreenState extends State<Screen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
-                      children: [
-                        Text("Names Display Mode"),
+                      children: const [
+                        Text('Names Display Mode'),
                         ElevatedButton(
-                            onPressed: null, child: Text("Show BU & CA")),
+                            onPressed: null, child: Text('Show BU & CA')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Show Splits")),
+                            onPressed: null, child: Text('Show Splits')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Imp. Splits")),
+                            onPressed: null, child: Text('Imp. Splits')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Show Coord(s)")),
+                            onPressed: null, child: Text('Show Coord(s)')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Set C or CC2")),
+                            onPressed: null, child: Text('Set C or CC2')),
                         ElevatedButton(
-                            onPressed: null, child: Text("Set CC 1")),
+                            onPressed: null, child: Text('Set CC 1')),
                       ],
                     ),
                     Column(
                       children: [
                         Title(
-                            title: 'Auxilury Data',
+                            title: 'Auxiliary Data',
                             color: const Color(0xFFFFFFFF),
-                            child: aux_data()),
+                            child: auxData()),
                       ],
                     )
                   ],
@@ -348,7 +356,7 @@ class _ScreenState extends State<Screen> {
                     onPressed: () {
                       context.appScreen.showOnlyMaster();
                     },
-                    child: Text('Show master'),
+                    child: const Text('Show master'),
                   ),
               ],
             ),
@@ -359,7 +367,9 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder masterPane() {
-    print('BUILD: masterPane');
+    if (kDebugMode) {
+      print('BUILD: masterPane');
+    }
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -368,8 +378,8 @@ class _ScreenState extends State<Screen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                children: [
-                  Text("status: need to import",
+                children: const [
+                  Text('status: need to import',
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
                 ],
@@ -383,7 +393,9 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder appContextMenu() {
-    print('BUILD: appContextMenu');
+    if (kDebugMode) {
+      print('BUILD: appContextMenu');
+    }
     return Builder(
       builder: (BuildContext context) {
         return SizedBox(
@@ -391,7 +403,7 @@ class _ScreenState extends State<Screen> {
           width: 400,
           child: Container(
             color: Colors.yellow,
-            child: Text('AppContextMenu'),
+            child: const Text('AppContextMenu'),
           ),
         );
       },
@@ -558,12 +570,12 @@ Widget data() {
   );
 }
 
-Widget aux_data() {
+Widget auxData() {
   return DataTable(
     columns: const <DataColumn>[
       DataColumn(
         label: Text(
-          'Auxilury Data',
+          'Auxiliary Data',
           softWrap: true,
           style: TextStyle(fontStyle: FontStyle.italic),
         ),
