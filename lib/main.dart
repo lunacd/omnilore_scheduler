@@ -1,115 +1,611 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_menu/flutter_menu.dart';
+
+const Map kColorMap = {
+  'Red': Colors.red,
+  'Blue': Colors.blue,
+  'Purple': Colors.purple,
+  'Black': Colors.black,
+  'Pink': Colors.pink,
+  'Yellow': Colors.yellow,
+  'Orange': Colors.orange,
+  'White': Colors.white,
+  'BlueGrey': Colors.blueGrey,
+};
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            overlayColor: MaterialStateProperty.all(
+                Colors.blueGrey[600]), // Set Button hover color
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all(Colors.black),
+
+            backgroundColor: MaterialStateProperty.all(Colors.white),
+            overlayColor: MaterialStateProperty.all(
+                Colors.blueGrey[600]), // Set Button hover color
+          ),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      home: Screen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class Screen extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _ScreenState createState() => _ScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _ScreenState extends State<Screen> {
+  final ScrollController scrollController = ScrollController();
+  TextEditingController controller = TextEditingController();
+  String _message = "Choose a MenuItem.";
+  String _drawerTitle = 'Tap a drawerItem';
+  IconData _drawerIcon = Icons.menu;
 
-  void _incrementCounter() {
+  Color masterBackgroundColor = Colors.white;
+  Color detailBackgroundColor = Colors.blueGrey[300] as Color;
+
+  void _showMessage(String newMessage) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _message = newMessage;
+    });
+  }
+
+  void _masterSetBackgroundColor(String color) {
+    setState(() {
+      masterBackgroundColor = kColorMap[color];
+    });
+  }
+
+  void _detailSetBackgroundColor(String color) {
+    setState(() {
+      detailBackgroundColor = kColorMap[color];
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: AppScreen(
+        masterContextMenu: ContextMenu(
+          width: 150,
+          height: 250,
+          child: ContextMenuSliver(
+            title: 'Master',
+            children: [
+              masterContextMenuItem(color: 'Red'),
+              masterContextMenuItem(color: 'Blue'),
+              masterContextMenuItem(color: 'Purple'),
+              masterContextMenuItem(color: 'Pink'),
+              masterContextMenuItem(color: 'White'),
+            ],
+          ),
         ),
+        detailContextMenu: ContextMenu(
+          width: 300,
+          height: 150,
+          child: ContextMenuSliver(
+            title: 'Detail',
+            children: [
+              detailContextMenuItem(color: 'Yellow'),
+              detailContextMenuItem(color: 'Orange'),
+              detailContextMenuItem(color: 'Pink'),
+              detailContextMenuItem(color: 'Red'),
+              detailContextMenuItem(color: 'BlueGrey'),
+            ],
+          ),
+        ),
+        menuList: [
+          MenuItem(title: 'File', menuListItems: [
+            MenuListItem(
+              icon: Icons.open_in_new,
+              title: 'Open',
+              onPressed: () {
+                _showMessage('File.open');
+              },
+              shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
+            ),
+            MenuListItem(
+              title: 'Close',
+              onPressed: () {
+                _showMessage('File.close');
+              },
+            ),
+            MenuListItem(
+              title: 'Save',
+              onPressed: () {
+                _showMessage('File.save');
+              },
+            ),
+            MenuListItem(
+              title: 'Delete',
+              shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, alt: true),
+              onPressed: () {
+                _showMessage('File.delete');
+              },
+            ),
+          ]),
+          MenuItem(title: 'View', isActive: true, menuListItems: [
+            MenuListItem(title: 'View all'),
+            MenuListItem(title: 'close view'),
+            MenuListItem(title: 'jump to'),
+            MenuListItem(title: 'go to'),
+          ]),
+          MenuItem(title: 'Help', isActive: true, menuListItems: [
+            MenuListItem(title: 'Help'),
+            MenuListItem(title: 'About'),
+            MenuListItem(title: 'License'),
+            MenuListDivider(),
+            MenuListItem(title: 'Goodbye'),
+          ]),
+        ],
+        masterPane: masterPane(),
+        detailPane: detailPane(),
+        drawer: AppDrawer(
+          defaultSmall: false,
+          largeDrawerWidth: 200,
+          largeDrawer: drawer(small: false),
+          smallDrawerWidth: 60,
+          smallDrawer: drawer(small: true),
+        ),
+        onBreakpointChange: () {
+          setState(() {
+            print('Breakpoint change');
+          });
+        },
+        masterPaneMinWidth: 500,
+        detailPaneMinWidth: 500,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  Widget drawer({required bool small}) {
+    return Container(
+        color: Colors.amber,
+        child: ListView(
+          children: [
+            drawerButton(
+                title: 'User', icon: Icons.account_circle, small: small),
+            drawerButton(title: 'Inbox', icon: Icons.inbox, small: small),
+            drawerButton(title: 'Files', icon: Icons.save, small: small),
+            drawerButton(
+              title: 'Clients',
+              icon: Icons.supervised_user_circle,
+              small: small,
+            ),
+            drawerButton(
+              title: 'Settings',
+              icon: Icons.settings,
+              small: small,
+            ),
+          ],
+        ));
+  }
+
+  Widget drawerButton(
+      {required String title, required IconData icon, required bool small}) {
+    return small
+        ? drawerSmallButton(icon: icon, title: title)
+        : drawerLargeButton(icon: icon, title: title);
+  }
+
+  Widget drawerLargeButton({required String title, required IconData icon}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+          elevation: 8,
+          child: ListTile(
+            leading: Icon(icon),
+            title: Text(title),
+            onTap: () {
+              setState(() {
+                _drawerIcon = icon;
+                _drawerTitle = title;
+              });
+            },
+          )),
+    );
+  }
+
+  Widget drawerSmallButton({required String title, required IconData icon}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(3, 8, 3, 8),
+      child: Card(
+          elevation: 8,
+          child: SizedBox(
+            height: 40,
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _drawerIcon = icon;
+                  _drawerTitle = title;
+                });
+              },
+              child: Center(child: Icon(icon, size: 30, color: Colors.black54)),
+            ),
+          )),
+    );
+  }
+
+  Builder detailPane() {
+    print('BUILD: detailPane');
+    return Builder(
+      builder: (BuildContext context) {
+        return Container(
+          color: detailBackgroundColor,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 20),
+                Card(
+                  elevation: 12,
+                  child: Container(
+                    width: 300,
+                    height: 50,
+                    child: Container(
+                      color: Colors.amber,
+                      child: Center(
+                          child:
+                              Text('DETAIL', style: TextStyle(fontSize: 20))),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        context.appScreen.closeMenu();
+                      },
+                      child: Text('Close Menu'),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        context.appScreen.hideMenu();
+                      },
+                      child: Text('Hide Menu'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.appScreen.showMenu();
+                      },
+                      child: Text('Show Menu'),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: Container(
+                    color: Colors.blueGrey,
+                    child: Center(
+                        child: Text(_message,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 40))),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Card(
+                  elevation: 12,
+                  child: Container(
+                    width: 300,
+                    height: 50,
+                    child: Center(
+                      child: Text(
+                          'Pane height: ${context.appScreen.detailPaneDetails.height.toStringAsFixed(1)} width: ${context.appScreen.detailPaneDetails.width.toStringAsFixed(1)}',
+                          style: TextStyle(fontSize: 20)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Title(
+                    title: 'Auxilury Data',
+                    color: const Color(0xFFFFFFFF),
+                    child: aux_data()),
+                if (context.appScreen.isCompact())
+                  ElevatedButton(
+                    onPressed: () {
+                      context.appScreen.showOnlyMaster();
+                    },
+                    child: Text('Show master'),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Builder masterPane() {
+    print('BUILD: masterPane');
+    return Builder(
+      builder: (BuildContext context) {
+        return Container(
+          color: masterBackgroundColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Text("status: need to import",
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
+                ],
+              ),
+              data()
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Builder appContextMenu() {
+    print('BUILD: appContextMenu');
+    return Builder(
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: 300,
+          width: 400,
+          child: Container(
+            color: Colors.yellow,
+            child: Text('AppContextMenu'),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget masterContextMenuItem({required String color}) {
+    return ContextMenuItem(
+      onTap: () {
+        _masterSetBackgroundColor(color);
+      },
+      child: Container(
+        color: kColorMap[color],
+        child: Center(child: Text(color)),
+      ),
+    );
+  }
+
+  Widget detailContextMenuItem({required String color}) {
+    return ContextMenuItem(
+      onTap: () {
+        _detailSetBackgroundColor(color);
+      },
+      child: Container(
+        color: kColorMap[color],
+        child: Center(child: Text(color)),
+      ),
+    );
+  }
+}
+
+Widget data() {
+  return DataTable(
+    columns: const <DataColumn>[
+      DataColumn(
+        label: Text(
+          'Name',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'First Choices',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'First Backup',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'Second Backup',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'Third Backup',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'Add from BU\'s',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'Drop, Bad Time',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'Drop, Dupe Class',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'Drop, Class Full',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'resulting size',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+    ],
+    rows: const <DataRow>[
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Sarah')),
+          DataCell(Text('19')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Sarah')),
+          DataCell(Text('19')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Sarah')),
+          DataCell(Text('19')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Sarah')),
+          DataCell(Text('19')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+          DataCell(Text('Student')),
+        ],
+      ),
+    ],
+  );
+}
+
+Widget aux_data() {
+  return DataTable(
+    columns: const <DataColumn>[
+      DataColumn(
+        label: Text(
+          '',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          '',
+          softWrap: true,
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+    ],
+    rows: const <DataRow>[
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Course Takers')),
+          DataCell(Text('19')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Go Courses')),
+          DataCell(Text('19')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('places asked')),
+          DataCell(Text('19')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('places given')),
+          DataCell(Text('19')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('un-met wants')),
+          DataCell(Text('19')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('on leave')),
+          DataCell(Text('19')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Missing')),
+          DataCell(Text('19')),
+        ],
+      ),
+    ],
+  );
 }
