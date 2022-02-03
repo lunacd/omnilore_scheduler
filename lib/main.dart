@@ -15,10 +15,12 @@ const Map kColorMap = {
 };
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -43,12 +45,14 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: Screen(),
+      home: const Screen(),
     );
   }
 }
 
 class Screen extends StatefulWidget {
+  const Screen({Key? key}) : super(key: key);
+
   @override
   _ScreenState createState() => _ScreenState();
 }
@@ -57,8 +61,9 @@ class _ScreenState extends State<Screen> {
   final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
   String _message = "Choose a MenuItem.";
-  String _drawerTitle = 'Tap a drawerItem';
-  IconData _drawerIcon = Icons.menu;
+
+  // String _drawerTitle = 'Tap a drawerItem';
+  // IconData _drawerIcon = Icons.menu;
 
   Color masterBackgroundColor = Colors.white;
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
@@ -168,7 +173,7 @@ class _ScreenState extends State<Screen> {
         ),
         onBreakpointChange: () {
           setState(() {
-            print('Breakpoint change');
+            // print('Breakpoint change');
           });
         },
         masterPaneMinWidth: 500,
@@ -216,10 +221,10 @@ class _ScreenState extends State<Screen> {
             leading: Icon(icon),
             title: Text(title),
             onTap: () {
-              setState(() {
-                _drawerIcon = icon;
-                _drawerTitle = title;
-              });
+              // setState(() {
+              //   _drawerIcon = icon;
+              //   _drawerTitle = title;
+              // });
             },
           )),
     );
@@ -234,10 +239,10 @@ class _ScreenState extends State<Screen> {
             height: 40,
             child: ElevatedButton(
               onPressed: () {
-                setState(() {
-                  _drawerIcon = icon;
-                  _drawerTitle = title;
-                });
+                // setState(() {
+                //   _drawerIcon = icon;
+                //   _drawerTitle = title;
+                // });
               },
               child: Center(child: Icon(icon, size: 30, color: Colors.black54)),
             ),
@@ -246,7 +251,7 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder detailPane() {
-    print('BUILD: detailPane');
+    // print('BUILD: detailPane');
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -255,21 +260,21 @@ class _ScreenState extends State<Screen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Card(
                   elevation: 12,
-                  child: Container(
+                  child: SizedBox(
                     width: 300,
                     height: 50,
                     child: Container(
                       color: Colors.amber,
-                      child: Center(
+                      child: const Center(
                           child:
                               Text('DETAIL', style: TextStyle(fontSize: 20))),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -278,7 +283,7 @@ class _ScreenState extends State<Screen> {
                       onPressed: () {
                         context.appScreen.closeMenu();
                       },
-                      child: Text('Close Menu'),
+                      child: const Text('Close Menu'),
                     ),
                   ],
                 ),
@@ -290,17 +295,17 @@ class _ScreenState extends State<Screen> {
                       onPressed: () {
                         context.appScreen.hideMenu();
                       },
-                      child: Text('Hide Menu'),
+                      child: const Text('Hide Menu'),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         context.appScreen.showMenu();
                       },
-                      child: Text('Show Menu'),
+                      child: const Text('Show Menu'),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 SizedBox(
                   width: 300,
                   height: 300,
@@ -309,33 +314,33 @@ class _ScreenState extends State<Screen> {
                     child: Center(
                         child: Text(_message,
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 40))),
+                            style: const TextStyle(fontSize: 40))),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Card(
                   elevation: 12,
-                  child: Container(
+                  child: SizedBox(
                     width: 300,
                     height: 50,
                     child: Center(
                       child: Text(
                           'Pane height: ${context.appScreen.detailPaneDetails.height.toStringAsFixed(1)} width: ${context.appScreen.detailPaneDetails.width.toStringAsFixed(1)}',
-                          style: TextStyle(fontSize: 20)),
+                          style: const TextStyle(fontSize: 20)),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Title(
-                    title: 'Auxilury Data',
+                    title: 'Auxiliary Data',
                     color: const Color(0xFFFFFFFF),
-                    child: aux_data()),
+                    child: auxData()),
                 if (context.appScreen.isCompact())
                   ElevatedButton(
                     onPressed: () {
                       context.appScreen.showOnlyMaster();
                     },
-                    child: Text('Show master'),
+                    child: const Text('Show master'),
                   ),
               ],
             ),
@@ -346,7 +351,7 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder masterPane() {
-    print('BUILD: masterPane');
+    // print('BUILD: masterPane');
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -355,7 +360,7 @@ class _ScreenState extends State<Screen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                children: [
+                children: const [
                   Text("status: need to import",
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
@@ -370,7 +375,7 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder appContextMenu() {
-    print('BUILD: appContextMenu');
+    // print('BUILD: appContextMenu');
     return Builder(
       builder: (BuildContext context) {
         return SizedBox(
@@ -378,7 +383,7 @@ class _ScreenState extends State<Screen> {
           width: 400,
           child: Container(
             color: Colors.yellow,
-            child: Text('AppContextMenu'),
+            child: const Text('AppContextMenu'),
           ),
         );
       },
@@ -545,7 +550,7 @@ Widget data() {
   );
 }
 
-Widget aux_data() {
+Widget auxData() {
   return DataTable(
     columns: const <DataColumn>[
       DataColumn(
