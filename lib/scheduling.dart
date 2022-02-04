@@ -40,6 +40,7 @@ class Scheduling {
   /// course code more than once.
   /// Throws a [InconsistentCourseAndPeopleException] when people and the course
   /// schedule are inconsistent
+  ///
   /// Asynchronously returns the number of courses successfully read.
   /// ```dart
   /// int numCourses = await scheduling.loadCourses('/path/to/file');
@@ -75,6 +76,8 @@ class Scheduling {
   /// availability value other than empty, 1, 2, or 3.
   /// Throws a [DuplicateClassSelectionException] when a person selects a class
   /// more than once.
+  /// Throws a [InconsistentCourseAndPeopleException] when people and the course
+  /// schedule are inconsistent
   ///
   /// Asynchronously returns the number of people successfully read.
   ///
@@ -110,6 +113,7 @@ class Scheduling {
   }
 }
 
+/// Enum for all possible statuses of processing
 enum StatusOfProcessing {
   needCourses,
   needPeople,

@@ -1,5 +1,6 @@
 import 'package:omnilore_scheduler/model/availability.dart';
 
+/// Person holds information of an Omnilore member
 class Person {
   const Person(
       {required this.fName,
