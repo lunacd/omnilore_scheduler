@@ -59,6 +59,28 @@ void main() {
         ])));
   });
 
+  test('Load people: Listing class when wanting 0', () async {
+    var people = People();
+    expect(
+        () => people
+            .loadPeople('test/resources/people_listing_when_wanting_zero.txt'),
+        throwsA(allOf([
+          isA<ListingWhenWantingZeroException>(),
+          hasMessage('Fran Wielin still listed classes when wanting 0')
+        ])));
+  });
+
+  test('Load people: Wanting more than listed', () async {
+    var people = People();
+    expect(
+            () => people
+            .loadPeople('test/resources/people_wanting_more_than_listed.txt'),
+        throwsA(allOf([
+          isA<WantingMoreThanListedException>(),
+          hasMessage('Elaine Winer wanted more class than they listed')
+        ])));
+  });
+
   test('Load people', () async {
     var people = People();
     expect(await people.loadPeople('test/resources/people.txt'), 271);
@@ -96,7 +118,8 @@ void main() {
 
   test('Load people: whitespace', () async {
     var people = People();
-    expect(await people.loadPeople('test/resources/people_whitespace.txt'), 271);
+    expect(
+        await people.loadPeople('test/resources/people_whitespace.txt'), 271);
     var person1 = people.people[111];
     expect(person1.lName, 'Johnson');
     expect(person1.fName, 'Carol');

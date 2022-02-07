@@ -21,6 +21,10 @@ class People {
   /// availability value other than empty, 1, 2, or 3.
   /// Throws a [DuplicateClassSelectionException] when a person selects a class
   /// more than once.
+  /// Throws a [WantingMoreThanListedException] when a member wants more classes
+  /// than they listed.
+  /// Throws a [ListingWhenWantingZeroException] when a member still listed
+  /// classes when they want 0.
   ///
   /// Asynchronously returns the number of people successfully read.
   ///
@@ -99,6 +103,12 @@ class People {
             chosenClassesSet.add(chosenClass);
           }
         }
+      }
+      if (classes.length < numClassWanted) {
+        throw WantingMoreThanListedException(fName: fName, lName: lName);
+      }
+      if (numClassWanted == 0 && classes.isNotEmpty) {
+        throw ListingWhenWantingZeroException(fName: fName, lName: lName);
       }
 
       people.add(Person(

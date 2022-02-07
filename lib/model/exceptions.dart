@@ -100,6 +100,34 @@ class InvalidClassRankException implements Exception {
   }
 }
 
+/// Exception for members wanting more class than they listed
+class WantingMoreThanListedException implements Exception {
+  const WantingMoreThanListedException(
+      {required this.fName, required this.lName});
+
+  final String fName;
+  final String lName;
+
+  @override
+  String toString() {
+    return '$fName $lName wanted more class than they listed';
+  }
+}
+
+/// Exception for members still listing classes when they want 0
+class ListingWhenWantingZeroException implements Exception {
+  const ListingWhenWantingZeroException(
+      {required this.fName, required this.lName});
+
+  final String fName;
+  final String lName;
+
+  @override
+  String toString() {
+    return '$fName $lName still listed classes when wanting 0';
+  }
+}
+
 /// Fatal errors that should not have happened
 class UnexpectedFatalException implements Exception {
   // Ignoring this in coverage because this exception should never be thrown
@@ -108,5 +136,5 @@ class UnexpectedFatalException implements Exception {
   String toString() {
     return 'Fatal Error: This should not have occurred. Try restarting the program.';
   }
-  // coverage:ignore-end
+// coverage:ignore-end
 }
