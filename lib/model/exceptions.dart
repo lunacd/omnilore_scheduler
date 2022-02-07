@@ -87,3 +87,26 @@ class InconsistentCourseAndPeopleException implements Exception {
     return message;
   }
 }
+
+/// Exception for asking for an invalid class rank
+class InvalidClassRankException implements Exception {
+  const InvalidClassRankException({required this.rank});
+
+  final int rank;
+
+  @override
+  String toString() {
+    return '$rank is not a valid class rank';
+  }
+}
+
+/// Fatal errors that should not have happened
+class UnexpectedFatalException implements Exception {
+  // Ignoring this in coverage because this exception should never be thrown
+  // coverage:ignore-start
+  @override
+  String toString() {
+    return 'Fatal Error: This should not have occurred. Try restarting the program.';
+  }
+  // coverage:ignore-end
+}

@@ -21,8 +21,7 @@ class Course {
     return false;
   }
 
-  // coverage:ignore-start
-  @override
-  int get hashCode => code.hashCode ^ name.hashCode ^ reading.hashCode;
-  // coverage:ignore-end
+  @override // coverage:ignore-line
+  int get hashCode =>
+      code.hashCode ^ name.hashCode ^ reading.hashCode; // coverage:ignore-line
 }

@@ -7,6 +7,7 @@ import 'package:omnilore_scheduler/store/courses.dart';
 void main() {
   test('Consistent people and course file', () async {
     var courses = Courses();
+    var validator = Validate();
     await courses.loadCourses('test/resources/course.txt');
     var people = [
       Person(
@@ -18,11 +19,12 @@ void main() {
           classes: ['SIS'],
           submissionOrder: 1)
     ];
-    expect(Validate.validatePeopleAgainstCourses(people, courses), null);
+    expect(validator.validatePeopleAgainstCourses(people, courses), null);
   });
 
   test('Inconsistent people and course file', () async {
     var courses = Courses();
+    var validator = Validate();
     await courses.loadCourses('test/resources/course.txt');
     var people = [
       Person(
@@ -34,7 +36,7 @@ void main() {
           classes: ['SCI'],
           submissionOrder: 1)
     ];
-    expect(Validate.validatePeopleAgainstCourses(people, courses),
+    expect(validator.validatePeopleAgainstCourses(people, courses),
         'Invalid class choice: SCI by test test');
   });
 }

@@ -1,5 +1,8 @@
+import 'dart:collection';
 import 'dart:io';
+import 'dart:ui';
 
+import 'package:omnilore_scheduler/analysis/compute.dart';
 import 'package:omnilore_scheduler/analysis/validate.dart';
 import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
@@ -8,9 +11,11 @@ import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
 class Scheduling {
-  final Courses _courses = Courses();
-  final People _people = People();
-  bool _isValid = true;
+  final _courses = Courses();
+  final _people = People();
+
+  final validate = Validate();
+  final compute = Compute();
 
   /// Get an iterable list of course codes
   ///
@@ -39,21 +44,22 @@ class Scheduling {
   /// Throws a [DuplicateCourseCodeException] when the input file specifies a
   /// course code more than once.
   /// Throws a [InconsistentCourseAndPeopleException] when people and the course
-  /// schedule are inconsistent
+  /// schedule are inconsistent.
   ///
   /// Asynchronously returns the number of courses successfully read.
   /// ```dart
   /// int numCourses = await scheduling.loadCourses('/path/to/file');
   /// ```
   Future<int> loadCourses(String inputFile) async {
-    _isValid = true;
     int numCourses;
     numCourses = await _courses.loadCourses(inputFile);
+    if (numCourses != 0) {
+      compute.resetState(_courses);
+    }
     if (numCourses != 0 && _people.people.isNotEmpty) {
       var result =
-          Validate.validatePeopleAgainstCourses(_people.people, _courses);
+          validate.validatePeopleAgainstCourses(_people.people, _courses);
       if (result != null) {
-        _isValid = false;
         throw InconsistentCourseAndPeopleException(message: result);
       }
     }
@@ -77,7 +83,7 @@ class Scheduling {
   /// Throws a [DuplicateClassSelectionException] when a person selects a class
   /// more than once.
   /// Throws a [InconsistentCourseAndPeopleException] when people and the course
-  /// schedule are inconsistent
+  /// schedule are inconsistent.
   ///
   /// Asynchronously returns the number of people successfully read.
   ///
@@ -85,13 +91,11 @@ class Scheduling {
   /// int numPeople = await people.loadPeople('/path/to/file');
   /// ```
   Future<int> loadPeople(String inputFile) async {
-    _isValid = true;
     var numPeople = await _people.loadPeople(inputFile);
     if (numPeople != 0 && _courses.getNumCourses() != 0) {
       var result =
-          Validate.validatePeopleAgainstCourses(_people.people, _courses);
+          validate.validatePeopleAgainstCourses(_people.people, _courses);
       if (result != null) {
-        _isValid = false;
         throw InconsistentCourseAndPeopleException(message: result);
       }
     }
@@ -100,7 +104,7 @@ class Scheduling {
 
   /// Get a description of the current status of processing
   StatusOfProcessing getStatusOfProcessing() {
-    if (!_isValid) {
+    if (!validate.isValid()) {
       return StatusOfProcessing.inconsistent;
     }
     if (_courses.getNumCourses() == 0) {
@@ -110,6 +114,24 @@ class Scheduling {
       return StatusOfProcessing.needPeople;
     }
     return StatusOfProcessing.notImplemented;
+  }
+
+  /// Get the number people who has listed a given course as their nth choice
+  /// (rank)
+  ///
+  /// Throws [InvalidClassRankException] if the given rank is not in [0, 5].
+  /// Throws [UnexpectedFatalException] if the people and course files are not
+  /// consistent. This might happen if trying to query choices despite a
+  /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
+  /// [loadCourses]. Frontend should prevent this.
+  ///
+  /// Returns null if course code does not exist
+  ///
+  /// The first call to this function after a course/people load might take
+  /// longer. All subsequent calls use cached results and will return
+  /// instantaneously.
+  int? getNumChoices(String course, int rank) {
+    return compute.getNumChoices(rank, course, _people);
   }
 }
 

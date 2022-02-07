@@ -122,4 +122,21 @@ void main() {
           hasMessage('Invalid class choice: SCI by Judi Jones')
         ])));
   });
+
+  test('Get course rank', () async {
+    var scheduling = Scheduling();
+    await scheduling.loadCourses('test/resources/course.txt');
+    await scheduling.loadPeople('test/resources/people.txt');
+    expect(scheduling.getNumChoices('SIS', 0), 4);
+    expect(scheduling.getNumChoices('BRX', 0), 18);
+    expect(scheduling.getNumChoices('QUR', 3), 3);
+    expect(scheduling.getNumChoices('ABC', 0), null);
+    expect(scheduling.getNumChoices('ABC', 5), null);
+    expect(
+        () => scheduling.getNumChoices('SIS', 6),
+        throwsA(allOf([
+          isA<InvalidClassRankException>(),
+          hasMessage('6 is not a valid class rank')
+        ])));
+  });
 }
