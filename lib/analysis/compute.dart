@@ -5,7 +5,13 @@ import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
 class Compute {
+  final int _classMinSize = 10;
+  final int _classMaxSize = 19;
+
   final _choices = HashMap<String, List<int?>>();
+  bool? _undersize;
+  bool? _oversize;
+  int? _numRequested;
 
   /// Reset computing state
   void resetState(Courses courses) {
@@ -13,6 +19,9 @@ class Compute {
     for (var code in courses.getCodes()) {
       _choices[code] = List<int?>.filled(6, null);
     }
+    _oversize = null;
+    _undersize = null;
+    _numRequested = null;
   }
 
   /// Get the number people who has listed a given course as their nth choice
@@ -64,6 +73,72 @@ class Compute {
           throw UnexpectedFatalException(); // coverage:ignore-line
         }
       }
+    }
+    for (var course in _choices.keys) {
+      if (_choices[course]![rank] == null) {
+        _choices[course]![rank] = 0;
+      }
+    }
+  }
+
+  /// Get whether there is class to split
+  bool hasOversizeClasses(Courses courses, People people) {
+    if (_oversize != null) {
+      return _oversize!;
+    } else {
+      for (var course in courses.getCodes()) {
+        if (getNumChoices(0, course, people)! > _classMaxSize) {
+          _oversize = true;
+          return true;
+        }
+      }
+      _oversize = false;
+      return false;
+    }
+  }
+
+  /// Get whether there is class to drop
+  bool hasUndersizeClassed(Courses courses, People people) {
+    if (_undersize != null) {
+      return _undersize!;
+    } else {
+      for (var course in courses.getCodes()) {
+        if (getNumChoices(0, course, people)! < _classMinSize) {
+          _undersize = true;
+          return true;
+        }
+      }
+      _undersize = false;
+      return false;
+    }
+  }
+
+  /// Get the total number of classes wanted
+  int getNumClassesWanted(People people) {
+    if (_numRequested != null) {
+      return _numRequested!;
+    } else {
+      _numRequested = 0;
+      for (var person in people.people) {
+        _numRequested = _numRequested! + person.numClassWanted;
+      }
+      return _numRequested!;
+    }
+  }
+
+  /// Get the total number of classes given
+  ///
+  /// Before scheduling classes, this is always equal to the number of classes
+  /// wanted.
+  int getNumClassesGiven(People people) {
+    if (_numRequested != null) {
+      return _numRequested!;
+    } else {
+      _numRequested = 0;
+      for (var person in people.people) {
+        _numRequested = _numRequested! + person.numClassWanted;
+      }
+      return _numRequested!;
     }
   }
 }

@@ -50,6 +50,7 @@ void main() {
     var scheduling = Scheduling();
     expect(await scheduling.loadPeople('test/resources/people.txt'), 271);
     expect(await scheduling.loadCourses('test/resources/course.txt'), 23);
+    expect(scheduling.getNumPeople(), 271);
     var person1 = scheduling.getPeople()[111];
     expect(person1.lName, 'Johnson');
     expect(person1.fName, 'Carol');
@@ -82,14 +83,35 @@ void main() {
     expect(person2.submissionOrder, 259);
   });
 
-  test('Status of processing', () async {
+  test('Status of processing: drop', () async {
     var scheduling = Scheduling();
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
     expect(await scheduling.loadCourses('test/resources/course.txt'), 23);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needPeople);
-    expect(await scheduling.loadPeople('test/resources/people.txt'), 271);
+    expect(await scheduling.loadPeople('test/resources/people_drop.txt'), 1);
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.drop);
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.drop);
+  });
+
+  test('Status of processing: split', () async {
+    var scheduling = Scheduling();
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
+    expect(await scheduling.loadCourses('test/resources/course_split.txt'), 21);
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needPeople);
+    expect(await scheduling.loadPeople('test/resources/people_split.txt'), 271);
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.split);
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.split);
+  });
+
+  test('Status of processing: schedule', () async {
+    var scheduling = Scheduling();
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
+    expect(await scheduling.loadCourses('test/resources/course_split.txt'), 21);
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needPeople);
     expect(
-        scheduling.getStatusOfProcessing(), StatusOfProcessing.notImplemented);
+        await scheduling.loadPeople('test/resources/people_schedule.txt'), 268);
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.schedule);
+    expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.schedule);
   });
 
   test('Inconsistent people and course', () async {
@@ -129,7 +151,7 @@ void main() {
     await scheduling.loadPeople('test/resources/people.txt');
     expect(scheduling.getNumChoices('SIS', 0), 4);
     expect(scheduling.getNumChoices('BRX', 0), 18);
-    expect(scheduling.getNumChoices('QUR', 3), 3);
+    expect(scheduling.getNumChoices('LES', 5), 0);
     expect(scheduling.getNumChoices('ABC', 0), null);
     expect(scheduling.getNumChoices('ABC', 5), null);
     expect(
@@ -138,5 +160,17 @@ void main() {
           isA<InvalidClassRankException>(),
           hasMessage('6 is not a valid class rank')
         ])));
+  });
+
+  test('Get auxiliary data', () async {
+    var scheduling = Scheduling();
+    await scheduling.loadCourses('test/resources/course.txt');
+    await scheduling.loadPeople('test/resources/people.txt');
+    expect(scheduling.getNumClassesWanted(), 318);
+    expect(scheduling.getNumClassesGiven(), 318);
+    await scheduling.loadCourses('test/resources/course.txt');
+    expect(scheduling.getNumClassesGiven(), 318);
+    expect(scheduling.getNumClassesWanted(), 318);
+    expect(scheduling.getUnmetWants(), 0);
   });
 }

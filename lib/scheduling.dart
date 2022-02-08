@@ -1,6 +1,4 @@
-import 'dart:collection';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:omnilore_scheduler/analysis/compute.dart';
 import 'package:omnilore_scheduler/analysis/validate.dart';
@@ -71,6 +69,11 @@ class Scheduling {
     return _people.people;
   }
 
+  /// Get the number of people
+  int getNumPeople() {
+    return _people.people.length;
+  }
+
   /// Load people from a text file
   ///
   /// Throws a [FileSystemException] when the given input file does not exist.
@@ -92,6 +95,9 @@ class Scheduling {
   /// ```
   Future<int> loadPeople(String inputFile) async {
     var numPeople = await _people.loadPeople(inputFile);
+    if (numPeople != 0) {
+      compute.resetState(_courses);
+    }
     if (numPeople != 0 && _courses.getNumCourses() != 0) {
       var result =
           validate.validatePeopleAgainstCourses(_people.people, _courses);
@@ -102,7 +108,7 @@ class Scheduling {
     return numPeople;
   }
 
-  /// Get a description of the current status of processing
+  /// Get the current status of processing
   StatusOfProcessing getStatusOfProcessing() {
     if (!validate.isValid()) {
       return StatusOfProcessing.inconsistent;
@@ -113,7 +119,13 @@ class Scheduling {
     if (_people.people.isEmpty) {
       return StatusOfProcessing.needPeople;
     }
-    return StatusOfProcessing.notImplemented;
+    if (compute.hasUndersizeClassed(_courses, _people)) {
+      return StatusOfProcessing.drop;
+    }
+    if (compute.hasOversizeClasses(_courses, _people)) {
+      return StatusOfProcessing.split;
+    }
+    return StatusOfProcessing.schedule;
   }
 
   /// Get the number people who has listed a given course as their nth choice
@@ -133,6 +145,21 @@ class Scheduling {
   int? getNumChoices(String course, int rank) {
     return compute.getNumChoices(rank, course, _people);
   }
+
+  /// Get the total number of classes wanted
+  int getNumClassesWanted() {
+    return compute.getNumClassesWanted(_people);
+  }
+
+  /// Get the total number of classes given
+  int getNumClassesGiven() {
+    return compute.getNumClassesGiven(_people);
+  }
+
+  /// Get the total number of unmet wants
+  int getUnmetWants() {
+    return getNumClassesWanted() - getNumClassesGiven();
+  }
 }
 
 /// Enum for all possible statuses of processing
@@ -140,5 +167,7 @@ enum StatusOfProcessing {
   needCourses,
   needPeople,
   inconsistent,
-  notImplemented
+  drop,
+  split,
+  schedule
 }
