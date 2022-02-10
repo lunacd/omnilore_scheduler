@@ -145,17 +145,62 @@ void main() {
         ])));
   });
 
-  test('Get course rank', () async {
+  test('Get list of people for course rank', () async {
     var scheduling = Scheduling();
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
-    expect(scheduling.getNumChoices('SIS', 0), 4);
-    expect(scheduling.getNumChoices('BRX', 0), 18);
-    expect(scheduling.getNumChoices('LES', 5), 0);
-    expect(scheduling.getNumChoices('ABC', 0), null);
-    expect(scheduling.getNumChoices('ABC', 5), null);
     expect(
-        () => scheduling.getNumChoices('SIS', 6),
+        scheduling.getPeopleForClassRank('SIS', 0),
+        containsAll([
+          'Marion Smith',
+          'Donald Tlougan',
+          'Kathleen Fitzgerald',
+          'Jim Parkman'
+        ]));
+    expect(
+        scheduling.getPeopleForClassRank('BRX', 0),
+        containsAll([
+          'Allan Conrad',
+          'Jim North',
+          'Norman Stockwell',
+          'Rick Spillane',
+          'Helen Stockwell',
+          'Ken Meyer',
+          'Gloria Dumais',
+          'Judy North',
+          'Elizabeth Brown',
+          'Marilyn Landau',
+          'Judy Close',
+          'Janet Brown',
+          'Ralph Brown',
+          'Maria Ruiz',
+          'Sally Downie',
+          'Ken Pickar',
+          'Sandra Pickar',
+          'Lynn Solomita'
+        ]));
+    expect(scheduling.getPeopleForClassRank('LES', 5), []);
+    expect(scheduling.getPeopleForClassRank('ABC', 0), null);
+    expect(scheduling.getPeopleForClassRank('ABC', 5), null);
+    expect(
+        () => scheduling.getPeopleForClassRank('SIS', 6),
+        throwsA(allOf([
+          isA<InvalidClassRankException>(),
+          hasMessage('6 is not a valid class rank')
+        ])));
+  });
+
+  test('Get number of choices for course rank', () async {
+    var scheduling = Scheduling();
+    await scheduling.loadCourses('test/resources/course.txt');
+    await scheduling.loadPeople('test/resources/people.txt');
+    expect(scheduling.getNumChoicesForClassRank('SIS', 0), 4);
+    expect(scheduling.getNumChoicesForClassRank('BRX', 0), 18);
+    expect(scheduling.getNumChoicesForClassRank('LES', 5), 0);
+    expect(scheduling.getNumChoicesForClassRank('ABC', 0), null);
+    expect(scheduling.getNumChoicesForClassRank('ABC', 5), null);
+    expect(
+        () => scheduling.getNumChoicesForClassRank('SIS', 6),
         throwsA(allOf([
           isA<InvalidClassRankException>(),
           hasMessage('6 is not a valid class rank')

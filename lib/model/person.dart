@@ -31,4 +31,9 @@ class Person {
 
   /// The order of submission, with smaller being submitted earlier
   final int submissionOrder;
+
+  /// Get full name
+  String getName() {
+    return '$fName $lName';
+  }
 }

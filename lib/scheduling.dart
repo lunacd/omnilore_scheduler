@@ -137,13 +137,35 @@ class Scheduling {
   /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
   /// [loadCourses]. Frontend should prevent this.
   ///
-  /// Returns null if course code does not exist
+  /// Returns null if course code does not exist.
   ///
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
-  int? getNumChoices(String course, int rank) {
+  int? getNumChoicesForClassRank(String course, int rank) {
     return compute.getNumChoices(rank, course, _people);
+  }
+
+  /// Get a list of people who selected a given class as their nth choice (rank)
+  ///
+  /// Throws [InvalidClassRankException] if the given rank is not in [0, 5].
+  /// Throws [UnexpectedFatalException] if the people and course files are not
+  /// consistent. This might happen if trying to query choices despite a
+  /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
+  /// [loadCourses]. Frontend should prevent this.
+  ///
+  /// Returns null if course code does not exist.
+  ///
+  /// The first call to this function after a course/people load might take
+  /// longer. All subsequent calls use cached results and will return
+  /// instantaneously.
+  ///
+  /// The frontend should NOT default to calling this function and use the
+  /// length of the iterable as the number of choices. Query this only when the
+  /// user want to see this info. This function is slower than
+  /// [getNumChoicesForClassRank].
+  Iterable<String>? getPeopleForClassRank(String course, int rank) {
+    return compute.getPeopleForClassRank(rank, course, _people);
   }
 
   /// Get the total number of classes wanted
