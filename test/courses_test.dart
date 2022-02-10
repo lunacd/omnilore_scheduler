@@ -36,11 +36,11 @@ void main() {
 
   test('Load courses', () async {
     var courses = Courses();
-    expect(await courses.loadCourses('test/resources/course.txt'), 23);
-    expect(courses.getNumCourses(), 23);
+    expect(await courses.loadCourses('test/resources/course.txt'), 24);
+    expect(courses.getNumCourses(), 24);
     expect(
         courses.getCodes(),
-        equals([
+        containsAll([
           'BAD',
           'THK',
           'BIG',
@@ -63,7 +63,8 @@ void main() {
           'RWD',
           'PRF',
           'FAC',
-          'ILA'
+          'ILA',
+          'FOO'
         ]));
     expect(
         courses.getCourse('ILA'),

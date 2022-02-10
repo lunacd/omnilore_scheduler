@@ -36,4 +36,17 @@ class Person {
   String getName() {
     return '$fName $lName';
   }
+
+  @override
+  int get hashCode => fName.hashCode ^ lName.hashCode ^ phone.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is Person) {
+      return (lName == other.lName) &&
+          (fName == other.fName) &&
+          (phone == other.phone);
+    }
+    return false;
+  }
 }

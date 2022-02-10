@@ -21,3 +21,4 @@ SCH	How Schools Work	How Schools Work : An Inside Account of . . . , by Arne Dun
 SHK	Shakespeare:   All the World's a Stage . . .	Selected Plays
 SIS	Science and Islam	The House of Wisdom, by Jim Al-Khalili
 THK	Think	Think: A Compelling Introduction to Philosophy, by Simon Blackburn
+FOO	Placeholder class for testing	The most useful textbook ever

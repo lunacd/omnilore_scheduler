@@ -10,32 +10,36 @@ void main() {
   test('Get course info', () async {
     var scheduling = Scheduling();
     expect(await scheduling.loadPeople('test/resources/people.txt'), 271);
-    expect(await scheduling.loadCourses('test/resources/course.txt'), 23);
-    expect(scheduling.getCourseCodes(), [
-      'BAD',
-      'THK',
-      'BIG',
-      'BRX',
-      'SCH',
-      'CHK',
-      'ASA',
-      'RAH',
-      'OCN',
-      'IMP',
-      'REF',
-      'EVC',
-      'HCD',
-      'QUR',
-      'SAF',
-      'GOO',
-      'SHK',
-      'SIS',
-      'LES',
-      'RWD',
-      'PRF',
-      'FAC',
-      'ILA'
-    ]);
+    expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
+    expect(scheduling.getCourseCodes().length, 24);
+    expect(
+        scheduling.getCourseCodes(),
+        containsAll([
+          'BAD',
+          'THK',
+          'BIG',
+          'BRX',
+          'SCH',
+          'CHK',
+          'ASA',
+          'RAH',
+          'OCN',
+          'IMP',
+          'REF',
+          'EVC',
+          'HCD',
+          'QUR',
+          'SAF',
+          'GOO',
+          'SHK',
+          'SIS',
+          'LES',
+          'RWD',
+          'PRF',
+          'FAC',
+          'ILA',
+          'FOO'
+        ]));
     expect(
         scheduling.getCourse('ILA'),
         const Course(
@@ -43,13 +47,13 @@ void main() {
             name: 'The Invention of Los Angeles',
             reading:
                 'The Mirage Factory: Illusion, Imagination, and the . . . , by Gary Krist'));
-    expect(scheduling.getNumCourses(), 23);
+    expect(scheduling.getNumCourses(), 24);
   });
 
   test('Get people', () async {
     var scheduling = Scheduling();
     expect(await scheduling.loadPeople('test/resources/people.txt'), 271);
-    expect(await scheduling.loadCourses('test/resources/course.txt'), 23);
+    expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
     expect(scheduling.getNumPeople(), 271);
     var person1 = scheduling.getPeople()[111];
     expect(person1.lName, 'Johnson');
@@ -86,7 +90,7 @@ void main() {
   test('Status of processing: drop', () async {
     var scheduling = Scheduling();
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
-    expect(await scheduling.loadCourses('test/resources/course.txt'), 23);
+    expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needPeople);
     expect(await scheduling.loadPeople('test/resources/people_drop.txt'), 1);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.drop);
@@ -117,7 +121,7 @@ void main() {
   test('Inconsistent people and course: course first', () async {
     var scheduling = Scheduling();
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
-    expect(await scheduling.loadCourses('test/resources/course.txt'), 23);
+    expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needPeople);
     expect(
         scheduling.loadPeople('test/resources/people_inconsistent.txt'),
@@ -217,5 +221,59 @@ void main() {
     expect(scheduling.getNumClassesGiven(), 318);
     expect(scheduling.getNumClassesWanted(), 318);
     expect(scheduling.getUnmetWants(), 0);
+  });
+
+  test('Drop classes', () async {
+    var scheduling = Scheduling();
+    await scheduling.loadCourses('test/resources/course.txt');
+    await scheduling.loadPeople('test/resources/people.txt');
+    scheduling.drop('LES');
+    expect(scheduling.getNumAddFromBackup('BIG'), 1);
+    expect(scheduling.getPeopleAddFromBackup('BIG')!.length, 1);
+    expect(scheduling.getPeopleAddFromBackup('BIG'),
+        containsAll(['Bob Bacinski']));
+    expect(scheduling.getNumAddFromBackup('FAC'), 2);
+    expect(scheduling.getPeopleAddFromBackup('FAC')!.length, 2);
+    expect(scheduling.getPeopleAddFromBackup('FAC'),
+        containsAll(['Barbara Case', 'Sarah Jones']));
+    expect(scheduling.getNumAddFromBackup('GOO'), 3);
+    expect(scheduling.getPeopleAddFromBackup('GOO')!.length, 3);
+    expect(scheduling.getPeopleAddFromBackup('GOO'),
+        containsAll(['Ray Destabelle', 'Pettina Long', 'Suzanne Mann']));
+    expect(scheduling.getNumAddFromBackup('LES'), 0);
+    expect(scheduling.getPeopleAddFromBackup('LES')!.length, 0);
+    expect(scheduling.getNumAddFromBackup('HCD'), 0);
+    expect(scheduling.getPeopleAddFromBackup('HCD')!.length, 0);
+  });
+
+  test('Drop classes: drop with backup', () async {
+    var scheduling = Scheduling();
+    await scheduling.loadCourses('test/resources/course.txt');
+    await scheduling.loadPeople('test/resources/people.txt');
+    scheduling.drop('LES');
+    scheduling.drop('FOO');
+    scheduling.drop('GOO');
+    expect(scheduling.getNumAddFromBackup('LES'), 0);
+    expect(scheduling.getPeopleAddFromBackup('LES')!.length, 0);
+    expect(scheduling.getNumAddFromBackup('GOO'), 0);
+    expect(scheduling.getPeopleAddFromBackup('GOO')!.length, 0);
+    expect(scheduling.getNumAddFromBackup('BIG'), 1);
+    expect(scheduling.getPeopleAddFromBackup('BIG')!.length, 1);
+    expect(scheduling.getPeopleAddFromBackup('BIG'),
+        containsAll(['Bob Bacinski']));
+    expect(scheduling.getNumAddFromBackup('HCD'), 4);
+    expect(scheduling.getPeopleAddFromBackup('HCD')!.length, 4);
+    expect(
+        scheduling.getPeopleAddFromBackup('HCD'),
+        containsAll(
+            ['Stan Nah', 'Ray Destabelle', 'Helen Nah', 'Suzanne Mann']));
+    expect(scheduling.getNumAddFromBackup('ABC'), null);
+    expect(scheduling.getPeopleAddFromBackup('ABC'), null);
+    expect(scheduling.getNumAddFromBackup('FAC'), 4);
+    expect(scheduling.getPeopleAddFromBackup('FAC')!.length, 4);
+    expect(
+        scheduling.getPeopleAddFromBackup('FAC'),
+        containsAll(
+            ['Barbara Case', 'Sarah Jones', 'Rich Gleerup', 'Dick Balsam']));
   });
 }

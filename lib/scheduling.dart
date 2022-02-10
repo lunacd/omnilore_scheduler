@@ -165,7 +165,23 @@ class Scheduling {
   /// user want to see this info. This function is slower than
   /// [getNumChoicesForClassRank].
   Iterable<String>? getPeopleForClassRank(String course, int rank) {
-    return compute.getPeopleForClassRank(rank, course, _people);
+    return compute
+        .getPeopleForClassRank(rank, course, _people)
+        ?.map((e) => e.getName());
+  }
+
+  /// Get the number of people added from backup for a course
+  ///
+  /// Returns null if course code does not exist.
+  int? getNumAddFromBackup(String course) {
+    return compute.getNumAddFromBackup(course);
+  }
+
+  /// Get a list of people added from backup for a course
+  ///
+  /// Returns null if course code does not exist.
+  Iterable<String>? getPeopleAddFromBackup(String course) {
+    return compute.getPeopleAddFromBackup(course)?.map((e) => e.key.getName());
   }
 
   /// Get the total number of classes wanted
@@ -181,6 +197,11 @@ class Scheduling {
   /// Get the total number of unmet wants
   int getUnmetWants() {
     return getNumClassesWanted() - getNumClassesGiven();
+  }
+
+  /// Drop class
+  void drop(String course) {
+    compute.drop(course, _people);
   }
 }
 

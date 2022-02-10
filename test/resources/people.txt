@@ -10,7 +10,7 @@ Bailer	Bonnie	937-1628	1			3	2			3			3	BAD	RWD	BRX				264
 Bailey	Brian	316-7889	1			3				3				FAC						170
 Bailey	Joann	316-7889	1	2		3				3				IMP	SIS					168
 Bally	Joann	372-8213	2			3				3				OCN	HCD	THK	PRF	QUR	SIS	78
-Balsam	Dick	398-1600	1							1			3	GOO	FAC					119
+Balsam	Dick	398-1600	1							1			3	GOO	LES	FAC				119
 Banks	Lindie	937-7996	0																	233
 Bay 	Eddy	547-2580	1	3	3	3								SHK						118
 Bayer	Judith	375-0012	1	3	3	3		3	3			3	3	CHK	ILA	BRX	BAD	QUR		167
@@ -61,7 +61,7 @@ Damecour	Claire	623-910-8975	3			3		3		3	3			IMP	FAC	CHK	RWD	THK	SAF	31
 Davidowitz	Sherry	418-5469	0																	253
 Davis	Cheri	424-558-3894	0																	254
 de Angelis	Jean	545-7536	1			2								BAD	BIG	GOO				72
-Destabelle	Ray	541-8469	1	3	3	3		3	3	3		3	3	LES	GOO	HCD	REF	FAC		25
+Destabelle	Ray	541-8469	1	3	3	3		3	3	3		3	3	LES	GOO	FOO	HCD	FAC		25
 DeVenuto	Denise	428-8957	1			3	3	3	3	3	3	3	3	BIG	EVC	ILA	SCH	BAD	OCN	165
 Digre	Patricia	379-9383	1	3				3				3		CHK	BRX					179
 Downie	Sally	643-8790	1											BRX	CHK					37
@@ -151,7 +151,7 @@ Loumeau	Kirsten	562 343 2927	1			3					3	3	3	GOO	IMP	RAH	SHK	THK	ILA	114
 Lyons	Jack	542-1108 	2							2				OCN	SCH	FAC				26
 Mallano	Bob	251-8657	1	3	3			3	3			3	3	EVC	ILA	ASA	CHK	BRX		100
 Mand	Peter	378-7476	1					3	3					PRF	LES	SHK				151
-Mann	Suzanne	480-6802	1		3									LES	ASA	HCD	OCN	IMP		246
+Mann	Suzanne	480-6802	1		3									LES	GOO	HCD	OCN	IMP		246
 Mansfield	Rich	562-421-7274	1											FAC	LES	OCN	BIG			157
 Marlotte	Gary	544-4677	0																	219
 Marlotte	Gretchen	544-4677	0																	220

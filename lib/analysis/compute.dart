@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:omnilore_scheduler/model/exceptions.dart';
+import 'package:omnilore_scheduler/model/person.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
@@ -8,16 +9,19 @@ class Compute {
   final int _classMinSize = 10;
   final int _classMaxSize = 19;
 
-  final _choices = HashMap<String, List<HashSet<String>>?>();
+  final _choices = HashMap<String, List<HashSet<Person>>?>();
   bool? _undersize;
   bool? _oversize;
   int? _numRequested;
+  final _dropped = HashSet<String>();
+  final _backupAdd = HashMap<String, HashMap<Person, int>>();
 
   /// Reset computing state
   void resetState(Courses courses) {
     _choices.clear();
     for (var code in courses.getCodes()) {
       _choices[code] = null;
+      _backupAdd[code] = HashMap<Person, int>();
     }
     _oversize = null;
     _undersize = null;
@@ -60,11 +64,11 @@ class Compute {
         var course = person.classes[rank];
         if (_choices.containsKey(course)) {
           if (_choices[course] == null) {
-            _choices[course] = List<HashSet<String>>.generate(
-                6, (index) => HashSet<String>(),
+            _choices[course] = List<HashSet<Person>>.generate(
+                6, (index) => HashSet<Person>(),
                 growable: false);
           }
-          _choices[course]![rank].add(person.getName());
+          _choices[course]![rank].add(person);
         } else {
           // This should never happen
           throw UnexpectedFatalException(); // coverage:ignore-line
@@ -73,8 +77,8 @@ class Compute {
     }
     for (var course in _choices.keys) {
       if (_choices[course] == null) {
-        _choices[course] = List<HashSet<String>>.generate(
-            6, (index) => HashSet<String>(),
+        _choices[course] = List<HashSet<Person>>.generate(
+            6, (index) => HashSet<Person>(),
             growable: false);
       }
     }
@@ -91,7 +95,7 @@ class Compute {
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
-  Iterable<String>? getPeopleForClassRank(
+  Iterable<Person>? getPeopleForClassRank(
       int rank, String course, People people) {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
@@ -107,6 +111,20 @@ class Compute {
         return choices[rank].toList(growable: false);
       }
     }
+  }
+
+  /// Get the number of people added from backup for a course
+  ///
+  /// Returns null if course code does not exist.
+  int? getNumAddFromBackup(String course) {
+    return _backupAdd[course]?.length;
+  }
+
+  /// Get a list of people added from backup for a course
+  ///
+  /// Returns null if course code does not exist.
+  Iterable<MapEntry<Person, int>>? getPeopleAddFromBackup(String course) {
+    return _backupAdd[course]?.entries;
   }
 
   /// Get whether there is class to split
@@ -167,6 +185,40 @@ class Compute {
         _numRequested = _numRequested! + person.numClassWanted;
       }
       return _numRequested!;
+    }
+  }
+
+  /// Drop class
+  void drop(String course, People people) {
+    _dropped.add(course);
+    var affectedFirstChoice = getPeopleForClassRank(0, course, people);
+    if (affectedFirstChoice == null) {
+      return;
+    }
+    var affectedBackup =
+        List<MapEntry<Person, int>>.from(getPeopleAddFromBackup(course)!);
+
+    for (var person in affectedFirstChoice) {
+      var index = 1;
+      while (index < person.classes.length &&
+          _dropped.contains(person.classes[index])) {
+        index++;
+      }
+      if (index < person.classes.length) {
+        _backupAdd[person.classes[index]]![person] = index;
+      }
+    }
+    for (var entry in affectedBackup) {
+      var person = entry.key;
+      var index = entry.value + 1;
+      while (index < person.classes.length &&
+          _dropped.contains(person.classes[index])) {
+        index++;
+      }
+      if (index < person.classes.length) {
+        _backupAdd[entry.key.classes[index]]![entry.key] = index;
+      }
+      _backupAdd[course]!.remove(entry.key);
     }
   }
 }
