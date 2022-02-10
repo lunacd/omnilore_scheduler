@@ -114,7 +114,7 @@ void main() {
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.schedule);
   });
 
-  test('Inconsistent people and course', () async {
+  test('Inconsistent people and course: course first', () async {
     var scheduling = Scheduling();
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
     expect(await scheduling.loadCourses('test/resources/course.txt'), 23);
@@ -127,15 +127,12 @@ void main() {
         ])));
   });
 
-  test('Inconsistent people and course', () async {
+  test('Inconsistent people and course: people first', () async {
     var scheduling = Scheduling();
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
     expect(
-        scheduling.loadPeople('test/resources/people_inconsistent.txt'),
-        throwsA(allOf([
-          isA<InconsistentCourseAndPeopleException>(),
-          hasMessage('Invalid class choice: SCI by Judi Jones')
-        ])));
+        await scheduling.loadPeople('test/resources/people_inconsistent.txt'),
+        271);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
     expect(
         scheduling.loadCourses('test/resources/course.txt'),
@@ -149,6 +146,9 @@ void main() {
     var scheduling = Scheduling();
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
+    expect(scheduling.getPeopleForClassRank('SIS', 0)!.length, 4);
+    expect(scheduling.getPeopleForClassRank('BRX', 0)!.length, 18);
+    expect(scheduling.getPeopleForClassRank('LES', 5)!.length, 0);
     expect(
         scheduling.getPeopleForClassRank('SIS', 0),
         containsAll([

@@ -8,7 +8,7 @@ class Compute {
   final int _classMinSize = 10;
   final int _classMaxSize = 19;
 
-  final _choices = HashMap<String, List<HashSet<String>?>>();
+  final _choices = HashMap<String, List<HashSet<String>>?>();
   bool? _undersize;
   bool? _oversize;
   int? _numRequested;
@@ -17,7 +17,7 @@ class Compute {
   void resetState(Courses courses) {
     _choices.clear();
     for (var code in courses.getCodes()) {
-      _choices[code] = List<HashSet<String>?>.filled(6, null);
+      _choices[code] = null;
     }
     _oversize = null;
     _undersize = null;
@@ -40,15 +40,15 @@ class Compute {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
     }
-    var choices = _choices[course];
-    if (choices == null) {
+    if (!_choices.containsKey(course)) {
       return null;
     } else {
-      if (choices[rank] == null) {
+      var choices = _choices[course];
+      if (choices == null) {
         _computeChoices(rank, people);
-        return _choices[course]![rank]!.length;
+        return _choices[course]![rank].length;
       } else {
-        return choices[rank]!.length;
+        return choices[rank].length;
       }
     }
   }
@@ -59,12 +59,12 @@ class Compute {
       if (rank < person.classes.length) {
         var course = person.classes[rank];
         if (_choices.containsKey(course)) {
-          var choices = _choices[course]!;
-          var rankChoices = choices[rank];
-          if (rankChoices == null) {
-            _choices[course]![rank] = HashSet<String>();
+          if (_choices[course] == null) {
+            _choices[course] = List<HashSet<String>>.generate(
+                6, (index) => HashSet<String>(),
+                growable: false);
           }
-          _choices[course]![rank]!.add(person.getName());
+          _choices[course]![rank].add(person.getName());
         } else {
           // This should never happen
           throw UnexpectedFatalException(); // coverage:ignore-line
@@ -72,8 +72,10 @@ class Compute {
       }
     }
     for (var course in _choices.keys) {
-      if (_choices[course]![rank] == null) {
-        _choices[course]![rank] = HashSet<String>();
+      if (_choices[course] == null) {
+        _choices[course] = List<HashSet<String>>.generate(
+            6, (index) => HashSet<String>(),
+            growable: false);
       }
     }
   }
@@ -89,19 +91,20 @@ class Compute {
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
-  Iterable<String>? getPeopleForClassRank(int rank, String course, People people) {
+  Iterable<String>? getPeopleForClassRank(
+      int rank, String course, People people) {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
     }
-    var choices = _choices[course];
-    if (choices == null) {
+    if (!_choices.containsKey(course)) {
       return null;
     } else {
-      if (choices[rank] == null) {
+      var choices = _choices[course];
+      if (choices == null) {
         _computeChoices(rank, people);
-        return _choices[course]![rank]!.toList(growable: false);
+        return _choices[course]![rank].toList(growable: false);
       } else {
-        return choices[rank]!.toList(growable: false);
+        return choices[rank].toList(growable: false);
       }
     }
   }
