@@ -1,7 +1,12 @@
+import 'dart:io';
+import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'scheduling.dart';
 
 const Map kColorMap = {
   'Red': Colors.red,
@@ -15,7 +20,11 @@ const Map kColorMap = {
   'BlueGrey': Colors.blueGrey,
 };
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
+    await DesktopWindow.setMinWindowSize(const Size(1000, 1000));
+  }
   runApp(const MyApp());
 }
 
@@ -26,7 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Omnilore Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         textButtonTheme: TextButtonThemeData(
@@ -75,6 +84,17 @@ class _ScreenState extends State<Screen> {
     // });
   }
 
+  Future<Future<bool?>> _fileExplorer() async {
+    //FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    return Alert(context: context, title: 'Testing').show();
+    // else {
+    //   //error
+    //   return Alert(context: context, title: 'Failed to import file').show();
+    //   ;
+    // }
+  }
+
   void _masterSetBackgroundColor(String color) {
     setState(() {
       masterBackgroundColor = kColorMap[color];
@@ -91,41 +111,41 @@ class _ScreenState extends State<Screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppScreen(
-        masterContextMenu: ContextMenu(
-          width: 150,
-          height: 250,
-          child: ContextMenuSliver(
-            title: 'Master',
-            children: [
-              masterContextMenuItem(color: 'Red'),
-              masterContextMenuItem(color: 'Blue'),
-              masterContextMenuItem(color: 'Purple'),
-              masterContextMenuItem(color: 'Pink'),
-              masterContextMenuItem(color: 'White'),
-            ],
-          ),
-        ),
-        detailContextMenu: ContextMenu(
-          width: 300,
-          height: 150,
-          child: ContextMenuSliver(
-            title: 'Detail',
-            children: [
-              detailContextMenuItem(color: 'Yellow'),
-              detailContextMenuItem(color: 'Orange'),
-              detailContextMenuItem(color: 'Pink'),
-              detailContextMenuItem(color: 'Red'),
-              detailContextMenuItem(color: 'BlueGrey'),
-            ],
-          ),
-        ),
+        // masterContextMenu: ContextMenu(
+        //   width: 150,
+        //   height: 250,
+        //   child: ContextMenuSliver(
+        //     title: 'Master',
+        //     children: [
+        //       masterContextMenuItem(color: 'Red'),
+        //       masterContextMenuItem(color: 'Blue'),
+        //       masterContextMenuItem(color: 'Purple'),
+        //       masterContextMenuItem(color: 'Pink'),
+        //       masterContextMenuItem(color: 'White'),
+        //     ],
+        //   ),
+        // ),
+        // detailContextMenu: ContextMenu(
+        //   width: 300,
+        //   height: 150,
+        //   child: ContextMenuSliver(
+        //     title: 'Detail',
+        //     children: [
+        //       detailContextMenuItem(color: 'Yellow'),
+        //       detailContextMenuItem(color: 'Orange'),
+        //       detailContextMenuItem(color: 'Pink'),
+        //       detailContextMenuItem(color: 'Red'),
+        //       detailContextMenuItem(color: 'BlueGrey'),
+        //     ],
+        //   ),
+        // ),
         menuList: [
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
               icon: Icons.open_in_new,
               title: 'Open',
               onPressed: () {
-                _showMessage('File.open');
+                _fileExplorer();
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
@@ -165,13 +185,13 @@ class _ScreenState extends State<Screen> {
         ],
         masterPane: masterPane(),
         detailPane: detailPane(),
-        drawer: AppDrawer(
-          defaultSmall: false,
-          largeDrawerWidth: 200,
-          largeDrawer: drawer(small: false),
-          smallDrawerWidth: 60,
-          smallDrawer: drawer(small: true),
-        ),
+        // drawer: AppDrawer(
+        //   defaultSmall: false,
+        //   largeDrawerWidth: 200,
+        //   largeDrawer: drawer(small: false),
+        //   smallDrawerWidth: 60,
+        //   smallDrawer: drawer(small: true),
+        // ),
         onBreakpointChange: () {
           setState(() {
             if (kDebugMode) {
@@ -366,6 +386,32 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  // Builder masterPane() {
+  //   if (kDebugMode) {
+  //     print('BUILD: masterPane');
+  //   }
+  //   return Builder(
+  //     builder: (BuildContext context) {
+  //       return Container(
+  //         color: masterBackgroundColor,
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.stretch,
+  //           children: [
+  //             Row(
+  //               children: const [
+  //                 Text('status: need to import',
+  //                     style:
+  //                         TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
+  //               ],
+  //             ),
+  //             data()
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
   Builder masterPane() {
     if (kDebugMode) {
       print('BUILD: masterPane');
@@ -373,9 +419,9 @@ class _ScreenState extends State<Screen> {
     return Builder(
       builder: (BuildContext context) {
         return Container(
+          width: 1000,
           color: masterBackgroundColor,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: const [
@@ -384,7 +430,8 @@ class _ScreenState extends State<Screen> {
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
                 ],
               ),
-              data()
+              classNameDisplay(),
+              tableData()
             ],
           ),
         );
@@ -433,6 +480,75 @@ class _ScreenState extends State<Screen> {
       ),
     );
   }
+}
+
+Widget classNameDisplay() {
+  return Container(
+    height: 400,
+    width: double.infinity,
+    color: Colors.blue,
+    child: Column(children: [
+      Container(
+        alignment: Alignment.center,
+        child: const Text('Class Names Display',
+            style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
+      ),
+      Container(
+        alignment: Alignment.center,
+        child: const Text('Show constituents by clicking a desired cell.',
+            style: TextStyle(fontSize: 15)),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: const [
+          ElevatedButton(onPressed: null, child: Text('Dec Clust')),
+          ElevatedButton(onPressed: null, child: Text('Inc Clust')),
+          ElevatedButton(onPressed: null, child: Text('Back')),
+          ElevatedButton(onPressed: null, child: Text('Forward')),
+        ],
+      ),
+      Container(
+        color: Colors.white,
+      )
+    ]),
+  );
+}
+
+Widget tableData() {
+  final growableList = <String>[
+    '',
+    'First Choices',
+    'First backup',
+    'Second backup',
+    'Third backup',
+    'Add from BUs',
+    'Drop, bad time',
+    'Drop, dup class',
+    'Drop class full',
+    'Resulting Size'
+  ];
+  final tempList = List<int>.generate(24, (index) => 1);
+  return Container(
+    child: Table(
+      border: TableBorder.symmetric(
+          inside: const BorderSide(width: 1, color: Colors.blue),
+          outside: const BorderSide(width: 1)),
+      columnWidths: {0: IntrinsicColumnWidth()},
+      children: [
+        for (var option in growableList)
+          TableRow(children: [
+            TableCell(
+                child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Text(option.toString()),
+              ],
+            )),
+            for (var val in tempList) Text(val.toString())
+          ])
+      ],
+    ),
+  );
 }
 
 Widget data() {
