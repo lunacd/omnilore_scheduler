@@ -9,7 +9,7 @@ import 'test_util.dart';
 void main() {
   test('Get course info', () async {
     var scheduling = Scheduling();
-    expect(await scheduling.loadPeople('test/resources/people.txt'), 271);
+    expect(await scheduling.loadPeople('test/resources/people.txt'), 267);
     expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
     expect(scheduling.getCourseCodes().length, 24);
     expect(
@@ -52,10 +52,12 @@ void main() {
 
   test('Get people', () async {
     var scheduling = Scheduling();
-    expect(await scheduling.loadPeople('test/resources/people.txt'), 271);
+    expect(await scheduling.loadPeople('test/resources/people.txt'), 267);
     expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
-    expect(scheduling.getNumPeople(), 271);
-    var person1 = scheduling.getPeople()[111];
+    expect(scheduling.getNumPeople(), 267);
+    var person1 = scheduling
+        .getPeople()
+        .firstWhere((element) => element.getName() == 'Carol Johnson');
     expect(person1.lName, 'Johnson');
     expect(person1.fName, 'Carol');
     expect(person1.phone, '372-8535');
@@ -70,7 +72,9 @@ void main() {
         true);
     expect(person1.classes, ['CHK', 'FAC', 'IMP', 'ILA', 'PRF']);
     expect(person1.submissionOrder, 108);
-    var person2 = scheduling.getPeople()[201];
+    var person2 = scheduling
+        .getPeople()
+        .firstWhere((element) => element.getName() == 'Stan Pleatman');
     expect(person2.lName, 'Pleatman');
     expect(person2.fName, 'Stan');
     expect(person2.phone, '709-2404');
@@ -102,7 +106,7 @@ void main() {
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
     expect(await scheduling.loadCourses('test/resources/course_split.txt'), 21);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needPeople);
-    expect(await scheduling.loadPeople('test/resources/people_split.txt'), 271);
+    expect(await scheduling.loadPeople('test/resources/people_split.txt'), 270);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.split);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.split);
   });
@@ -113,7 +117,7 @@ void main() {
     expect(await scheduling.loadCourses('test/resources/course_split.txt'), 21);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needPeople);
     expect(
-        await scheduling.loadPeople('test/resources/people_schedule.txt'), 268);
+        await scheduling.loadPeople('test/resources/people_schedule.txt'), 267);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.schedule);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.schedule);
   });
@@ -136,7 +140,7 @@ void main() {
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
     expect(
         await scheduling.loadPeople('test/resources/people_inconsistent.txt'),
-        271);
+        267);
     expect(scheduling.getStatusOfProcessing(), StatusOfProcessing.needCourses);
     expect(
         scheduling.loadCourses('test/resources/course.txt'),
@@ -151,7 +155,7 @@ void main() {
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
     expect(scheduling.getPeopleForClassRank('SIS', 0)!.length, 4);
-    expect(scheduling.getPeopleForClassRank('BRX', 0)!.length, 18);
+    expect(scheduling.getPeopleForClassRank('BRX', 0)!.length, 17);
     expect(scheduling.getPeopleForClassRank('LES', 5)!.length, 0);
     expect(
         scheduling.getPeopleForClassRank('SIS', 0),
@@ -164,24 +168,23 @@ void main() {
     expect(
         scheduling.getPeopleForClassRank('BRX', 0),
         containsAll([
-          'Allan Conrad',
-          'Jim North',
-          'Norman Stockwell',
-          'Rick Spillane',
-          'Helen Stockwell',
-          'Ken Meyer',
-          'Gloria Dumais',
-          'Judy North',
-          'Elizabeth Brown',
-          'Marilyn Landau',
-          'Judy Close',
           'Janet Brown',
-          'Ralph Brown',
-          'Maria Ruiz',
           'Sally Downie',
-          'Ken Pickar',
           'Sandra Pickar',
-          'Lynn Solomita'
+          'Lynn Solomita',
+          'Ken Pickar',
+          'Jim North',
+          'Maria Ruiz',
+          'Judy Close',
+          'Gloria Dumais',
+          'Ralph Brown',
+          'Ken Meyer',
+          'Elizabeth Brown',
+          'Judy North',
+          'Norman Stockwell',
+          'Marilyn Landau',
+          'Allan Conrad',
+          'Helen Stockwell'
         ]));
     expect(scheduling.getPeopleForClassRank('LES', 5), []);
     expect(scheduling.getPeopleForClassRank('ABC', 0), null);
@@ -199,7 +202,7 @@ void main() {
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
     expect(scheduling.getNumChoicesForClassRank('SIS', 0), 4);
-    expect(scheduling.getNumChoicesForClassRank('BRX', 0), 18);
+    expect(scheduling.getNumChoicesForClassRank('BRX', 0), 17);
     expect(scheduling.getNumChoicesForClassRank('LES', 5), 0);
     expect(scheduling.getNumChoicesForClassRank('ABC', 0), null);
     expect(scheduling.getNumChoicesForClassRank('ABC', 5), null);
@@ -215,11 +218,11 @@ void main() {
     var scheduling = Scheduling();
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
-    expect(scheduling.getNumClassesWanted(), 318);
-    expect(scheduling.getNumClassesGiven(), 318);
+    expect(scheduling.getNumClassesWanted(), 306);
+    expect(scheduling.getNumClassesGiven(), 306);
     await scheduling.loadCourses('test/resources/course.txt');
-    expect(scheduling.getNumClassesGiven(), 318);
-    expect(scheduling.getNumClassesWanted(), 318);
+    expect(scheduling.getNumClassesGiven(), 306);
+    expect(scheduling.getNumClassesWanted(), 306);
     expect(scheduling.getUnmetWants(), 0);
   });
 

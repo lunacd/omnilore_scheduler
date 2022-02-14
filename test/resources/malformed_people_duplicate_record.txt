@@ -31,7 +31,7 @@ Bosch	Dennis	381-9187	2									3	3	BIG	GOO	ASA	OCN			162
 Bowman	Adonna	317-908-5695	1											RAH	BRX					164
 Brashear	Marilyn	907 888-0527	1									3	3	ASA	SIS					149
 Brodsky	Clifford	483-3119	2											ASA	HCD	PRF				145
-Brown	Elizabeth	318-5191	2			2		1		1				BRX	ILA	CHK	SCH	RWD	EVC	186
+Brown	Elizabeth	318-5191	2			3		1		1				BRX	ILA	CHK	SCH	RWD	EVC	186
 Brown	Fran	377-5252	2	3	2		3	3	1	3	1	3		IMP	BAD					9
 Brown	Ginny	542-3889	2											BAD	CHK	BRX	RAH	OCN		35
 Brown	Janet	379-8346	2					1						BRX	LES	ILA	SAF			112
@@ -51,7 +51,6 @@ Coe	Rob	631-329-2397	1											GOO	ILA					29
 Coe	Sara	631-329-2397	1							3	3			RWD	BRX					57
 Conrad	Allan	375-1500	1	3		3		3	3	3		3		BRX						17
 Crandall	Marjorie	375-1073	1											OCN	BIG	ILA				6
-
 Criswell	Leslie	809-4365	1			3		3		3		3		THK	SAF	SCH				36
 Croft	Dick	534-0583	1											SHK						94
 Culbert	Merle	545-7994	0																	127
@@ -109,7 +108,7 @@ Irizarry	Art	422-8693	0																	218
 Irwin	Bill	424 224-7737	1	3	3			1	1	3	3	3	3	ASA	HCD					47
 Jenson	Linda	375-7693	1											REF	RWD	QUR				90
 Jetton	Jim	541-8418	3											THK	LES	FAC	ILA	HCD	SAF	174
-Johnson	Carol	372-8535	1	3   		3		3		3		3		CHK	FAC	IMP	ILA	PRF		108
+Johnson	Carol	372-8535	1	3		3		3		3		3		CHK	FAC	IMP	ILA	PRF		108
 Johnson	Dale	791-9981	1	3	3	1	1	2	2			3	3	IMP						84
 Johnson	Dick	791-9981	1	3	3	2	2					3	3	SAF	ASA					146
 Johnson	KC	325-3251	1	3	3	3	1		3		3	2		BAD	RAH	CHK	GOO	ILA	BRX	22
@@ -143,10 +142,6 @@ Lemmi	Ronnie	541-9668	1											GOO	PRF					190
 Lescoe	AnnaJane	376-7912	1	3		3		3		3		3		THK	RAH	PRF	EVC			169
 Leveille	Marty	200-0110	1							3				GOO						245
 Leven	Helen	372-4418	2	3	3									BAD	BRX	SHK	RWD	RAH		28
-
-
-
-
 Lewis	Leslie	626 375-7800	3		3									PRF	LES	ASA	SIS	QUR	SHK	8
 Lieman	Marilou	378-5086	0																	256
 Little	Mary Jo	351-5170	2	3					3				3	SHK	BAD	GOO	CHK			12
@@ -175,9 +170,6 @@ Merickel	Karen	375-2498	1	3	3	3	3	3			3	3		IMP	QUR					83
 Meyer	Ken	650-3728 	1							3	3			BRX	BAD					207
 Miller	David	377-3913	2											RAH	SHK	SCH				97
 Miller	Steve	379-5559	2	3	3	3	3			3				GOO	PRF	LES	BIG			208
-
-
-
 Milner	Teddie	384-5737	1											IMP						249
 Minami	Vera	371-2663	2	3	3	3	3			3				SHK	CHK	BRX	BAD	GOO	HCD	48
 Minchella	Michael	692-5302	0																	236
@@ -205,11 +197,9 @@ Paul	Bill	634-3402	0																	257
 Pepys	Mark	375-5639	3	3		3		3		3	3	3		HCD	IMP	RAH				226
 Pickar	Ken	722-9161	1			3	3			3	3			BRX	ASA	CHK	ILA			280
 Pickar	Sandra	377-3043	2											BRX	ASA	ILA				251
- Pleatman	Carol	709-2402	0																	258
-Pleatman    	Stan	709-2404   	0  																	259
+Pleatman	Carol	709-2402	0																	258
+Pleatman	Stan	709-2404	0																	259
 Pohlner	Carolyn	370-2494	1	3	3	3				3	3			RWD						209
-
-
 Pohlner	Frank	370-2494	1											RWD						227
 Porzucki	Elaine	619-8615	1	3	3	3	3			3	3	3	3	ILA	RAH					113
 Powell	Carolyn	530-3918	1								2			LES	RAH	BAD				80
@@ -268,13 +258,11 @@ Weitz	Suzanne	373-4384	0																	263
 Wielin	Fran	541-6189	1				3		2	3	3	3	3	BAD	GOO					161
 Wilson	Jeanne	480-4913	2	1							3			RWD	ILA	RAH				141
 Winer	Elaine	320-5088	1		3								3	RWD						68
+Winer	Elaine	320-5088	1		3								3	RWD						68
 Wingate	Carol	291-3698	1				3							RAH	BIG					64
 Witkin	Paula	617-872-7825	1					3	3					GOO	IMP					106
 Wong	Donna	542-9620 	1			3				3		3		ASA	HCD	ILA				14
 Young	Jean	376-9494	1	3	3	3				3				RWD	BAD					150
-
-
-
 Young	Larry	376-9494	1											GOO	LES					75
 Zimmerman	Arnold	968-2510	0																	241
 Zupke	Janet	377-2621	1	3	3	3	3	2		3	3	3	3	IMP						137

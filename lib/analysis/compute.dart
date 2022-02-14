@@ -59,7 +59,7 @@ class Compute {
 
   /// Compute number of choices for all classes at at given rank
   void _computeChoices(int rank, People people) {
-    for (var person in people.people) {
+    for (var person in people.people.values) {
       if (rank < person.classes.length) {
         var course = person.classes[rank];
         if (_choices.containsKey(course)) {
@@ -165,7 +165,7 @@ class Compute {
       return _numRequested!;
     } else {
       _numRequested = 0;
-      for (var person in people.people) {
+      for (var person in people.people.values) {
         _numRequested = _numRequested! + person.numClassWanted;
       }
       return _numRequested!;
@@ -181,7 +181,7 @@ class Compute {
       return _numRequested!;
     } else {
       _numRequested = 0;
-      for (var person in people.people) {
+      for (var person in people.people.values) {
         _numRequested = _numRequested! + person.numClassWanted;
       }
       return _numRequested!;

@@ -32,7 +32,7 @@ void main() {
         throwsA(allOf([
           isA<InvalidNumClassWantedException>(),
           hasMessage(
-              'People file specifies invalid number of classes wanted: 7 at line 56')
+              'People file specifies invalid number of classes wanted: 7 at line 55')
         ])));
   });
 
@@ -59,6 +59,17 @@ void main() {
         ])));
   });
 
+  test('Load people: Duplicate record', () async {
+    var people = People();
+    expect(
+        () => people
+            .loadPeople('test/resources/malformed_people_duplicate_record.txt'),
+        throwsA(allOf([
+          isA<DuplicateRecordsException>(),
+          hasMessage('Elaine Winer has more than one record')
+        ])));
+  });
+
   test('Load people: Listing class when wanting 0', () async {
     var people = People();
     expect(
@@ -73,7 +84,7 @@ void main() {
   test('Load people: Wanting more than listed', () async {
     var people = People();
     expect(
-            () => people
+        () => people
             .loadPeople('test/resources/people_wanting_more_than_listed.txt'),
         throwsA(allOf([
           isA<WantingMoreThanListedException>(),
@@ -83,8 +94,8 @@ void main() {
 
   test('Load people', () async {
     var people = People();
-    expect(await people.loadPeople('test/resources/people.txt'), 271);
-    var person1 = people.people[111];
+    expect(await people.loadPeople('test/resources/people.txt'), 267);
+    var person1 = people.people['Carol Johnson']!;
     expect(person1.lName, 'Johnson');
     expect(person1.fName, 'Carol');
     expect(person1.phone, '372-8535');
@@ -99,7 +110,7 @@ void main() {
         true);
     expect(person1.classes, ['CHK', 'FAC', 'IMP', 'ILA', 'PRF']);
     expect(person1.submissionOrder, 108);
-    var person2 = people.people[201];
+    var person2 = people.people['Stan Pleatman']!;
     expect(person2.lName, 'Pleatman');
     expect(person2.fName, 'Stan');
     expect(person2.phone, '709-2404');
@@ -119,8 +130,8 @@ void main() {
   test('Load people: whitespace', () async {
     var people = People();
     expect(
-        await people.loadPeople('test/resources/people_whitespace.txt'), 271);
-    var person1 = people.people[111];
+        await people.loadPeople('test/resources/people_whitespace.txt'), 267);
+    var person1 = people.people['Carol Johnson']!;
     expect(person1.lName, 'Johnson');
     expect(person1.fName, 'Carol');
     expect(person1.phone, '372-8535');
@@ -135,7 +146,7 @@ void main() {
         true);
     expect(person1.classes, ['CHK', 'FAC', 'IMP', 'ILA', 'PRF']);
     expect(person1.submissionOrder, 108);
-    var person2 = people.people[201];
+    var person2 = people.people['Stan Pleatman']!;
     expect(person2.lName, 'Pleatman');
     expect(person2.fName, 'Stan');
     expect(person2.phone, '709-2404');

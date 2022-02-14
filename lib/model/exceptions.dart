@@ -128,6 +128,20 @@ class ListingWhenWantingZeroException implements Exception {
   }
 }
 
+/// Exception for a person to have duplicate records in the people file
+class DuplicateRecordsException implements Exception {
+  const DuplicateRecordsException(
+      {required this.fName, required this.lName});
+
+  final String fName;
+  final String lName;
+
+  @override
+  String toString() {
+    return '$fName $lName has more than one record';
+  }
+}
+
 /// Fatal errors that should not have happened
 class UnexpectedFatalException implements Exception {
   // Ignoring this in coverage because this exception should never be thrown

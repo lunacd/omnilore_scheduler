@@ -65,8 +65,8 @@ class Scheduling {
   }
 
   /// Get a list of people, ordered as is presented in the input file
-  List<Person> getPeople() {
-    return _people.people;
+  Iterable<Person> getPeople() {
+    return _people.people.values;
   }
 
   /// Get the number of people

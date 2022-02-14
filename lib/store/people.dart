@@ -8,7 +8,7 @@ import 'package:omnilore_scheduler/model/person.dart';
 
 class People {
   /// A list of people, ordered as is presented in the input file
-  List<Person> people = [];
+  HashMap<String, Person> people = HashMap<String, Person>();
 
   /// Load people from a text file
   ///
@@ -111,7 +111,10 @@ class People {
         throw ListingWhenWantingZeroException(fName: fName, lName: lName);
       }
 
-      people.add(Person(
+      if (people.containsKey('$fName $lName')) {
+        throw DuplicateRecordsException(fName: fName, lName: lName);
+      }
+      people['$fName $lName'] = (Person(
           fName: fName,
           lName: lName,
           phone: phone,
