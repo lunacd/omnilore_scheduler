@@ -9,11 +9,34 @@ class AuxiliaryData {
   final Courses _courses;
   final People _people;
 
-  int? _numRequested;
+  int? _nbrRequested;
+  int? _nbrCourseTakers;
 
   /// Reset compute state
   void resetState() {
-    _numRequested = null;
+    _nbrRequested = null;
+    _nbrCourseTakers = null;
+  }
+
+  /// Get the total number of course takers
+  int getNbrCourseTakers() {
+    if (_nbrCourseTakers != null) {
+      return _nbrCourseTakers!;
+    } else {
+      _nbrCourseTakers =
+          _people.people.values.fold<int>(0, (int previousValue, element) {
+        if (element.numClassWanted > 0) {
+          return previousValue + 1;
+        }
+        return previousValue;
+      });
+      return _nbrCourseTakers!;
+    }
+  }
+
+  /// Get number of people on leave (not taking classes)
+  int getNbrOnLeave() {
+    return _people.people.length - getNbrCourseTakers();
   }
 
   /// Get the total number of courses
@@ -23,14 +46,14 @@ class AuxiliaryData {
 
   /// Get the total number of classes asked
   int getNbrPlacesAsked() {
-    if (_numRequested != null) {
-      return _numRequested!;
+    if (_nbrRequested != null) {
+      return _nbrRequested!;
     } else {
-      _numRequested = 0;
+      _nbrRequested = 0;
       for (var person in _people.people.values) {
-        _numRequested = _numRequested! + person.numClassWanted;
+        _nbrRequested = _nbrRequested! + person.numClassWanted;
       }
-      return _numRequested!;
+      return _nbrRequested!;
     }
   }
 
@@ -39,14 +62,14 @@ class AuxiliaryData {
   /// Before scheduling classes, this is always equal to the number of classes
   /// wanted.
   int getNbrPlacesGiven() {
-    if (_numRequested != null) {
-      return _numRequested!;
+    if (_nbrRequested != null) {
+      return _nbrRequested!;
     } else {
-      _numRequested = 0;
+      _nbrRequested = 0;
       for (var person in _people.people.values) {
-        _numRequested = _numRequested! + person.numClassWanted;
+        _nbrRequested = _nbrRequested! + person.numClassWanted;
       }
-      return _numRequested!;
+      return _nbrRequested!;
     }
   }
 
