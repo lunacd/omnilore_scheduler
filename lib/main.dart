@@ -7,6 +7,7 @@ import 'package:flutter_menu/flutter_menu.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'scheduling.dart';
+import 'package:filepicker_windows/filepicker_windows.dart';
 
 const Map kColorMap = {
   'Red': Colors.red,
@@ -84,10 +85,27 @@ class _ScreenState extends State<Screen> {
     // });
   }
 
-  Future<Future<bool?>> _fileExplorer() async {
-    //FilePickerResult? result = await FilePicker.platform.pickFiles();
+  Future<String> _fileExplorer() async {
+    final file = OpenFilePicker()
+      ..filterSpecification = {
+        'Word Document (*.doc)': '*.doc',
+        'Web Page (*.htm; *.html)': '*.htm;*.html',
+        'Text Document (*.txt)': '*.txt',
+        'All Files': '*.*'
+      }
+      ..defaultFilterIndex = 0
+      ..defaultExtension = 'doc'
+      ..title = 'Select a document';
 
-    return Alert(context: context, title: 'Testing').show();
+    final result = file.getFile();
+    if (result != null) {
+      print(result.path);
+      return result.path;
+    } else {
+      return 'error';
+    }
+
+    //return Alert(context: context, title: 'Testing').show();
     // else {
     //   //error
     //   return Alert(context: context, title: 'Failed to import file').show();
