@@ -131,7 +131,8 @@ class Scheduling {
   /// Get the number people who has listed a given course as their nth choice
   /// (rank)
   ///
-  /// Throws [InvalidClassRankException] if the given rank is not in [0, 5].
+  /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
+  /// inclusive.
   /// Throws [UnexpectedFatalException] if the people and course files are not
   /// consistent. This might happen if trying to query choices despite a
   /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
@@ -148,7 +149,8 @@ class Scheduling {
 
   /// Get a list of people who selected a given class as their nth choice (rank)
   ///
-  /// Throws [InvalidClassRankException] if the given rank is not in [0, 5].
+  /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
+  /// inclusive.
   /// Throws [UnexpectedFatalException] if the people and course files are not
   /// consistent. This might happen if trying to query choices despite a
   /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or

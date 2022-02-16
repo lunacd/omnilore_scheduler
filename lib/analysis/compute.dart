@@ -30,7 +30,8 @@ class Compute {
   /// Get the number people who has listed a given course as their nth choice
   /// (rank)
   ///
-  /// Throws [InvalidClassRankException] if the given rank is not in [0, 5].
+  /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
+  /// inclusive.
   /// Throws [UnexpectedFatalException] if the people and course files are not
   /// consistent.
   ///
@@ -85,7 +86,8 @@ class Compute {
 
   /// Get a list of people who selected a given class as their nth choice (rank)
   ///
-  /// Throws [InvalidClassRankException] if the given rank is not in [0, 5].
+  /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
+  /// inclusive.
   /// Throws [UnexpectedFatalException] if the people and course files are not
   /// consistent.
   ///
