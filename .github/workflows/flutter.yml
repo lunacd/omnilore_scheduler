@@ -42,7 +42,7 @@ jobs:
           channel: 'stable'
       - uses: dart-lang/setup-dart@v1
         with:
-          sdk: '2.15'
+          sdk: '2.15.1'
 
       - name: Get dependencies
         run: flutter pub get
