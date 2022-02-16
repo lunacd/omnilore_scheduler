@@ -40,6 +40,9 @@ jobs:
         with:
           flutter-version: '2.8.1'
           channel: 'stable'
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '2.15'
 
       - name: Get dependencies
         run: flutter pub get
