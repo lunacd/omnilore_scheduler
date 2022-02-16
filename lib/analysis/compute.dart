@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:omnilore_scheduler/model/exceptions.dart';
-import 'package:omnilore_scheduler/model/person.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
@@ -9,19 +8,19 @@ class Compute {
   final int _classMinSize = 10;
   final int _classMaxSize = 19;
 
-  final _choices = HashMap<String, List<HashSet<Person>>?>();
+  final _choices = HashMap<String, List<HashSet<String>>?>();
   bool? _undersize;
   bool? _oversize;
   int? _numRequested;
   final _dropped = HashSet<String>();
-  final _backupAdd = HashMap<String, HashMap<Person, int>>();
+  final _backupAdd = HashMap<String, HashMap<String, int>>();
 
   /// Reset computing state
   void resetState(Courses courses) {
     _choices.clear();
     for (var code in courses.getCodes()) {
       _choices[code] = null;
-      _backupAdd[code] = HashMap<Person, int>();
+      _backupAdd[code] = HashMap<String, int>();
     }
     _oversize = null;
     _undersize = null;
@@ -64,11 +63,11 @@ class Compute {
         var course = person.classes[rank];
         if (_choices.containsKey(course)) {
           if (_choices[course] == null) {
-            _choices[course] = List<HashSet<Person>>.generate(
-                6, (index) => HashSet<Person>(),
+            _choices[course] = List<HashSet<String>>.generate(
+                6, (index) => HashSet<String>(),
                 growable: false);
           }
-          _choices[course]![rank].add(person);
+          _choices[course]![rank].add(person.getName());
         } else {
           // This should never happen
           throw UnexpectedFatalException(); // coverage:ignore-line
@@ -77,8 +76,8 @@ class Compute {
     }
     for (var course in _choices.keys) {
       if (_choices[course] == null) {
-        _choices[course] = List<HashSet<Person>>.generate(
-            6, (index) => HashSet<Person>(),
+        _choices[course] = List<HashSet<String>>.generate(
+            6, (index) => HashSet<String>(),
             growable: false);
       }
     }
@@ -95,7 +94,7 @@ class Compute {
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
-  Iterable<Person>? getPeopleForClassRank(
+  Iterable<String>? getPeopleForClassRank(
       int rank, String course, People people) {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
@@ -123,7 +122,7 @@ class Compute {
   /// Get a list of people added from backup for a course
   ///
   /// Returns null if course code does not exist.
-  Iterable<MapEntry<Person, int>>? getPeopleAddFromBackup(String course) {
+  Iterable<MapEntry<String, int>>? getPeopleAddFromBackup(String course) {
     return _backupAdd[course]?.entries;
   }
 
@@ -196,27 +195,28 @@ class Compute {
       return;
     }
     var affectedBackup =
-        List<MapEntry<Person, int>>.from(getPeopleAddFromBackup(course)!);
+        List<MapEntry<String, int>>.from(getPeopleAddFromBackup(course)!);
 
-    for (var person in affectedFirstChoice) {
+    for (var name in affectedFirstChoice) {
+      var person = people.people[name]!;
       var index = 1;
       while (index < person.classes.length &&
           _dropped.contains(person.classes[index])) {
         index++;
       }
       if (index < person.classes.length) {
-        _backupAdd[person.classes[index]]![person] = index;
+        _backupAdd[person.classes[index]]![name] = index;
       }
     }
     for (var entry in affectedBackup) {
-      var person = entry.key;
+      var person = people.people[entry.key]!;
       var index = entry.value + 1;
       while (index < person.classes.length &&
           _dropped.contains(person.classes[index])) {
         index++;
       }
       if (index < person.classes.length) {
-        _backupAdd[entry.key.classes[index]]![entry.key] = index;
+        _backupAdd[person.classes[index]]![entry.key] = index;
       }
       _backupAdd[course]!.remove(entry.key);
     }

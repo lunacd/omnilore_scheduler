@@ -165,9 +165,7 @@ class Scheduling {
   /// user want to see this info. This function is slower than
   /// [getNumChoicesForClassRank].
   Iterable<String>? getPeopleForClassRank(String course, int rank) {
-    return compute
-        .getPeopleForClassRank(rank, course, _people)
-        ?.map((e) => e.getName());
+    return compute.getPeopleForClassRank(rank, course, _people);
   }
 
   /// Get the number of people added from backup for a course
@@ -181,7 +179,7 @@ class Scheduling {
   ///
   /// Returns null if course code does not exist.
   Iterable<String>? getPeopleAddFromBackup(String course) {
-    return compute.getPeopleAddFromBackup(course)?.map((e) => e.key.getName());
+    return compute.getPeopleAddFromBackup(course)?.map((e) => e.key);
   }
 
   /// Get the total number of classes wanted
