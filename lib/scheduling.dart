@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:omnilore_scheduler/analysis/auxiliary_data.dart';
 import 'package:omnilore_scheduler/analysis/compute.dart';
 import 'package:omnilore_scheduler/analysis/validate.dart';
 import 'package:omnilore_scheduler/model/course.dart';
@@ -12,8 +13,16 @@ class Scheduling {
   final _courses = Courses();
   final _people = People();
 
-  final validate = Validate();
-  final compute = Compute();
+  final _validate = Validate();
+  final _compute = Compute();
+
+  late final auxiliaryData = AuxiliaryData(_courses, _people);
+
+  /// Clear cache and reset compute state
+  void resetState() {
+    _compute.resetState(_courses);
+    auxiliaryData.resetState();
+  }
 
   /// Get an iterable list of course codes
   ///
@@ -27,11 +36,6 @@ class Scheduling {
   /// Get course information given a course code
   Course? getCourse(String code) {
     return _courses.getCourse(code);
-  }
-
-  /// Get the total number of courses
-  int getNumCourses() {
-    return _courses.getNumCourses();
   }
 
   /// Loads courses from a text file
@@ -52,11 +56,11 @@ class Scheduling {
     int numCourses;
     numCourses = await _courses.loadCourses(inputFile);
     if (numCourses != 0) {
-      compute.resetState(_courses);
+      resetState();
     }
     if (numCourses != 0 && _people.people.isNotEmpty) {
       var result =
-          validate.validatePeopleAgainstCourses(_people.people, _courses);
+          _validate.validatePeopleAgainstCourses(_people.people, _courses);
       if (result != null) {
         throw InconsistentCourseAndPeopleException(message: result);
       }
@@ -96,11 +100,11 @@ class Scheduling {
   Future<int> loadPeople(String inputFile) async {
     var numPeople = await _people.loadPeople(inputFile);
     if (numPeople != 0) {
-      compute.resetState(_courses);
+      resetState();
     }
     if (numPeople != 0 && _courses.getNumCourses() != 0) {
       var result =
-          validate.validatePeopleAgainstCourses(_people.people, _courses);
+          _validate.validatePeopleAgainstCourses(_people.people, _courses);
       if (result != null) {
         throw InconsistentCourseAndPeopleException(message: result);
       }
@@ -110,7 +114,7 @@ class Scheduling {
 
   /// Get the current status of processing
   StatusOfProcessing getStatusOfProcessing() {
-    if (!validate.isValid()) {
+    if (!_validate.isValid()) {
       return StatusOfProcessing.inconsistent;
     }
     if (_courses.getNumCourses() == 0) {
@@ -119,10 +123,10 @@ class Scheduling {
     if (_people.people.isEmpty) {
       return StatusOfProcessing.needPeople;
     }
-    if (compute.hasUndersizeClassed(_courses, _people)) {
+    if (_compute.hasUndersizeClassed(_courses, _people)) {
       return StatusOfProcessing.drop;
     }
-    if (compute.hasOversizeClasses(_courses, _people)) {
+    if (_compute.hasOversizeClasses(_courses, _people)) {
       return StatusOfProcessing.split;
     }
     return StatusOfProcessing.schedule;
@@ -144,7 +148,7 @@ class Scheduling {
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
   int? getNumChoicesForClassRank(String course, int rank) {
-    return compute.getNumChoices(rank, course, _people);
+    return _compute.getNumChoices(rank, course, _people);
   }
 
   /// Get a list of people who selected a given class as their nth choice (rank)
@@ -167,41 +171,26 @@ class Scheduling {
   /// user want to see this info. This function is slower than
   /// [getNumChoicesForClassRank].
   Iterable<String>? getPeopleForClassRank(String course, int rank) {
-    return compute.getPeopleForClassRank(rank, course, _people);
+    return _compute.getPeopleForClassRank(rank, course, _people);
   }
 
   /// Get the number of people added from backup for a course
   ///
   /// Returns null if course code does not exist.
   int? getNumAddFromBackup(String course) {
-    return compute.getNumAddFromBackup(course);
+    return _compute.getNumAddFromBackup(course);
   }
 
   /// Get a list of people added from backup for a course
   ///
   /// Returns null if course code does not exist.
   Iterable<String>? getPeopleAddFromBackup(String course) {
-    return compute.getPeopleAddFromBackup(course)?.map((e) => e.key);
-  }
-
-  /// Get the total number of classes wanted
-  int getNumClassesWanted() {
-    return compute.getNumClassesWanted(_people);
-  }
-
-  /// Get the total number of classes given
-  int getNumClassesGiven() {
-    return compute.getNumClassesGiven(_people);
-  }
-
-  /// Get the total number of unmet wants
-  int getUnmetWants() {
-    return getNumClassesWanted() - getNumClassesGiven();
+    return _compute.getPeopleAddFromBackup(course)?.map((e) => e.key);
   }
 
   /// Drop class
   void drop(String course) {
-    compute.drop(course, _people);
+    _compute.drop(course, _people);
   }
 }
 

@@ -11,7 +11,6 @@ class Compute {
   final _choices = HashMap<String, List<HashSet<String>>?>();
   bool? _undersize;
   bool? _oversize;
-  int? _numRequested;
   final _dropped = HashSet<String>();
   final _backupAdd = HashMap<String, HashMap<String, int>>();
 
@@ -24,7 +23,6 @@ class Compute {
     }
     _oversize = null;
     _undersize = null;
-    _numRequested = null;
   }
 
   /// Get the number people who has listed a given course as their nth choice
@@ -157,35 +155,6 @@ class Compute {
       }
       _undersize = false;
       return false;
-    }
-  }
-
-  /// Get the total number of classes wanted
-  int getNumClassesWanted(People people) {
-    if (_numRequested != null) {
-      return _numRequested!;
-    } else {
-      _numRequested = 0;
-      for (var person in people.people.values) {
-        _numRequested = _numRequested! + person.numClassWanted;
-      }
-      return _numRequested!;
-    }
-  }
-
-  /// Get the total number of classes given
-  ///
-  /// Before scheduling classes, this is always equal to the number of classes
-  /// wanted.
-  int getNumClassesGiven(People people) {
-    if (_numRequested != null) {
-      return _numRequested!;
-    } else {
-      _numRequested = 0;
-      for (var person in people.people.values) {
-        _numRequested = _numRequested! + person.numClassWanted;
-      }
-      return _numRequested!;
     }
   }
 

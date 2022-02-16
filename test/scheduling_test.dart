@@ -47,7 +47,6 @@ void main() {
             name: 'The Invention of Los Angeles',
             reading:
                 'The Mirage Factory: Illusion, Imagination, and the . . . , by Gary Krist'));
-    expect(scheduling.getNumCourses(), 24);
   });
 
   test('Get people', () async {
@@ -212,18 +211,6 @@ void main() {
           isA<InvalidClassRankException>(),
           hasMessage('6 is not a valid class rank')
         ])));
-  });
-
-  test('Get auxiliary data', () async {
-    var scheduling = Scheduling();
-    await scheduling.loadCourses('test/resources/course.txt');
-    await scheduling.loadPeople('test/resources/people.txt');
-    expect(scheduling.getNumClassesWanted(), 306);
-    expect(scheduling.getNumClassesGiven(), 306);
-    await scheduling.loadCourses('test/resources/course.txt');
-    expect(scheduling.getNumClassesGiven(), 306);
-    expect(scheduling.getNumClassesWanted(), 306);
-    expect(scheduling.getUnmetWants(), 0);
   });
 
   test('Drop classes', () async {
