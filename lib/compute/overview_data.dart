@@ -1,28 +1,48 @@
 import 'dart:collection';
 
+import 'package:omnilore_scheduler/compute/course_control.dart';
+import 'package:omnilore_scheduler/compute/validate.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
+import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
-class Compute {
+class OverviewData {
+  OverviewData(Courses courses, People people, Validate validate)
+      : _courses = courses,
+        _people = people,
+        _validate = validate;
+
+  // Config
   final int _classMinSize = 10;
   final int _classMaxSize = 19;
 
+  // Global data
+  final People _people;
+  final Courses _courses;
+  final Validate _validate;
+
+  // Internal states
   final _choices = HashMap<String, List<HashSet<String>>?>();
   bool? _undersize;
   bool? _oversize;
-  final _dropped = HashSet<String>();
-  final _backupAdd = HashMap<String, HashMap<String, int>>();
+
+  // Readonly access to CourseControl
+  late final CourseControl _courseControl;
+
+  /// Late initialize CourseControl
+  void initialize(CourseControl courseControl) {
+    _courseControl = courseControl;
+  }
 
   /// Reset computing state
-  void resetState(Courses courses) {
+  void resetState() {
     _choices.clear();
-    for (var code in courses.getCodes()) {
+    for (var code in _courses.getCodes()) {
       _choices[code] = null;
-      _backupAdd[code] = HashMap<String, int>();
     }
-    _oversize = null;
     _undersize = null;
+    _oversize = null;
   }
 
   /// Get the number people who has listed a given course as their nth choice
@@ -31,14 +51,16 @@ class Compute {
   /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
   /// inclusive.
   /// Throws [UnexpectedFatalException] if the people and course files are not
-  /// consistent.
+  /// consistent. This might happen if trying to query choices despite a
+  /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
+  /// [loadCourses]. Frontend should prevent this.
   ///
   /// Returns null if course code does not exist.
   ///
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
-  int? getNumChoices(int rank, String course, People people) {
+  int? getNbrForClassRank(String course, int rank) {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
     }
@@ -47,7 +69,7 @@ class Compute {
     } else {
       var choices = _choices[course];
       if (choices == null) {
-        _computeChoices(rank, people);
+        _computeChoices(rank, _people);
         return _choices[course]![rank].length;
       } else {
         return choices[rank].length;
@@ -87,15 +109,21 @@ class Compute {
   /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
   /// inclusive.
   /// Throws [UnexpectedFatalException] if the people and course files are not
-  /// consistent.
+  /// consistent. This might happen if trying to query choices despite a
+  /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
+  /// [loadCourses]. Frontend should prevent this.
   ///
   /// Returns null if course code does not exist.
   ///
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
-  Iterable<String>? getPeopleForClassRank(
-      int rank, String course, People people) {
+  ///
+  /// The frontend should NOT default to calling this function and use the
+  /// length of the iterable as the number of choices. Query this only when the
+  /// user want to see this info. This function is slower than
+  /// [getNumChoicesForClassRank].
+  Iterable<String>? getPeopleForClassRank(String course, int rank) {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
     }
@@ -104,7 +132,7 @@ class Compute {
     } else {
       var choices = _choices[course];
       if (choices == null) {
-        _computeChoices(rank, people);
+        _computeChoices(rank, _people);
         return _choices[course]![rank].toList(growable: false);
       } else {
         return choices[rank].toList(growable: false);
@@ -112,27 +140,33 @@ class Compute {
     }
   }
 
-  /// Get the number of people added from backup for a course
-  ///
-  /// Returns null if course code does not exist.
-  int? getNumAddFromBackup(String course) {
-    return _backupAdd[course]?.length;
-  }
-
-  /// Get a list of people added from backup for a course
-  ///
-  /// Returns null if course code does not exist.
-  Iterable<MapEntry<String, int>>? getPeopleAddFromBackup(String course) {
-    return _backupAdd[course]?.entries;
+  /// Get the current status of processing
+  StateOfProcessing getStateOfProcessing() {
+    if (!_validate.isValid()) {
+      return StateOfProcessing.inconsistent;
+    }
+    if (_courses.getNumCourses() == 0) {
+      return StateOfProcessing.needCourses;
+    }
+    if (_people.people.isEmpty) {
+      return StateOfProcessing.needPeople;
+    }
+    if (_hasUndersizeClassed(_courses, _people)) {
+      return StateOfProcessing.drop;
+    }
+    if (_hasOversizeClasses(_courses, _people)) {
+      return StateOfProcessing.split;
+    }
+    return StateOfProcessing.schedule;
   }
 
   /// Get whether there is class to split
-  bool hasOversizeClasses(Courses courses, People people) {
+  bool _hasOversizeClasses(Courses courses, People people) {
     if (_oversize != null) {
       return _oversize!;
     } else {
       for (var course in courses.getCodes()) {
-        if (getNumChoices(0, course, people)! > _classMaxSize) {
+        if (getNbrForClassRank(course, 0)! > _classMaxSize) {
           _oversize = true;
           return true;
         }
@@ -143,12 +177,12 @@ class Compute {
   }
 
   /// Get whether there is class to drop
-  bool hasUndersizeClassed(Courses courses, People people) {
+  bool _hasUndersizeClassed(Courses courses, People people) {
     if (_undersize != null) {
       return _undersize!;
     } else {
       for (var course in courses.getCodes()) {
-        if (getNumChoices(0, course, people)! < _classMinSize) {
+        if (getNbrForClassRank(course, 0)! < _classMinSize) {
           _undersize = true;
           return true;
         }
@@ -158,38 +192,23 @@ class Compute {
     }
   }
 
-  /// Drop class
-  void drop(String course, People people) {
-    _dropped.add(course);
-    var affectedFirstChoice = getPeopleForClassRank(0, course, people);
-    if (affectedFirstChoice == null) {
-      return;
-    }
-    var affectedBackup =
-        List<MapEntry<String, int>>.from(getPeopleAddFromBackup(course)!);
+  /// Get the number of people added from backup for a course
+  ///
+  /// Returns null if course code does not exist.
+  ///
+  /// This is an alias to the function of the same name under CourseControl.
+  /// Alias provided for consistency.
+  int? getNbrAddFromBackup(String course) {
+    return _courseControl.getNbrAddFromBackup(course);
+  }
 
-    for (var name in affectedFirstChoice) {
-      var person = people.people[name]!;
-      var index = 1;
-      while (index < person.classes.length &&
-          _dropped.contains(person.classes[index])) {
-        index++;
-      }
-      if (index < person.classes.length) {
-        _backupAdd[person.classes[index]]![name] = index;
-      }
-    }
-    for (var entry in affectedBackup) {
-      var person = people.people[entry.key]!;
-      var index = entry.value + 1;
-      while (index < person.classes.length &&
-          _dropped.contains(person.classes[index])) {
-        index++;
-      }
-      if (index < person.classes.length) {
-        _backupAdd[person.classes[index]]![entry.key] = index;
-      }
-      _backupAdd[course]!.remove(entry.key);
-    }
+  /// Get a list of people added from backup for a course
+  ///
+  /// Returns null if course code does not exist.
+  ///
+  /// This is an alias to the function of the same name under CourseControl.
+  /// Alias provided for consistency.
+  Iterable<String>? getPeopleAddFromBackup(String course) {
+    return _courseControl.getPeopleAddFromBackup(course);
   }
 }

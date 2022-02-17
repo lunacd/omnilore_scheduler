@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:omnilore_scheduler/analysis/auxiliary_data.dart';
-import 'package:omnilore_scheduler/analysis/compute.dart';
-import 'package:omnilore_scheduler/analysis/validate.dart';
+import 'package:omnilore_scheduler/compute/auxiliary_data.dart';
+import 'package:omnilore_scheduler/compute/course_control.dart';
+import 'package:omnilore_scheduler/compute/overview_data.dart';
+import 'package:omnilore_scheduler/compute/validate.dart';
 import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/person.dart';
@@ -10,18 +11,30 @@ import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
 class Scheduling {
+  Scheduling() {
+    auxiliaryData = AuxiliaryData(_courses, _people);
+    overviewData = OverviewData(_courses, _people, _validate);
+    courseControl = CourseControl(_courses, _people);
+
+    courseControl.initialize(overviewData);
+    overviewData.initialize(courseControl);
+  }
+
+  // Shared data
   final _courses = Courses();
   final _people = People();
-
   final _validate = Validate();
-  final _compute = Compute();
 
-  late final auxiliaryData = AuxiliaryData(_courses, _people);
+  // Compute modules
+  late AuxiliaryData auxiliaryData;
+  late OverviewData overviewData;
+  late CourseControl courseControl;
 
   /// Clear cache and reset compute state
   void resetState() {
-    _compute.resetState(_courses);
     auxiliaryData.resetState();
+    overviewData.resetState();
+    courseControl.resetState();
   }
 
   /// Get an iterable list of course codes
@@ -111,95 +124,4 @@ class Scheduling {
     }
     return numPeople;
   }
-
-  /// Get the current status of processing
-  StatusOfProcessing getStatusOfProcessing() {
-    if (!_validate.isValid()) {
-      return StatusOfProcessing.inconsistent;
-    }
-    if (_courses.getNumCourses() == 0) {
-      return StatusOfProcessing.needCourses;
-    }
-    if (_people.people.isEmpty) {
-      return StatusOfProcessing.needPeople;
-    }
-    if (_compute.hasUndersizeClassed(_courses, _people)) {
-      return StatusOfProcessing.drop;
-    }
-    if (_compute.hasOversizeClasses(_courses, _people)) {
-      return StatusOfProcessing.split;
-    }
-    return StatusOfProcessing.schedule;
-  }
-
-  /// Get the number people who has listed a given course as their nth choice
-  /// (rank)
-  ///
-  /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
-  /// inclusive.
-  /// Throws [UnexpectedFatalException] if the people and course files are not
-  /// consistent. This might happen if trying to query choices despite a
-  /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
-  /// [loadCourses]. Frontend should prevent this.
-  ///
-  /// Returns null if course code does not exist.
-  ///
-  /// The first call to this function after a course/people load might take
-  /// longer. All subsequent calls use cached results and will return
-  /// instantaneously.
-  int? getNumChoicesForClassRank(String course, int rank) {
-    return _compute.getNumChoices(rank, course, _people);
-  }
-
-  /// Get a list of people who selected a given class as their nth choice (rank)
-  ///
-  /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
-  /// inclusive.
-  /// Throws [UnexpectedFatalException] if the people and course files are not
-  /// consistent. This might happen if trying to query choices despite a
-  /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
-  /// [loadCourses]. Frontend should prevent this.
-  ///
-  /// Returns null if course code does not exist.
-  ///
-  /// The first call to this function after a course/people load might take
-  /// longer. All subsequent calls use cached results and will return
-  /// instantaneously.
-  ///
-  /// The frontend should NOT default to calling this function and use the
-  /// length of the iterable as the number of choices. Query this only when the
-  /// user want to see this info. This function is slower than
-  /// [getNumChoicesForClassRank].
-  Iterable<String>? getPeopleForClassRank(String course, int rank) {
-    return _compute.getPeopleForClassRank(rank, course, _people);
-  }
-
-  /// Get the number of people added from backup for a course
-  ///
-  /// Returns null if course code does not exist.
-  int? getNumAddFromBackup(String course) {
-    return _compute.getNumAddFromBackup(course);
-  }
-
-  /// Get a list of people added from backup for a course
-  ///
-  /// Returns null if course code does not exist.
-  Iterable<String>? getPeopleAddFromBackup(String course) {
-    return _compute.getPeopleAddFromBackup(course)?.map((e) => e.key);
-  }
-
-  /// Drop class
-  void drop(String course) {
-    _compute.drop(course, _people);
-  }
-}
-
-/// Enum for all possible statuses of processing
-enum StatusOfProcessing {
-  needCourses,
-  needPeople,
-  inconsistent,
-  drop,
-  split,
-  schedule
 }

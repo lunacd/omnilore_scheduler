@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:omnilore_scheduler/analysis/validate.dart';
+import 'package:omnilore_scheduler/compute/validate.dart';
 import 'package:omnilore_scheduler/model/availability.dart';
 import 'package:omnilore_scheduler/model/person.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
