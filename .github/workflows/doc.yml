@@ -3,35 +3,14 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Flutter
+name: Documentation
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  analyze:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '2.10.1'
-          channel: 'stable'
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Analyze project source
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
-
-  docs:
+  doc:
     runs-on: ubuntu-latest
 
     steps:
