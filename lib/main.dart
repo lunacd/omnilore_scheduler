@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:omnilore_scheduler/scheduling.dart';
 
 const Map kColorMap = {
   'Red': Colors.red,
@@ -61,7 +62,10 @@ class Screen extends StatefulWidget {
 class _ScreenState extends State<Screen> {
   final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
+  Scheduling? schedule;
 
+  Future<int>? numCourses;
+  Future<int>? numPeople;
   // String _message = 'Choose a MenuItem.';
   // String _drawerTitle = 'Tap a drawerItem';
   // IconData _drawerIcon = Icons.menu;
@@ -123,7 +127,7 @@ class _ScreenState extends State<Screen> {
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
               icon: Icons.open_in_new,
-              title: 'Open',
+              title: 'Import',
               onPressed: () {
                 _showMessage('File.open');
               },
@@ -305,14 +309,48 @@ class _ScreenState extends State<Screen> {
                       ],
                     ),
                     Column(
-                      children: const [
+                      children: [
                         Text('Select Process'),
                         ElevatedButton(
-                            onPressed: null, child: Text('Enter/Edit Crs')),
+                            onPressed: () {
+                              setState(() {
+                                // ignore: prefer_conditional_assignment
+                                if (schedule == null) {
+                                  schedule = Scheduling();
+                                }
+                                numCourses = schedule?.loadCourses(
+                                    '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
+                                numPeople = schedule?.loadPeople(
+                                    '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
+                                schedule?.initControl();
+                                schedule?.initOverview();
+
+                                schedule?.initAuxiliary();
+                                print(numCourses);
+                                print(numPeople);
+                              });
+                            },
+                            child: Text('Enter/Edit Crs')),
                         ElevatedButton(
                             onPressed: null, child: Text('Display Courses')),
                         ElevatedButton(
-                            onPressed: null, child: Text('Enter/Edit Ppl')),
+                            onPressed: () {
+                              setState(() {
+                                // ignore: prefer_conditional_assignment
+                                if (schedule != null) {
+                                  numPeople = schedule?.loadPeople(
+                                      '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
+                                  schedule?.initControl();
+                                  schedule?.initOverview();
+
+                                  schedule?.initAuxiliary();
+
+                                  print("${numCourses}");
+                                  print('${numPeople}');
+                                }
+                              });
+                            },
+                            child: Text('Enter/Edit Ppl')),
                         ElevatedButton(
                             onPressed: null, child: Text('New Curriculum')),
                         ElevatedButton(
@@ -433,141 +471,122 @@ class _ScreenState extends State<Screen> {
       ),
     );
   }
-}
 
-Widget data() {
-  return DataTable(
-    columns: const <DataColumn>[
-      DataColumn(
-        label: Text(
-          'Name',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+  Widget data() {
+    return DataTable(
+      columns: const <DataColumn>[
+        DataColumn(
+          label: Text(
+            'Name',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'First Choices',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'First Choices',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'First Backup',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'First Backup',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'Second Backup',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'Second Backup',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'Third Backup',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'Third Backup',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'Add from BU\'s',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'Add from BU\'s',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'Drop, Bad Time',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'Drop, Bad Time',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'Drop, Dupe Class',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'Drop, Dupe Class',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'Drop, Class Full',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'Drop, Class Full',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          'resulting size',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            'resulting size',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-    ],
-    rows: const <DataRow>[
-      DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Sarah')),
-          DataCell(Text('19')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Sarah')),
-          DataCell(Text('19')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Sarah')),
-          DataCell(Text('19')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Sarah')),
-          DataCell(Text('19')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-        ],
-      ),
-    ],
-  );
+      ],
+      rows: BuildTable(),
+    );
+  }
+
+  List<DataRow> BuildTable() {
+    List<DataRow> list = <DataRow>[];
+    if (schedule != null) {
+      for (String code in schedule!.getCourseCodes()) {
+        print(code + " loop started");
+        int? first = schedule!.overviewData.getNbrForClassRank(code, 0);
+        print(code + " first: $first calculated");
+        int? second = schedule!.overviewData.getNbrForClassRank(code, 1);
+        print(code + " second: $second calculated");
+        int? third = schedule!.overviewData.getNbrForClassRank(code, 2);
+        print(code + " third: $third calculated");
+        int? fourth = schedule!.overviewData.getNbrForClassRank(code, 3);
+        print(code + " fourth: $fourth calculated");
+        int? fromBU = schedule!.overviewData.getNbrAddFromBackup(code);
+        print(code + " fromBU: $fromBU calculated");
+        int total = first! + second! + third! + fourth! + fromBU!;
+        print(code + " total: $total calculated");
+        list.add(DataRow(
+          cells: <DataCell>[
+            DataCell(Text(code)),
+            DataCell(Text('$first')),
+            DataCell(Text('$second')),
+            DataCell(Text('$third')),
+            DataCell(Text('$fourth')),
+            DataCell(Text('$fromBU')),
+            DataCell(Text('0')),
+            DataCell(Text('0')),
+            DataCell(Text('0')),
+            DataCell(Text('$total')),
+          ],
+        ));
+      }
+      return list;
+    } else {
+      return <DataRow>[];
+    }
+  }
 }
 
 Widget auxData() {

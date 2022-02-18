@@ -37,6 +37,7 @@ class OverviewData {
 
   /// Reset computing state
   void resetState() {
+    print("overview reset");
     _choices.clear();
     for (var code in _courses.getCodes()) {
       _choices[code] = null;
