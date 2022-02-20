@@ -67,8 +67,9 @@ class _ScreenState extends State<Screen> {
 
   int? numCourses;
   int? numPeople;
-  int _currentSortColumn = 0;
-  bool _isAscending = true;
+  final int _currentSortColumn = 0;
+  final bool _isAscending = true;
+
   // String _message = 'Choose a MenuItem.';
   // String _drawerTitle = 'Tap a drawerItem';
   // IconData _drawerIcon = Icons.menu;
@@ -337,38 +338,38 @@ class _ScreenState extends State<Screen> {
                                 child: Text('Cont. Old Curric')),
                           ],
                         ),
-                        Text('Names Display Mode'),
-                        ElevatedButton(
+                        const Text('Names Display Mode'),
+                        const ElevatedButton(
                             onPressed: null, child: Text('Show BU & CA')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Show Splits')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Imp. Splits')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Show Coord(s)')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Set C or CC2')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Set CC 1')),
                         auxData(schedule),
-                        Text('Select Process'),
-                        ElevatedButton(
-                            onPressed: () async {
-                              numCourses = await schedule.loadCourses(
-                                  '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
-                              numPeople = await schedule.loadPeople(
-                                  '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
-
-                              setState(() {});
-                            },
+                        const Text('Select Process'),
+                        const ElevatedButton(
+                            // onPressed: () async {
+                            //   numCourses = await schedule.loadCourses(
+                            //       '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
+                            //   numPeople = await schedule.loadPeople(
+                            //       '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
+                            //   setState(() {});
+                            // },
+                            onPressed: null,
                             child: Text('Enter/Edit Crs')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Display Courses')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Enter/Edit Ppl')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('New Curriculum')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Cont. Old Curric')),
                       ],
                     ),
@@ -561,7 +562,6 @@ class _ScreenState extends State<Screen> {
       int third = schedule.overviewData.getNbrForClassRank(code, 2) ?? -1;
       int fourth = schedule.overviewData.getNbrForClassRank(code, 3) ?? -1;
       int fromBU = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
-      int total = first + second + third + fourth + fromBU;
       list.add(DataRow(
         cells: <DataCell>[
           DataCell(Text(code)),
@@ -585,15 +585,15 @@ class _ScreenState extends State<Screen> {
             '$fromBU',
             textAlign: TextAlign.center,
           )),
-          DataCell(Text(
+          const DataCell(Text(
             '0',
             textAlign: TextAlign.center,
           )),
-          DataCell(Text(
+          const DataCell(Text(
             '0',
             textAlign: TextAlign.center,
           )),
-          DataCell(Text(
+          const DataCell(Text(
             '0',
             textAlign: TextAlign.center,
           )),
