@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:omnilore_scheduler/scheduling.dart';
+import 'package:file_picker/file_picker.dart';
 
 const Map kColorMap = {
   'Red': Colors.red,
@@ -61,6 +63,12 @@ class Screen extends StatefulWidget {
 class _ScreenState extends State<Screen> {
   final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
+  Scheduling schedule = Scheduling();
+
+  int? numCourses;
+  int? numPeople;
+  final int _currentSortColumn = 0;
+  final bool _isAscending = true;
 
   // String _message = 'Choose a MenuItem.';
   // String _drawerTitle = 'Tap a drawerItem';
@@ -123,17 +131,48 @@ class _ScreenState extends State<Screen> {
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
               icon: Icons.open_in_new,
-              title: 'Open',
-              onPressed: () {
-                _showMessage('File.open');
+              title: 'Import Courses',
+              onPressed: () async {
+                FilePickerResult? result =
+                    await FilePicker.platform.pickFiles();
+
+                if (result != null) {
+                  String path = result.files.single.path ?? '';
+                  if (path != '') {
+                    try {
+                      numCourses = await schedule.loadCourses(path);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'courses');
+                    }
+                  }
+                } else {
+                  // User canceled the picker
+                }
+                setState(() {});
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
             MenuListItem(
-              title: 'Close',
-              onPressed: () {
-                _showMessage('File.close');
+              title: 'Import People',
+              onPressed: () async {
+                FilePickerResult? result =
+                    await FilePicker.platform.pickFiles();
+
+                if (result != null) {
+                  String path = result.files.single.path ?? '';
+                  if (path != '') {
+                    try {
+                      numPeople = await schedule.loadPeople(path);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'people');
+                    }
+                  }
+                } else {
+                  // User canceled the picker
+                }
+                setState(() {});
               },
+              shortcut: MenuShortcut(key: LogicalKeyboardKey.keyP, ctrl: true),
             ),
             MenuListItem(
               title: 'Save',
@@ -189,6 +228,7 @@ class _ScreenState extends State<Screen> {
     return Container(
         color: Colors.amber,
         child: ListView(
+          controller: ScrollController(),
           children: [
             drawerButton(
                 title: 'User', icon: Icons.account_circle, small: small),
@@ -282,73 +322,57 @@ class _ScreenState extends State<Screen> {
                 const Text(
                     'Show people in a cell by clicking on a desired cell \nshowing: people assigned to DSC'),
                 Row(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: const [
-                        ElevatedButton(
-                            onPressed: null, child: Text('Enter/Edit Ppl')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('New Curriculum')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Cont. Old Curric')),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
                       children: [
-                        auxData(),
-                      ],
-                    ),
-                    Column(
-                      children: const [
-                        Text('Select Process'),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Enter/Edit Crs')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Display Courses')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Enter/Edit Ppl')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('New Curriculum')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Cont. Old Curric')),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: const [
-                        Text('Names Display Mode'),
-                        ElevatedButton(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: const [
+                            ElevatedButton(
+                                onPressed: null, child: Text('Enter/Edit Ppl')),
+                            ElevatedButton(
+                                onPressed: null, child: Text('New Curriculum')),
+                            ElevatedButton(
+                                onPressed: null,
+                                child: Text('Cont. Old Curric')),
+                          ],
+                        ),
+                        const Text('Names Display Mode'),
+                        const ElevatedButton(
                             onPressed: null, child: Text('Show BU & CA')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Show Splits')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Imp. Splits')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Show Coord(s)')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Set C or CC2')),
-                        ElevatedButton(
+                        const ElevatedButton(
                             onPressed: null, child: Text('Set CC 1')),
+                        auxData(schedule),
+                        const Text('Select Process'),
+                        const ElevatedButton(
+                            // onPressed: () async {
+                            //   numCourses = await schedule.loadCourses(
+                            //       '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
+                            //   numPeople = await schedule.loadPeople(
+                            //       '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
+                            //   setState(() {});
+                            // },
+                            onPressed: null,
+                            child: Text('Enter/Edit Crs')),
+                        const ElevatedButton(
+                            onPressed: null, child: Text('Display Courses')),
+                        const ElevatedButton(
+                            onPressed: null, child: Text('Enter/Edit Ppl')),
+                        const ElevatedButton(
+                            onPressed: null, child: Text('New Curriculum')),
+                        const ElevatedButton(
+                            onPressed: null, child: Text('Cont. Old Curric')),
                       ],
                     ),
-                    Column(
-                      children: [
-                        Title(
-                            title: 'Auxiliary Data',
-                            color: const Color(0xFFFFFFFF),
-                            child: auxData()),
-                      ],
-                    )
                   ],
                 ),
                 if (context.appScreen.isCompact())
@@ -373,21 +397,22 @@ class _ScreenState extends State<Screen> {
     return Builder(
       builder: (BuildContext context) {
         return Container(
-          color: masterBackgroundColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: const [
-                  Text('status: need to import',
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
+            color: masterBackgroundColor,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: const [
+                      Text('status: need to import',
+                          style: TextStyle(
+                              fontSize: 25, fontWeight: FontWeight.bold))
+                    ],
+                  ),
+                  data()
                 ],
               ),
-              data()
-            ],
-          ),
-        );
+            ));
       },
     );
   }
@@ -433,144 +458,186 @@ class _ScreenState extends State<Screen> {
       ),
     );
   }
+
+  Widget data() {
+    return DataTable(
+      columnSpacing: 0,
+      sortColumnIndex: _currentSortColumn,
+      sortAscending: _isAscending,
+      border: TableBorder.all(width: 1.0, color: Colors.blueGrey),
+      columns: const <DataColumn>[
+        DataColumn(
+          label: Center(
+              child: Text(
+            'Name',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          )),
+        ),
+        DataColumn(
+          label: Center(
+              child: Text(
+            'First Choices',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          )),
+        ),
+        DataColumn(
+          label: Text(
+            'First BU',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Second BU',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Third BU',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Add BU\'s',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Drop, Bad',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Drop, Dupe',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Drop, Full',
+            overflow: TextOverflow.clip,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'total',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ],
+      rows: buildTable(),
+    );
+  }
+
+  List<DataRow> buildTable() {
+    List<DataRow> list = <DataRow>[];
+
+    for (String code in schedule.getCourseCodes()) {
+      int first = schedule.overviewData.getNbrForClassRank(code, 0) ?? -1;
+      int second = schedule.overviewData.getNbrForClassRank(code, 1) ?? -1;
+      int third = schedule.overviewData.getNbrForClassRank(code, 2) ?? -1;
+      int fourth = schedule.overviewData.getNbrForClassRank(code, 3) ?? -1;
+      int fromBU = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+      list.add(DataRow(
+        cells: <DataCell>[
+          DataCell(Text(code)),
+          DataCell(Text(
+            '$first',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$second',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$third',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$fourth',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$fromBU',
+            textAlign: TextAlign.center,
+          )),
+          const DataCell(Text(
+            '0',
+            textAlign: TextAlign.center,
+          )),
+          const DataCell(Text(
+            '0',
+            textAlign: TextAlign.center,
+          )),
+          const DataCell(Text(
+            '0',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$first',
+            textAlign: TextAlign.center,
+          )),
+        ],
+      ));
+    }
+    return list;
+  }
+
+  Future<void> _showMyDialog(String error, String loadType) async {
+    // found at https://docs.flutter.dev/cookbook/forms/text-input
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('There was a problem loading the $loadType file'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('The following error was encountered: $error'),
+                const Text('make sure you have selected the correct file'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
-Widget data() {
-  return DataTable(
-    columns: const <DataColumn>[
-      DataColumn(
-        label: Text(
-          'Name',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'First Choices',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'First Backup',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'Second Backup',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'Third Backup',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'Add from BU\'s',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'Drop, Bad Time',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'Drop, Dupe Class',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'Drop, Class Full',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'resulting size',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-    ],
-    rows: const <DataRow>[
-      DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Sarah')),
-          DataCell(Text('19')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Sarah')),
-          DataCell(Text('19')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Sarah')),
-          DataCell(Text('19')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Sarah')),
-          DataCell(Text('19')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-          DataCell(Text('Student')),
-        ],
-      ),
-    ],
-  );
-}
-
-Widget auxData() {
+Widget auxData(Scheduling scheduling) {
   return DataTable(
     columns: const <DataColumn>[
       DataColumn(
@@ -588,47 +655,47 @@ Widget auxData() {
         ),
       ),
     ],
-    rows: const <DataRow>[
+    rows: <DataRow>[
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('Course Takers')),
-          DataCell(Text('19')),
+          const DataCell(Text('Course Takers')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrCourseTakers()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('Go Courses')),
-          DataCell(Text('19')),
+          const DataCell(Text('Go Courses')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrGoCourses()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('places asked')),
-          DataCell(Text('19')),
+          const DataCell(Text('places asked')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesAsked()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('places given')),
-          DataCell(Text('19')),
+          const DataCell(Text('places given')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesGiven()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('un-met wants')),
-          DataCell(Text('19')),
+          const DataCell(Text('un-met wants')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrUnmetWants()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('on leave')),
-          DataCell(Text('19')),
+          const DataCell(Text('on leave')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrOnLeave()}')),
         ],
       ),
-      DataRow(
+      const DataRow(
         cells: <DataCell>[
           DataCell(Text('Missing')),
-          DataCell(Text('19')),
+          DataCell(Text('0')),
         ],
       ),
     ],
