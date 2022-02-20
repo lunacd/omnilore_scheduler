@@ -67,6 +67,8 @@ class _ScreenState extends State<Screen> {
 
   int? numCourses;
   int? numPeople;
+  int _currentSortColumn = 0;
+  bool _isAscending = true;
   // String _message = 'Choose a MenuItem.';
   // String _drawerTitle = 'Tap a drawerItem';
   // IconData _drawerIcon = Icons.menu;
@@ -136,7 +138,11 @@ class _ScreenState extends State<Screen> {
                 if (result != null) {
                   String path = result.files.single.path ?? '';
                   if (path != '') {
-                    numCourses = await schedule.loadCourses(path);
+                    try {
+                      numCourses = await schedule.loadCourses(path);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'courses');
+                    }
                   }
                 } else {
                   // User canceled the picker
@@ -154,7 +160,11 @@ class _ScreenState extends State<Screen> {
                 if (result != null) {
                   String path = result.files.single.path ?? '';
                   if (path != '') {
-                    numCourses = await schedule.loadPeople(path);
+                    try {
+                      numPeople = await schedule.loadPeople(path);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'people');
+                    }
                   }
                 } else {
                   // User canceled the picker
@@ -311,30 +321,36 @@ class _ScreenState extends State<Screen> {
                 const Text(
                     'Show people in a cell by clicking on a desired cell \nshowing: people assigned to DSC'),
                 Row(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: const [
-                        ElevatedButton(
-                            onPressed: null, child: Text('Enter/Edit Ppl')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('New Curriculum')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Cont. Old Curric')),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
                       children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: const [
+                            ElevatedButton(
+                                onPressed: null, child: Text('Enter/Edit Ppl')),
+                            ElevatedButton(
+                                onPressed: null, child: Text('New Curriculum')),
+                            ElevatedButton(
+                                onPressed: null,
+                                child: Text('Cont. Old Curric')),
+                          ],
+                        ),
+                        Text('Names Display Mode'),
+                        ElevatedButton(
+                            onPressed: null, child: Text('Show BU & CA')),
+                        ElevatedButton(
+                            onPressed: null, child: Text('Show Splits')),
+                        ElevatedButton(
+                            onPressed: null, child: Text('Imp. Splits')),
+                        ElevatedButton(
+                            onPressed: null, child: Text('Show Coord(s)')),
+                        ElevatedButton(
+                            onPressed: null, child: Text('Set C or CC2')),
+                        ElevatedButton(
+                            onPressed: null, child: Text('Set CC 1')),
                         auxData(schedule),
-                      ],
-                    ),
-                    Column(
-                      children: [
                         Text('Select Process'),
                         ElevatedButton(
                             onPressed: () async {
@@ -356,36 +372,6 @@ class _ScreenState extends State<Screen> {
                             onPressed: null, child: Text('Cont. Old Curric')),
                       ],
                     ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: const [
-                        Text('Names Display Mode'),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Show BU & CA')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Show Splits')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Imp. Splits')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Show Coord(s)')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Set C or CC2')),
-                        ElevatedButton(
-                            onPressed: null, child: Text('Set CC 1')),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Title(
-                            title: 'Auxiliary Data',
-                            color: const Color(0xFFFFFFFF),
-                            child: auxData(schedule)),
-                      ],
-                    )
                   ],
                 ),
                 if (context.appScreen.isCompact())
@@ -475,6 +461,8 @@ class _ScreenState extends State<Screen> {
   Widget data() {
     return DataTable(
       columnSpacing: 0,
+      sortColumnIndex: _currentSortColumn,
+      sortAscending: _isAscending,
       border: TableBorder.all(width: 1.0, color: Colors.blueGrey),
       columns: const <DataColumn>[
         DataColumn(
@@ -610,7 +598,7 @@ class _ScreenState extends State<Screen> {
             textAlign: TextAlign.center,
           )),
           DataCell(Text(
-            '$total',
+            '$first',
             textAlign: TextAlign.center,
           )),
         ],
@@ -619,7 +607,34 @@ class _ScreenState extends State<Screen> {
     return list;
   }
 
-  void updateTable() {}
+  Future<void> _showMyDialog(String error, String loadType) async {
+    // found at https://docs.flutter.dev/cookbook/forms/text-input
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('There was a problem loading the $loadType file'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('The following error was encountered: $error'),
+                const Text('make sure you have selected the correct file'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 Widget auxData(Scheduling scheduling) {
