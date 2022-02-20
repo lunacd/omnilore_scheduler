@@ -101,6 +101,13 @@ void main() {
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
     expect(scheduling.overviewData.getNbrForClassRank('SIS', 0), 4);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 1), 4);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 2), 3);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 3), 1);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 4), 1);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 5), 3);
+
+    await scheduling.loadPeople('test/resources/people.txt');
     expect(scheduling.overviewData.getNbrForClassRank('BRX', 0), 17);
     expect(scheduling.overviewData.getNbrForClassRank('LES', 5), 0);
     expect(scheduling.overviewData.getNbrForClassRank('ABC', 0), null);

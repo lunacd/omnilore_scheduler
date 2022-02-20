@@ -23,7 +23,7 @@ class OverviewData {
   final Validate _validate;
 
   // Internal states
-  final _choices = HashMap<String, List<HashSet<String>>?>();
+  final _choices = HashMap<String, List<HashSet<String>?>>();
   bool? _undersize;
   bool? _oversize;
 
@@ -39,7 +39,7 @@ class OverviewData {
   void resetState() {
     _choices.clear();
     for (var code in _courses.getCodes()) {
-      _choices[code] = null;
+      _choices[code] = List<HashSet<String>?>.filled(6, null, growable: false);
     }
     _undersize = null;
     _oversize = null;
@@ -67,12 +67,12 @@ class OverviewData {
     if (!_choices.containsKey(course)) {
       return null;
     } else {
-      var choices = _choices[course];
+      var choices = _choices[course]![rank];
       if (choices == null) {
         _computeChoices(rank, _people);
-        return _choices[course]![rank].length;
+        return _choices[course]![rank]!.length;
       } else {
-        return choices[rank].length;
+        return choices.length;
       }
     }
   }
@@ -83,12 +83,10 @@ class OverviewData {
       if (rank < person.classes.length) {
         var course = person.classes[rank];
         if (_choices.containsKey(course)) {
-          if (_choices[course] == null) {
-            _choices[course] = List<HashSet<String>>.generate(
-                6, (index) => HashSet<String>(),
-                growable: false);
+          if (_choices[course]![rank] == null) {
+            _choices[course]![rank] = HashSet<String>();
           }
-          _choices[course]![rank].add(person.getName());
+          _choices[course]![rank]!.add(person.getName());
         } else {
           // This should never happen
           throw UnexpectedFatalException(); // coverage:ignore-line
@@ -96,10 +94,8 @@ class OverviewData {
       }
     }
     for (var course in _choices.keys) {
-      if (_choices[course] == null) {
-        _choices[course] = List<HashSet<String>>.generate(
-            6, (index) => HashSet<String>(),
-            growable: false);
+      if (_choices[course]![rank] == null) {
+        _choices[course]![rank] = HashSet<String>();
       }
     }
   }
@@ -130,12 +126,12 @@ class OverviewData {
     if (!_choices.containsKey(course)) {
       return null;
     } else {
-      var choices = _choices[course];
+      var choices = _choices[course]![rank];
       if (choices == null) {
         _computeChoices(rank, _people);
-        return _choices[course]![rank].toList(growable: false);
+        return _choices[course]![rank]!.toList(growable: false);
       } else {
-        return choices[rank].toList(growable: false);
+        return choices.toList(growable: false);
       }
     }
   }
