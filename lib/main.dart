@@ -128,8 +128,17 @@ class _ScreenState extends State<Screen> {
             MenuListItem(
               icon: Icons.open_in_new,
               title: 'Import',
-              onPressed: () {
-                _showMessage('File.open');
+              onPressed: () async {
+                numCourses = await schedule.loadCourses(
+                    '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
+                numPeople = await schedule.loadPeople(
+                    '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
+
+                print(numCourses);
+                print(numPeople);
+                setState(() {
+                  print('state changed');
+                });
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
@@ -193,6 +202,7 @@ class _ScreenState extends State<Screen> {
     return Container(
         color: Colors.amber,
         child: ListView(
+          controller: ScrollController(),
           children: [
             drawerButton(
                 title: 'User', icon: Icons.account_circle, small: small),
@@ -453,73 +463,87 @@ class _ScreenState extends State<Screen> {
 
   Widget data() {
     return DataTable(
+      columnSpacing: 0,
+      border: TableBorder.all(width: 1.0, color: Colors.blueGrey),
       columns: const <DataColumn>[
         DataColumn(
-          label: Text(
+          label: Center(
+              child: Text(
             'Name',
+            overflow: TextOverflow.fade,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
-          ),
+          )),
         ),
         DataColumn(
-          label: Text(
+          label: Center(
+              child: Text(
             'First Choices',
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          )),
+        ),
+        DataColumn(
+          label: Text(
+            'First BU',
+            overflow: TextOverflow.fade,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
         DataColumn(
           label: Text(
-            'First Backup',
+            'Second BU',
+            overflow: TextOverflow.fade,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
         DataColumn(
           label: Text(
-            'Second Backup',
+            'Third BU',
+            overflow: TextOverflow.fade,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
         DataColumn(
           label: Text(
-            'Third Backup',
+            'Add BU\'s',
+            overflow: TextOverflow.fade,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
         DataColumn(
           label: Text(
-            'Add from BU\'s',
+            'Drop, Bad',
+            overflow: TextOverflow.fade,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
         DataColumn(
           label: Text(
-            'Drop, Bad Time',
+            'Drop, Dupe',
+            overflow: TextOverflow.fade,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
         DataColumn(
           label: Text(
-            'Drop, Dupe Class',
+            'Drop, Full',
+            overflow: TextOverflow.clip,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
         DataColumn(
           label: Text(
-            'Drop, Class Full',
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'resulting size',
+            'total',
+            overflow: TextOverflow.fade,
             softWrap: true,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
@@ -533,31 +557,51 @@ class _ScreenState extends State<Screen> {
     List<DataRow> list = <DataRow>[];
     if (schedule != null) {
       for (String code in schedule.getCourseCodes()) {
-        print(code + " loop started");
-        int? first = schedule.overviewData.getNbrForClassRank(code, 0);
-        print(code + " first: $first calculated");
-        int? second = schedule.overviewData.getNbrForClassRank(code, 1);
-        print(code + " second: $second calculated");
-        int? third = schedule.overviewData.getNbrForClassRank(code, 2);
-        print(code + " third: $third calculated");
-        int? fourth = schedule.overviewData.getNbrForClassRank(code, 3);
-        print(code + " fourth: $fourth calculated");
-        int? fromBU = schedule.overviewData.getNbrAddFromBackup(code);
-        print(code + " fromBU: $fromBU calculated");
-        int total = first! + second! + third! + fourth! + fromBU!;
-        print(code + " total: $total calculated");
+        int first = schedule.overviewData.getNbrForClassRank(code, 0) ?? -1;
+        int second = schedule.overviewData.getNbrForClassRank(code, 1) ?? -1;
+        int third = schedule.overviewData.getNbrForClassRank(code, 2) ?? -1;
+        int fourth = schedule.overviewData.getNbrForClassRank(code, 3) ?? -1;
+        int fromBU = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+        int total = first + second + third + fourth + fromBU;
         list.add(DataRow(
           cells: <DataCell>[
             DataCell(Text(code)),
-            DataCell(Text('$first')),
-            DataCell(Text('$second')),
-            DataCell(Text('$third')),
-            DataCell(Text('$fourth')),
-            DataCell(Text('$fromBU')),
-            DataCell(Text('0')),
-            DataCell(Text('0')),
-            DataCell(Text('0')),
-            DataCell(Text('$total')),
+            DataCell(Text(
+              '$first',
+              textAlign: TextAlign.center,
+            )),
+            DataCell(Text(
+              '$second',
+              textAlign: TextAlign.center,
+            )),
+            DataCell(Text(
+              '$third',
+              textAlign: TextAlign.center,
+            )),
+            DataCell(Text(
+              '$fourth',
+              textAlign: TextAlign.center,
+            )),
+            DataCell(Text(
+              '$fromBU',
+              textAlign: TextAlign.center,
+            )),
+            DataCell(Text(
+              '0',
+              textAlign: TextAlign.center,
+            )),
+            DataCell(Text(
+              '0',
+              textAlign: TextAlign.center,
+            )),
+            DataCell(Text(
+              '0',
+              textAlign: TextAlign.center,
+            )),
+            DataCell(Text(
+              '$total',
+              textAlign: TextAlign.center,
+            )),
           ],
         ));
       }
