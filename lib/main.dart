@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
+import 'package:file_picker/file_picker.dart';
 
 const Map kColorMap = {
   'Red': Colors.red,
@@ -127,21 +128,40 @@ class _ScreenState extends State<Screen> {
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
               icon: Icons.open_in_new,
-              title: 'Import',
+              title: 'Import Courses',
               onPressed: () async {
-                numCourses = await schedule.loadCourses(
-                    '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
-                numPeople = await schedule.loadPeople(
-                    '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
+                FilePickerResult? result =
+                    await FilePicker.platform.pickFiles();
+
+                if (result != null) {
+                  String path = result.files.single.path ?? '';
+                  if (path != '') {
+                    numCourses = await schedule.loadCourses(path);
+                  }
+                } else {
+                  // User canceled the picker
+                }
                 setState(() {});
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
             MenuListItem(
-              title: 'Close',
-              onPressed: () {
-                _showMessage('File.close');
+              title: 'Import People',
+              onPressed: () async {
+                FilePickerResult? result =
+                    await FilePicker.platform.pickFiles();
+
+                if (result != null) {
+                  String path = result.files.single.path ?? '';
+                  if (path != '') {
+                    numCourses = await schedule.loadPeople(path);
+                  }
+                } else {
+                  // User canceled the picker
+                }
+                setState(() {});
               },
+              shortcut: MenuShortcut(key: LogicalKeyboardKey.keyP, ctrl: true),
             ),
             MenuListItem(
               title: 'Save',
@@ -310,7 +330,7 @@ class _ScreenState extends State<Screen> {
                   children: [
                     Column(
                       children: [
-                        auxData(),
+                        auxData(schedule),
                       ],
                     ),
                     Column(
@@ -363,7 +383,7 @@ class _ScreenState extends State<Screen> {
                         Title(
                             title: 'Auxiliary Data',
                             color: const Color(0xFFFFFFFF),
-                            child: auxData()),
+                            child: auxData(schedule)),
                       ],
                     )
                   ],
@@ -602,7 +622,7 @@ class _ScreenState extends State<Screen> {
   void updateTable() {}
 }
 
-Widget auxData() {
+Widget auxData(Scheduling scheduling) {
   return DataTable(
     columns: const <DataColumn>[
       DataColumn(
@@ -620,47 +640,47 @@ Widget auxData() {
         ),
       ),
     ],
-    rows: const <DataRow>[
+    rows: <DataRow>[
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('Course Takers')),
-          DataCell(Text('19')),
+          const DataCell(Text('Course Takers')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrCourseTakers()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('Go Courses')),
-          DataCell(Text('19')),
+          const DataCell(Text('Go Courses')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrGoCourses()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('places asked')),
-          DataCell(Text('19')),
+          const DataCell(Text('places asked')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesAsked()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('places given')),
-          DataCell(Text('19')),
+          const DataCell(Text('places given')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesGiven()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('un-met wants')),
-          DataCell(Text('19')),
+          const DataCell(Text('un-met wants')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrUnmetWants()}')),
         ],
       ),
       DataRow(
         cells: <DataCell>[
-          DataCell(Text('on leave')),
-          DataCell(Text('19')),
+          const DataCell(Text('on leave')),
+          DataCell(Text('${scheduling.auxiliaryData.getNbrOnLeave()}')),
         ],
       ),
-      DataRow(
+      const DataRow(
         cells: <DataCell>[
           DataCell(Text('Missing')),
-          DataCell(Text('19')),
+          DataCell(Text('0')),
         ],
       ),
     ],
