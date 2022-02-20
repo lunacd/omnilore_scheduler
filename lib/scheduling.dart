@@ -30,19 +30,6 @@ class Scheduling {
   late OverviewData overviewData;
   late CourseControl courseControl;
 
-  void initOverview() {
-    overviewData = OverviewData(_courses, _people, _validate);
-    overviewData.initialize(courseControl);
-  }
-
-  void initControl() {
-    courseControl = CourseControl(_courses, _people);
-  }
-
-  void initAuxiliary() {
-    auxiliaryData = AuxiliaryData(_courses, _people);
-  }
-
   /// Clear cache and reset compute state
   void resetState() {
     auxiliaryData.resetState();

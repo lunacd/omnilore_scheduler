@@ -32,7 +32,6 @@ class People {
   /// int numPeople = await people.loadPeople('/path/to/file');
   /// ```
   Future<int> loadPeople(String inputFile) async {
-    print("people being loaded");
     people.clear();
     var file = File(inputFile);
     var lines =

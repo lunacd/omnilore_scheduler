@@ -133,12 +133,7 @@ class _ScreenState extends State<Screen> {
                     '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
                 numPeople = await schedule.loadPeople(
                     '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
-
-                print(numCourses);
-                print(numPeople);
-                setState(() {
-                  print('state changed');
-                });
+                setState(() {});
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
@@ -328,11 +323,7 @@ class _ScreenState extends State<Screen> {
                               numPeople = await schedule.loadPeople(
                                   '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
 
-                              print(numCourses);
-                              print(numPeople);
-                              setState(() {
-                                print('state changed');
-                              });
+                              setState(() {});
                             },
                             child: Text('Enter/Edit Crs')),
                         ElevatedButton(
@@ -549,66 +540,63 @@ class _ScreenState extends State<Screen> {
           ),
         ),
       ],
-      rows: BuildTable(),
+      rows: buildTable(),
     );
   }
 
-  List<DataRow> BuildTable() {
+  List<DataRow> buildTable() {
     List<DataRow> list = <DataRow>[];
-    if (schedule != null) {
-      for (String code in schedule.getCourseCodes()) {
-        int first = schedule.overviewData.getNbrForClassRank(code, 0) ?? -1;
-        int second = schedule.overviewData.getNbrForClassRank(code, 1) ?? -1;
-        int third = schedule.overviewData.getNbrForClassRank(code, 2) ?? -1;
-        int fourth = schedule.overviewData.getNbrForClassRank(code, 3) ?? -1;
-        int fromBU = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
-        int total = first + second + third + fourth + fromBU;
-        list.add(DataRow(
-          cells: <DataCell>[
-            DataCell(Text(code)),
-            DataCell(Text(
-              '$first',
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
-              '$second',
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
-              '$third',
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
-              '$fourth',
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
-              '$fromBU',
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
-              '0',
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
-              '0',
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
-              '0',
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
-              '$total',
-              textAlign: TextAlign.center,
-            )),
-          ],
-        ));
-      }
-      return list;
-    } else {
-      return <DataRow>[];
+
+    for (String code in schedule.getCourseCodes()) {
+      int first = schedule.overviewData.getNbrForClassRank(code, 0) ?? -1;
+      int second = schedule.overviewData.getNbrForClassRank(code, 1) ?? -1;
+      int third = schedule.overviewData.getNbrForClassRank(code, 2) ?? -1;
+      int fourth = schedule.overviewData.getNbrForClassRank(code, 3) ?? -1;
+      int fromBU = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+      int total = first + second + third + fourth + fromBU;
+      list.add(DataRow(
+        cells: <DataCell>[
+          DataCell(Text(code)),
+          DataCell(Text(
+            '$first',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$second',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$third',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$fourth',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$fromBU',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '0',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '0',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '0',
+            textAlign: TextAlign.center,
+          )),
+          DataCell(Text(
+            '$total',
+            textAlign: TextAlign.center,
+          )),
+        ],
+      ));
     }
+    return list;
   }
 
   void updateTable() {}
