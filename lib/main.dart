@@ -62,10 +62,10 @@ class Screen extends StatefulWidget {
 class _ScreenState extends State<Screen> {
   final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
-  Scheduling? schedule;
+  Scheduling schedule = Scheduling();
 
-  Future<int>? numCourses;
-  Future<int>? numPeople;
+  int? numCourses;
+  int? numPeople;
   // String _message = 'Choose a MenuItem.';
   // String _drawerTitle = 'Tap a drawerItem';
   // IconData _drawerIcon = Icons.menu;
@@ -312,45 +312,23 @@ class _ScreenState extends State<Screen> {
                       children: [
                         Text('Select Process'),
                         ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                // ignore: prefer_conditional_assignment
-                                if (schedule == null) {
-                                  schedule = Scheduling();
-                                }
-                                numCourses = schedule?.loadCourses(
-                                    '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
-                                numPeople = schedule?.loadPeople(
-                                    '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
-                                schedule?.initControl();
-                                schedule?.initOverview();
+                            onPressed: () async {
+                              numCourses = await schedule.loadCourses(
+                                  '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
+                              numPeople = await schedule.loadPeople(
+                                  '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
 
-                                schedule?.initAuxiliary();
-                                print(numCourses);
-                                print(numPeople);
+                              print(numCourses);
+                              print(numPeople);
+                              setState(() {
+                                print('state changed');
                               });
                             },
                             child: Text('Enter/Edit Crs')),
                         ElevatedButton(
                             onPressed: null, child: Text('Display Courses')),
                         ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                // ignore: prefer_conditional_assignment
-                                if (schedule != null) {
-                                  numPeople = schedule?.loadPeople(
-                                      '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
-                                  schedule?.initControl();
-                                  schedule?.initOverview();
-
-                                  schedule?.initAuxiliary();
-
-                                  print("${numCourses}");
-                                  print('${numPeople}');
-                                }
-                              });
-                            },
-                            child: Text('Enter/Edit Ppl')),
+                            onPressed: null, child: Text('Enter/Edit Ppl')),
                         ElevatedButton(
                             onPressed: null, child: Text('New Curriculum')),
                         ElevatedButton(
@@ -411,21 +389,22 @@ class _ScreenState extends State<Screen> {
     return Builder(
       builder: (BuildContext context) {
         return Container(
-          color: masterBackgroundColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: const [
-                  Text('status: need to import',
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
+            color: masterBackgroundColor,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: const [
+                      Text('status: need to import',
+                          style: TextStyle(
+                              fontSize: 25, fontWeight: FontWeight.bold))
+                    ],
+                  ),
+                  data()
                 ],
               ),
-              data()
-            ],
-          ),
-        );
+            ));
       },
     );
   }
@@ -553,17 +532,17 @@ class _ScreenState extends State<Screen> {
   List<DataRow> BuildTable() {
     List<DataRow> list = <DataRow>[];
     if (schedule != null) {
-      for (String code in schedule!.getCourseCodes()) {
+      for (String code in schedule.getCourseCodes()) {
         print(code + " loop started");
-        int? first = schedule!.overviewData.getNbrForClassRank(code, 0);
+        int? first = schedule.overviewData.getNbrForClassRank(code, 0);
         print(code + " first: $first calculated");
-        int? second = schedule!.overviewData.getNbrForClassRank(code, 1);
+        int? second = schedule.overviewData.getNbrForClassRank(code, 1);
         print(code + " second: $second calculated");
-        int? third = schedule!.overviewData.getNbrForClassRank(code, 2);
+        int? third = schedule.overviewData.getNbrForClassRank(code, 2);
         print(code + " third: $third calculated");
-        int? fourth = schedule!.overviewData.getNbrForClassRank(code, 3);
+        int? fourth = schedule.overviewData.getNbrForClassRank(code, 3);
         print(code + " fourth: $fourth calculated");
-        int? fromBU = schedule!.overviewData.getNbrAddFromBackup(code);
+        int? fromBU = schedule.overviewData.getNbrAddFromBackup(code);
         print(code + " fromBU: $fromBU calculated");
         int total = first! + second! + third! + fourth! + fromBU!;
         print(code + " total: $total calculated");
@@ -587,6 +566,8 @@ class _ScreenState extends State<Screen> {
       return <DataRow>[];
     }
   }
+
+  void updateTable() {}
 }
 
 Widget auxData() {
