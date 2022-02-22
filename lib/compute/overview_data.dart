@@ -207,4 +207,17 @@ class OverviewData {
   Iterable<String>? getPeopleAddFromBackup(String course) {
     return _courseControl.getPeopleAddFromBackup(course);
   }
+
+  /// Get the resulting class size
+  ///
+  /// DO NOT call this on a dropped class. It will not return 0, which is the
+  /// correct resulting class size. That edge case is not handled because the
+  /// frontend should not ever need to know the resulting class size of a
+  /// dropped class.
+  int? getResultingClassSize(String course) {
+    int? firstChoice = getNbrForClassRank(course, 0);
+    if (firstChoice == null) return null;
+    int addFromBackup = getNbrAddFromBackup(course)!;
+    return firstChoice + addFromBackup;
+  }
 }

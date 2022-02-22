@@ -119,4 +119,35 @@ void main() {
           hasMessage('6 is not a valid class rank')
         ])));
   });
+
+  test('Resulting class size', () async {
+    var scheduling = Scheduling();
+    await scheduling.loadCourses('test/resources/course.txt');
+    await scheduling.loadPeople('test/resources/people.txt');
+    expect(scheduling.overviewData.getResultingClassSize('BIG'), 6);
+    expect(scheduling.overviewData.getResultingClassSize('HCD'), 6);
+    expect(scheduling.overviewData.getResultingClassSize('GOO'), 18);
+    expect(scheduling.overviewData.getResultingClassSize('ABC'), null);
+
+    scheduling.courseControl.drop('LES');
+    scheduling.courseControl.drop('FOO');
+    scheduling.courseControl.drop('GOO');
+    expect(scheduling.overviewData.getResultingClassSize('BIG'), 7);
+    expect(scheduling.overviewData.getResultingClassSize('HCD'), 10);
+    expect(scheduling.overviewData.getResultingClassSize('GOO'), 18);
+    expect(scheduling.overviewData.getResultingClassSize('ABC'), null);
+
+    scheduling.courseControl.undrop('FOO');
+    scheduling.courseControl.undrop('GOO');
+    expect(scheduling.overviewData.getResultingClassSize('BIG'), 7);
+    expect(scheduling.overviewData.getResultingClassSize('HCD'), 6);
+    expect(scheduling.overviewData.getResultingClassSize('GOO'), 21);
+    expect(scheduling.overviewData.getResultingClassSize('ABC'), null);
+
+    scheduling.courseControl.undrop('LES');
+    expect(scheduling.overviewData.getResultingClassSize('BIG'), 6);
+    expect(scheduling.overviewData.getResultingClassSize('HCD'), 6);
+    expect(scheduling.overviewData.getResultingClassSize('GOO'), 18);
+    expect(scheduling.overviewData.getResultingClassSize('ABC'), null);
+  });
 }
