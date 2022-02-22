@@ -13,10 +13,6 @@ class OverviewData {
         _people = people,
         _validate = validate;
 
-  // Config
-  final int _classMinSize = 10;
-  final int _classMaxSize = 19;
-
   // Global data
   final People _people;
   final Courses _courses;
@@ -24,8 +20,6 @@ class OverviewData {
 
   // Internal states
   final _choices = HashMap<String, List<HashSet<String>?>>();
-  bool? _undersize;
-  bool? _oversize;
 
   // Readonly access to CourseControl
   late final CourseControl _courseControl;
@@ -41,8 +35,6 @@ class OverviewData {
     for (var code in _courses.getCodes()) {
       _choices[code] = List<HashSet<String>?>.filled(6, null, growable: false);
     }
-    _undersize = null;
-    _oversize = null;
   }
 
   /// Get the number people who has listed a given course as their nth choice
@@ -147,45 +139,13 @@ class OverviewData {
     if (_people.people.isEmpty) {
       return StateOfProcessing.needPeople;
     }
-    if (_hasUndersizeClassed(_courses, _people)) {
+    if (_courseControl.hasUndersizeClasses(_courses, _people)) {
       return StateOfProcessing.drop;
     }
-    if (_hasOversizeClasses(_courses, _people)) {
+    if (_courseControl.hasOversizeClasses(_courses, _people)) {
       return StateOfProcessing.split;
     }
     return StateOfProcessing.schedule;
-  }
-
-  /// Get whether there is class to split
-  bool _hasOversizeClasses(Courses courses, People people) {
-    if (_oversize != null) {
-      return _oversize!;
-    } else {
-      for (var course in courses.getCodes()) {
-        if (getNbrForClassRank(course, 0)! > _classMaxSize) {
-          _oversize = true;
-          return true;
-        }
-      }
-      _oversize = false;
-      return false;
-    }
-  }
-
-  /// Get whether there is class to drop
-  bool _hasUndersizeClassed(Courses courses, People people) {
-    if (_undersize != null) {
-      return _undersize!;
-    } else {
-      for (var course in courses.getCodes()) {
-        if (getNbrForClassRank(course, 0)! < _classMinSize) {
-          _undersize = true;
-          return true;
-        }
-      }
-      _undersize = false;
-      return false;
-    }
   }
 
   /// Get the number of people added from backup for a course

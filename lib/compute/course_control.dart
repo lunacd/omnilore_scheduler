@@ -9,6 +9,12 @@ class CourseControl {
       : _courses = courses,
         _people = people;
 
+  // Config
+  int _classMinSize = 10;
+  int _classMaxSize = 19;
+  final HashMap<String, int> _classMaxSizeMap = HashMap<String, int>();
+  final HashMap<String, int> _classMinSizeMap = HashMap<String, int>();
+
   // Shared data
   final People _people;
   final Courses _courses;
@@ -17,6 +23,9 @@ class CourseControl {
   final _dropped = HashSet<String>();
   final _backupAdd = HashMap<String, HashMap<String, int>>();
   final _affectedMembers = HashMap<String, List<String>>();
+
+  bool? _undersize;
+  bool? _oversize;
 
   // Readonly access to OverviewData
   late final OverviewData _overviewData;
@@ -32,6 +41,8 @@ class CourseControl {
       _backupAdd[code] = HashMap<String, int>();
       _affectedMembers[code] = [];
     }
+    _undersize = null;
+    _oversize = null;
   }
 
   /// Drop class
@@ -125,5 +136,91 @@ class CourseControl {
   /// Returns null if course code does not exist.
   Iterable<String>? getPeopleAddFromBackup(String course) {
     return _backupAdd[course]?.keys;
+  }
+
+  /// Get whether there is class to split
+  bool hasOversizeClasses(Courses courses, People people) {
+    if (_oversize != null) {
+      return _oversize!;
+    } else {
+      for (var course in courses.getCodes()) {
+        if (_overviewData.getNbrForClassRank(course, 0)! > _classMaxSize) {
+          _oversize = true;
+          return true;
+        }
+      }
+      _oversize = false;
+      return false;
+    }
+  }
+
+  /// Get whether there is class to drop
+  bool hasUndersizeClasses(Courses courses, People people) {
+    if (_undersize != null) {
+      return _undersize!;
+    } else {
+      for (var course in courses.getCodes()) {
+        if (_overviewData.getNbrForClassRank(course, 0)! < _classMinSize) {
+          _undersize = true;
+          return true;
+        }
+      }
+      _undersize = false;
+      return false;
+    }
+  }
+
+  /// Set global maximum class size
+  void setMaxClassSize(int maxSize) {
+    _classMaxSize = maxSize;
+    _oversize = null;
+  }
+
+  /// Set maximum class size for a specific class
+  ///
+  /// This will overwrite the global maximum configuration. To cancel the
+  /// specific class size configuration for a class, pass null as maxSize to
+  /// this function.
+  void setMaxClassSizeForClass(String course, int? maxSize) {
+    if (maxSize == null) {
+      _classMaxSizeMap.remove(course);
+    } else {
+      _classMaxSizeMap[course] = maxSize;
+    }
+  }
+
+  /// Get the maximum class size for a class
+  ///
+  /// Returns the global maximum class size if no specific class size is set for
+  /// the class.
+  int getMaxClassSize(String course) {
+    return _classMaxSizeMap[course] ?? _classMaxSize;
+  }
+
+  /// Set global minimum class size
+  void setMinClassSize(int minSize) {
+    _classMinSize = minSize;
+    _undersize = null;
+  }
+
+  /// Set minimum class size for a specific class
+  ///
+  /// This will overwrite the global maximum configuration. To cancel the
+  /// specific class size configuration for a class, pass null as maxSize to
+  /// this function.
+  void setMinClassSizeForClass(String course, int? minSize) {
+    if (minSize == null) {
+      _classMinSizeMap.remove(course);
+    } else {
+      _classMinSizeMap[course] = minSize;
+    }
+  }
+
+  /// Get the minimum class size for a class
+  ///
+  /// Returns the global minimum class size if no specific class size is set for
+  /// the class.
+  int getMinClassSize(String course) {
+    return _classMinSizeMap[course] ?? _classMinSize;
   }
 }

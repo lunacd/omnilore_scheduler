@@ -87,4 +87,31 @@ void main() {
     expect(scheduling.overviewData.getNbrAddFromBackup('HCD'), 0);
     expect(scheduling.overviewData.getPeopleAddFromBackup('HCD')!.length, 0);
   });
+
+  test('Class size control', () async {
+    var scheduling = Scheduling();
+    expect(scheduling.courseControl.getMaxClassSize('SIS'), 19);
+    expect(scheduling.courseControl.getMinClassSize('SIS'), 10);
+    expect(scheduling.courseControl.getMaxClassSize('GOO'), 19);
+    expect(scheduling.courseControl.getMinClassSize('GOO'), 10);
+
+    scheduling.courseControl.setMaxClassSize(2000);
+    scheduling.courseControl.setMinClassSize(0);
+    expect(scheduling.courseControl.getMaxClassSize('SIS'), 2000);
+    expect(scheduling.courseControl.getMinClassSize('SIS'), 0);
+    expect(scheduling.courseControl.getMaxClassSize('GOO'), 2000);
+    expect(scheduling.courseControl.getMinClassSize('GOO'), 0);
+
+    scheduling.courseControl.setMinClassSizeForClass('SIS', 1000);
+    scheduling.courseControl.setMaxClassSizeForClass('SIS', 3000);
+    expect(scheduling.courseControl.getMaxClassSize('SIS'), 3000);
+    expect(scheduling.courseControl.getMinClassSize('SIS'), 1000);
+    expect(scheduling.courseControl.getMaxClassSize('GOO'), 2000);
+    expect(scheduling.courseControl.getMinClassSize('GOO'), 0);
+
+    scheduling.courseControl.setMinClassSizeForClass('SIS', null);
+    scheduling.courseControl.setMaxClassSizeForClass('SIS', null);
+    expect(scheduling.courseControl.getMaxClassSize('SIS'), 2000);
+    expect(scheduling.courseControl.getMinClassSize('SIS'), 0);
+  });
 }
