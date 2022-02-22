@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
+
+import 'test_util.dart';
 
 void main() {
   test('Drop classes', () async {
@@ -23,7 +26,7 @@ void main() {
     expect(scheduling.overviewData.getPeopleAddFromBackup('LES')!.length, 0);
     expect(scheduling.overviewData.getNbrAddFromBackup('HCD'), 0);
     expect(scheduling.overviewData.getPeopleAddFromBackup('HCD')!.length, 0);
-    
+
     scheduling.courseControl.undrop('LES');
     expect(scheduling.overviewData.getNbrAddFromBackup('BIG'), 0);
     expect(scheduling.overviewData.getPeopleAddFromBackup('BIG')!.length, 0);
@@ -95,23 +98,35 @@ void main() {
     expect(scheduling.courseControl.getMaxClassSize('GOO'), 19);
     expect(scheduling.courseControl.getMinClassSize('GOO'), 10);
 
-    scheduling.courseControl.setMaxClassSize(2000);
-    scheduling.courseControl.setMinClassSize(0);
+    scheduling.courseControl.setMinMaxClassSize(0, 2000);
     expect(scheduling.courseControl.getMaxClassSize('SIS'), 2000);
     expect(scheduling.courseControl.getMinClassSize('SIS'), 0);
     expect(scheduling.courseControl.getMaxClassSize('GOO'), 2000);
     expect(scheduling.courseControl.getMinClassSize('GOO'), 0);
 
-    scheduling.courseControl.setMinClassSizeForClass('SIS', 1000);
-    scheduling.courseControl.setMaxClassSizeForClass('SIS', 3000);
+    scheduling.courseControl.setMinMaxClassSizeForClass('SIS', 1000, 3000);
     expect(scheduling.courseControl.getMaxClassSize('SIS'), 3000);
     expect(scheduling.courseControl.getMinClassSize('SIS'), 1000);
     expect(scheduling.courseControl.getMaxClassSize('GOO'), 2000);
     expect(scheduling.courseControl.getMinClassSize('GOO'), 0);
 
-    scheduling.courseControl.setMinClassSizeForClass('SIS', null);
-    scheduling.courseControl.setMaxClassSizeForClass('SIS', null);
+    scheduling.courseControl.setMinMaxClassSizeForClass('SIS', null, null);
     expect(scheduling.courseControl.getMaxClassSize('SIS'), 2000);
     expect(scheduling.courseControl.getMinClassSize('SIS'), 0);
+
+    expect(
+        () => scheduling.courseControl.setMinMaxClassSize(20, 10),
+        throwsA(allOf([
+          isA<MinLargerThanMaxException>(),
+          hasMessage('Min: 20 is larger than max: 10')
+        ])));
+
+    expect(
+        () =>
+            scheduling.courseControl.setMinMaxClassSizeForClass('ABC', 20, 10),
+        throwsA(allOf([
+          isA<MinLargerThanMaxException>(),
+          hasMessage('Min: 20 is larger than max: 10')
+        ])));
   });
 }

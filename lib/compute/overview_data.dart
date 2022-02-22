@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/compute/validate.dart';
+import 'package:omnilore_scheduler/model/class_size.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
@@ -52,7 +53,7 @@ class OverviewData {
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
-  int? getNbrForClassRank(String course, int rank) {
+  ClassSize? getNbrForClassRank(String course, int rank) {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
     }
@@ -62,9 +63,9 @@ class OverviewData {
       var choices = _choices[course]![rank];
       if (choices == null) {
         _computeChoices(rank, _people);
-        return _choices[course]![rank]!.length;
+        return _getClassSizeFromRaw(course, _choices[course]![rank]!.length);
       } else {
-        return choices.length;
+        return _getClassSizeFromRaw(course, choices.length);
       }
     }
   }
@@ -174,10 +175,19 @@ class OverviewData {
   /// correct resulting class size. That edge case is not handled because the
   /// frontend should not ever need to know the resulting class size of a
   /// dropped class.
-  int? getResultingClassSize(String course) {
-    int? firstChoice = getNbrForClassRank(course, 0);
+  ClassSize? getResultingClassSize(String course) {
+    int? firstChoice = getNbrForClassRank(course, 0)?.size;
     if (firstChoice == null) return null;
     int addFromBackup = getNbrAddFromBackup(course)!;
-    return firstChoice + addFromBackup;
+    return _getClassSizeFromRaw(course, firstChoice + addFromBackup);
+  }
+
+  ClassSize _getClassSizeFromRaw(String course, int size) {
+    if (size > _courseControl.getMaxClassSize(course)) {
+      return ClassSize(size: size, state: ClassState.oversized);
+    } else if (size < _courseControl.getMinClassSize(course)) {
+      return ClassSize(size: size, state: ClassState.undersized);
+    }
+    return ClassSize(size: size, state: ClassState.normal);
   }
 }

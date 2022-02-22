@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:omnilore_scheduler/model/class_size.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
@@ -100,16 +101,16 @@ void main() {
     var scheduling = Scheduling();
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
-    expect(scheduling.overviewData.getNbrForClassRank('SIS', 0), 4);
-    expect(scheduling.overviewData.getNbrForClassRank('SIS', 1), 4);
-    expect(scheduling.overviewData.getNbrForClassRank('SIS', 2), 3);
-    expect(scheduling.overviewData.getNbrForClassRank('SIS', 3), 1);
-    expect(scheduling.overviewData.getNbrForClassRank('SIS', 4), 1);
-    expect(scheduling.overviewData.getNbrForClassRank('SIS', 5), 3);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 0)!.size, 4);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 1)!.size, 4);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 2)!.size, 3);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 3)!.size, 1);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 4)!.size, 1);
+    expect(scheduling.overviewData.getNbrForClassRank('SIS', 5)!.size, 3);
 
     await scheduling.loadPeople('test/resources/people.txt');
-    expect(scheduling.overviewData.getNbrForClassRank('BRX', 0), 17);
-    expect(scheduling.overviewData.getNbrForClassRank('LES', 5), 0);
+    expect(scheduling.overviewData.getNbrForClassRank('BRX', 0)!.size, 17);
+    expect(scheduling.overviewData.getNbrForClassRank('LES', 5)!.size, 0);
     expect(scheduling.overviewData.getNbrForClassRank('ABC', 0), null);
     expect(scheduling.overviewData.getNbrForClassRank('ABC', 5), null);
     expect(
@@ -124,30 +125,48 @@ void main() {
     var scheduling = Scheduling();
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
-    expect(scheduling.overviewData.getResultingClassSize('BIG'), 6);
-    expect(scheduling.overviewData.getResultingClassSize('HCD'), 6);
-    expect(scheduling.overviewData.getResultingClassSize('GOO'), 18);
+    expect(scheduling.overviewData.getResultingClassSize('BIG')!.size, 6);
+    expect(scheduling.overviewData.getResultingClassSize('HCD')!.size, 6);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.size, 18);
     expect(scheduling.overviewData.getResultingClassSize('ABC'), null);
 
     scheduling.courseControl.drop('LES');
     scheduling.courseControl.drop('FOO');
     scheduling.courseControl.drop('GOO');
-    expect(scheduling.overviewData.getResultingClassSize('BIG'), 7);
-    expect(scheduling.overviewData.getResultingClassSize('HCD'), 10);
-    expect(scheduling.overviewData.getResultingClassSize('GOO'), 18);
+    expect(scheduling.overviewData.getResultingClassSize('BIG')!.size, 7);
+    expect(scheduling.overviewData.getResultingClassSize('HCD')!.size, 10);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.size, 18);
     expect(scheduling.overviewData.getResultingClassSize('ABC'), null);
 
     scheduling.courseControl.undrop('FOO');
     scheduling.courseControl.undrop('GOO');
-    expect(scheduling.overviewData.getResultingClassSize('BIG'), 7);
-    expect(scheduling.overviewData.getResultingClassSize('HCD'), 6);
-    expect(scheduling.overviewData.getResultingClassSize('GOO'), 21);
+    expect(scheduling.overviewData.getResultingClassSize('BIG')!.size, 7);
+    expect(scheduling.overviewData.getResultingClassSize('HCD')!.size, 6);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.state,
+        ClassState.oversized);
+    scheduling.courseControl.setMinMaxClassSizeForClass('GOO', 10, 25);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.state,
+        ClassState.normal);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.size, 21);
+
     expect(scheduling.overviewData.getResultingClassSize('ABC'), null);
 
     scheduling.courseControl.undrop('LES');
-    expect(scheduling.overviewData.getResultingClassSize('BIG'), 6);
-    expect(scheduling.overviewData.getResultingClassSize('HCD'), 6);
-    expect(scheduling.overviewData.getResultingClassSize('GOO'), 18);
+    expect(scheduling.overviewData.getResultingClassSize('BIG')!.size, 6);
+    expect(scheduling.overviewData.getResultingClassSize('HCD')!.state,
+        ClassState.undersized);
+    expect(scheduling.overviewData.getResultingClassSize('HCD')!.size, 6);
+    scheduling.courseControl.setMinMaxClassSizeForClass('HCD', 4, 19);
+    expect(scheduling.overviewData.getResultingClassSize('HCD')!.state,
+        ClassState.normal);
+    expect(scheduling.overviewData.getResultingClassSize('HCD')!.size, 6);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.state,
+        ClassState.normal);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.size, 18);
+    scheduling.courseControl.setMinMaxClassSizeForClass('GOO', 10, 15);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.state,
+        ClassState.oversized);
+    expect(scheduling.overviewData.getResultingClassSize('GOO')!.size, 18);
     expect(scheduling.overviewData.getResultingClassSize('ABC'), null);
   });
 }

@@ -130,8 +130,7 @@ class ListingWhenWantingZeroException implements Exception {
 
 /// Exception for a person to have duplicate records in the people file
 class DuplicateRecordsException implements Exception {
-  const DuplicateRecordsException(
-      {required this.fName, required this.lName});
+  const DuplicateRecordsException({required this.fName, required this.lName});
 
   final String fName;
   final String lName;
@@ -139,6 +138,19 @@ class DuplicateRecordsException implements Exception {
   @override
   String toString() {
     return '$fName $lName has more than one record';
+  }
+}
+
+/// Exception for passing a min larger than max
+class MinLargerThanMaxException implements Exception {
+  const MinLargerThanMaxException({required this.min, required this.max});
+
+  final int min;
+  final int max;
+
+  @override
+  String toString() {
+    return 'Min: $min is larger than max: $max';
   }
 }
 

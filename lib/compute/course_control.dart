@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:omnilore_scheduler/compute/overview_data.dart';
+import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
@@ -144,7 +145,7 @@ class CourseControl {
       return _oversize!;
     } else {
       for (var course in courses.getCodes()) {
-        if (_overviewData.getNbrForClassRank(course, 0)! > _classMaxSize) {
+        if (_overviewData.getNbrForClassRank(course, 0)!.size > _classMaxSize) {
           _oversize = true;
           return true;
         }
@@ -160,7 +161,7 @@ class CourseControl {
       return _undersize!;
     } else {
       for (var course in courses.getCodes()) {
-        if (_overviewData.getNbrForClassRank(course, 0)! < _classMinSize) {
+        if (_overviewData.getNbrForClassRank(course, 0)!.size < _classMinSize) {
           _undersize = true;
           return true;
         }
@@ -170,23 +171,44 @@ class CourseControl {
     }
   }
 
-  /// Set global maximum class size
-  void setMaxClassSize(int maxSize) {
+  /// Set global minimum and maximum class size
+  ///
+  /// Throws [MinLargerThanMaxException] if minSize is larger than maxSize
+  void setMinMaxClassSize(int minSize, int maxSize) {
+    if (minSize > maxSize) {
+      throw MinLargerThanMaxException(min: minSize, max: maxSize);
+    }
     _classMaxSize = maxSize;
+    _classMinSize = minSize;
     _oversize = null;
+    _undersize = null;
   }
 
   /// Set maximum class size for a specific class
   ///
-  /// This will overwrite the global maximum configuration. To cancel the
-  /// specific class size configuration for a class, pass null as maxSize to
-  /// this function.
-  void setMaxClassSizeForClass(String course, int? maxSize) {
+  /// This will overwrite the global configuration. To cancel the specific
+  /// class size configuration for a class, pass null for both minSize and
+  /// maxSize to this function (I don't think this will be needed).
+  ///
+  /// Throws [MinLargerThanMaxException] if minSize is larger than maxSize
+  void setMinMaxClassSizeForClass(String course, int? minSize, int? maxSize) {
+    if (maxSize != null && minSize != null) {
+      if (minSize > maxSize) {
+        throw MinLargerThanMaxException(min: minSize, max: maxSize);
+      }
+    }
     if (maxSize == null) {
       _classMaxSizeMap.remove(course);
     } else {
       _classMaxSizeMap[course] = maxSize;
     }
+    if (minSize == null) {
+      _classMinSizeMap.remove(course);
+    } else {
+      _classMinSizeMap[course] = minSize;
+    }
+    _undersize = null;
+    _oversize = null;
   }
 
   /// Get the maximum class size for a class
@@ -195,25 +217,6 @@ class CourseControl {
   /// the class.
   int getMaxClassSize(String course) {
     return _classMaxSizeMap[course] ?? _classMaxSize;
-  }
-
-  /// Set global minimum class size
-  void setMinClassSize(int minSize) {
-    _classMinSize = minSize;
-    _undersize = null;
-  }
-
-  /// Set minimum class size for a specific class
-  ///
-  /// This will overwrite the global maximum configuration. To cancel the
-  /// specific class size configuration for a class, pass null as maxSize to
-  /// this function.
-  void setMinClassSizeForClass(String course, int? minSize) {
-    if (minSize == null) {
-      _classMinSizeMap.remove(course);
-    } else {
-      _classMinSizeMap[course] = minSize;
-    }
   }
 
   /// Get the minimum class size for a class

@@ -557,10 +557,12 @@ class _ScreenState extends State<Screen> {
     List<DataRow> list = <DataRow>[];
 
     for (String code in schedule.getCourseCodes()) {
-      int first = schedule.overviewData.getNbrForClassRank(code, 0) ?? -1;
-      int second = schedule.overviewData.getNbrForClassRank(code, 1) ?? -1;
-      int third = schedule.overviewData.getNbrForClassRank(code, 2) ?? -1;
-      int fourth = schedule.overviewData.getNbrForClassRank(code, 3) ?? -1;
+      int first = schedule.overviewData.getNbrForClassRank(code, 0)?.size ?? -1;
+      int second =
+          schedule.overviewData.getNbrForClassRank(code, 1)?.size ?? -1;
+      int third = schedule.overviewData.getNbrForClassRank(code, 2)?.size ?? -1;
+      int fourth =
+          schedule.overviewData.getNbrForClassRank(code, 3)?.size ?? -1;
       int fromBU = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
       list.add(DataRow(
         cells: <DataCell>[
