@@ -51,7 +51,6 @@ Coe	Rob	631-329-2397	1											GOO	ILA					29
 Coe	Sara	631-329-2397	1							3	3			RWD	BRX					57
 Conrad	Allan	375-1500	1	3		3		3	3	3		3		BRX						17
 Crandall	Marjorie	375-1073	1											OCN	BIG	ILA				6
-Criswell	Leslie	809-4365	3			3		3		3		3		EVC	ILA	BAD				36
 Criswell	Leslie	809-4365	1			3		3		3		3		THK	SAF	SCH				36
 Croft	Dick	534-0583	7											SHK						94
 Culbert	Merle	545-7994	0																	127
@@ -234,7 +233,6 @@ Solomita	Lynn	378-0765	1		3	3				3	3	3	3	BRX	RAH					211
 Solomita	Philip	 378-0765	1		3		3						3	LES	THK	FAC				212
 Sommerstein	Judith	375-7747	1									3	3	IMP	BAD					60
 Spillane	Lori	645-1431	1	3								3	3	ILA	OCN	ASA				44
-Spillane	Rick	645-1431	3			1	1						3	BRX	SHK	LES	ASA	FAC		43
 Spillane	Rick	645-1431	1			1	1						3	ILA	FAC	ASA				43
 Spotts	Jim	540-2946	1					3	3					ASA	HCD	LES	PRF	SCH	SIS	58
 Stern	Dan	545-5498	1						3			3	3	THK						46
@@ -250,11 +248,9 @@ Tlougan	Donald	833-3987	2											SIS	FAC	PRF	QUR			70
 Vandermay	Elaine	376-2486	1											BAD	IMP	RAH				173
 Varieur	Mary	375-5037	2		1		3							SHK	THK					86
 Vehrencamp	John	542-8460	1											ASA						231
-Vincent	Tom	534-2256	3	3	3									ASA	HCD	PRF	SIS 	OCN		55
 Vincent	Tom	534-2256	1	3	3									LES 	OCN	SIS				55
 Volchok	Vickie	626-5058 c	1			2	2					3	3	CHK						213
 Wallace	Rich	318-2060	1	3		3	3	3			3			HCD	ASA	CHK	LES			49
-Watson	Mary	373-5431	3											SHK	OCN	ILA				232
 Watson	Mary	373-5431	2											ASA	PRF					232
 Watson	Stu	316-1366	2											IMP	CHK	BRX	ASA	BAD		59
 Weiner	Sydell	292-2538 	2			3	3			3	3			THK	LES	FAC	GOO	BRX	ILA	172

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:omnilore_scheduler/model/person.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 
@@ -8,8 +10,9 @@ class Validate {
   ///
   /// If they are consistent, returns null
   /// If they are not, an error message is returned
-  String? validatePeopleAgainstCourses(List<Person> people, Courses courses) {
-    for (var person in people) {
+  String? validatePeopleAgainstCourses(
+      HashMap<String, Person> people, Courses courses) {
+    for (var person in people.values) {
       for (var classCode in person.classes) {
         if (!courses.hasCourse(classCode)) {
           _isValid = false;
