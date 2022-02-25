@@ -33,9 +33,6 @@ dependencies:
   #manage desktop size
   desktop_window: ^0.4.0
 
-  #open files
-  file_picker: ^3.0.4
-
   #Alert button
   rflutter_alert:
 

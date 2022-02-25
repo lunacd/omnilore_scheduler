@@ -67,8 +67,8 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
-  final ScrollController scrollController = ScrollController();
-  TextEditingController controller = TextEditingController();
+  // final ScrollController scrollController = ScrollController();
+  // TextEditingController controller = TextEditingController();
   Scheduling schedule = Scheduling();
 
   int? numCourses;
@@ -89,78 +89,22 @@ class _ScreenState extends State<Screen> {
     // });
   }
 
-  Future<String> _fileExplorer() async {
-    final file = OpenFilePicker()
-      ..filterSpecification = {
-        'Word Document (*.doc)': '*.doc',
-        'Web Page (*.htm; *.html)': '*.htm;*.html',
-        'Text Document (*.txt)': '*.txt',
-        'All Files': '*.*'
-      }
-      ..defaultFilterIndex = 0
-      ..defaultExtension = 'doc'
-      ..title = 'Select a document';
-
-    final result = file.getFile();
+  Future<String?> _fileExplorer() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
-      print(result.path);
-      return result.path;
+      print(result.files.single.path);
+      return result.files.single.path;
     } else {
       return 'error';
     }
-
-    //return Alert(context: context, title: 'Testing').show();
-    // else {
-    //   //error
-    //   return Alert(context: context, title: 'Failed to import file').show();
-    //   ;
-    // }
-  }
-
-  void _masterSetBackgroundColor(String color) {
-    setState(() {
-      masterBackgroundColor = kColorMap[color];
-    });
-  }
-
-  void _detailSetBackgroundColor(String color) {
-    setState(() {
-      detailBackgroundColor = kColorMap[color];
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppScreen(
-        // masterContextMenu: ContextMenu(
-        //   width: 150,
-        //   height: 250,
-        //   child: ContextMenuSliver(
-        //     title: 'Master',
-        //     children: [
-        //       masterContextMenuItem(color: 'Red'),
-        //       masterContextMenuItem(color: 'Blue'),
-        //       masterContextMenuItem(color: 'Purple'),
-        //       masterContextMenuItem(color: 'Pink'),
-        //       masterContextMenuItem(color: 'White'),
-        //     ],
-        //   ),
-        // ),
-        // detailContextMenu: ContextMenu(
-        //   width: 300,
-        //   height: 150,
-        //   child: ContextMenuSliver(
-        //     title: 'Detail',
-        //     children: [
-        //       detailContextMenuItem(color: 'Yellow'),
-        //       detailContextMenuItem(color: 'Orange'),
-        //       detailContextMenuItem(color: 'Pink'),
-        //       detailContextMenuItem(color: 'Red'),
-        //       detailContextMenuItem(color: 'BlueGrey'),
-        //     ],
-        //   ),
-        // ),
+        masterPaneFixedWidth: true,
+        detailPaneFlex: 0,
         menuList: [
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
@@ -222,109 +166,8 @@ class _ScreenState extends State<Screen> {
           ]),
         ],
         masterPane: masterPane(),
-        detailPane: detailPane(),
-        // drawer: AppDrawer(
-        //   defaultSmall: false,
-        //   largeDrawerWidth: 200,
-        //   largeDrawer: drawer(small: false),
-        //   smallDrawerWidth: 60,
-        //   smallDrawer: drawer(small: true),
-        // ),
-        onBreakpointChange: () {
-          setState(() {
-            if (kDebugMode) {
-              print('Breakpoint change');
-            }
-          });
-        },
-        masterPaneMinWidth: 500,
-        detailPaneMinWidth: 500,
+        detailPaneMinWidth: 0,
       ),
-    );
-  }
-
-  Widget drawer({required bool small}) {
-    return Container(
-        color: Colors.amber,
-        child: ListView(
-          controller: ScrollController(),
-          children: [
-            drawerButton(
-                title: 'User', icon: Icons.account_circle, small: small),
-            drawerButton(title: 'Inbox', icon: Icons.inbox, small: small),
-            drawerButton(title: 'Files', icon: Icons.save, small: small),
-            drawerButton(
-              title: 'Clients',
-              icon: Icons.supervised_user_circle,
-              small: small,
-            ),
-            drawerButton(
-              title: 'Settings',
-              icon: Icons.settings,
-              small: small,
-            ),
-          ],
-        ));
-  }
-
-  Widget drawerButton(
-      {required String title, required IconData icon, required bool small}) {
-    return small
-        ? drawerSmallButton(icon: icon, title: title)
-        : drawerLargeButton(icon: icon, title: title);
-  }
-
-  Widget drawerLargeButton({required String title, required IconData icon}) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-          elevation: 8,
-          child: ListTile(
-            leading: Icon(icon),
-            title: Text(title),
-            onTap: () {
-              // setState(() {
-              //   _drawerIcon = icon;
-              //   _drawerTitle = title;
-              // });
-            },
-          )),
-    );
-  }
-
-  Widget auxButton({required String title}) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-          elevation: 8,
-          child: ListTile(
-            title: Text(title),
-            onTap: () {
-              // setState(() {
-              //   _drawerTitle = title;
-              // });
-            },
-          )),
-    );
-  }
-
-  Widget drawerSmallButton({required String title, required IconData icon}) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(3, 8, 3, 8),
-      child: Card(
-          elevation: 8,
-          child: SizedBox(
-            height: 40,
-            child: ElevatedButton(
-              onPressed: () {
-                // setState(() {
-                //   _drawerIcon = icon;
-                //   _drawerTitle = title;
-                // });
-              },
-              child: Center(child: Icon(icon, size: 30, color: Colors.black54)),
-            ),
-          )),
     );
   }
 
@@ -409,32 +252,6 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  // Builder masterPane() {
-  //   if (kDebugMode) {
-  //     print('BUILD: masterPane');
-  //   }
-  //   return Builder(
-  //     builder: (BuildContext context) {
-  //       return Container(
-  //         color: masterBackgroundColor,
-  //         child: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.stretch,
-  //           children: [
-  //             Row(
-  //               children: const [
-  //                 Text('status: need to import',
-  //                     style:
-  //                         TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
-  //               ],
-  //             ),
-  //             data()
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   Builder masterPane() {
     if (kDebugMode) {
       print('BUILD: masterPane');
@@ -442,7 +259,7 @@ class _ScreenState extends State<Screen> {
     return Builder(
       builder: (BuildContext context) {
         return Container(
-          width: 1000,
+          width: double.infinity,
           color: masterBackgroundColor,
           child: Column(
             children: [
@@ -480,185 +297,162 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Widget masterContextMenuItem({required String color}) {
-    return ContextMenuItem(
-      onTap: () {
-        _masterSetBackgroundColor(color);
-      },
-      child: Container(
-        color: kColorMap[color],
-        child: Center(child: Text(color)),
-      ),
+  Widget classNameDisplay() {
+    return Container(
+      height: 400,
+      width: double.infinity,
+      color: Colors.blue,
+      child: Column(children: [
+        Container(
+          alignment: Alignment.center,
+          child: const Text('Class Names Display',
+              style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
+        ),
+        Container(
+          alignment: Alignment.center,
+          child: const Text('Show constituents by clicking a desired cell.',
+              style: TextStyle(fontSize: 15)),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: const [
+            ElevatedButton(onPressed: null, child: Text('Dec Clust')),
+            ElevatedButton(onPressed: null, child: Text('Inc Clust')),
+            ElevatedButton(onPressed: null, child: Text('Back')),
+            ElevatedButton(onPressed: null, child: Text('Forward')),
+          ],
+        ),
+        Container(
+          color: Colors.white,
+        )
+      ]),
     );
   }
 
-  Widget detailContextMenuItem({required String color}) {
-    return ContextMenuItem(
-      onTap: () {
-        _detailSetBackgroundColor(color);
-      },
-      child: Container(
-        color: kColorMap[color],
-        child: Center(child: Text(color)),
-      ),
-    );
-  }
+  Widget tableData() {
+    final growableList = <String>[
+      '',
+      'First Choices',
+      'First backup',
+      'Second backup',
+      'Third backup',
+      'Add from BUs',
+      'Drop, bad time',
+      'Drop, dup class',
+      'Drop class full',
+      'Resulting Size'
+    ];
 
-Widget classNameDisplay() {
-  return Container(
-    height: 400,
-    width: double.infinity,
-    color: Colors.blue,
-    child: Column(children: [
-      Container(
-        alignment: Alignment.center,
-        child: const Text('Class Names Display',
-            style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
-      ),
-      Container(
-        alignment: Alignment.center,
-        child: const Text('Show constituents by clicking a desired cell.',
-            style: TextStyle(fontSize: 15)),
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: const [
-          ElevatedButton(onPressed: null, child: Text('Dec Clust')),
-          ElevatedButton(onPressed: null, child: Text('Inc Clust')),
-          ElevatedButton(onPressed: null, child: Text('Back')),
-          ElevatedButton(onPressed: null, child: Text('Forward')),
+    final tempList = List<String>.generate(24, (index) => '');
+    return Container(
+      child: Table(
+        border: TableBorder.symmetric(
+            inside: const BorderSide(width: 1, color: Colors.blue),
+            outside: const BorderSide(width: 1)),
+        columnWidths: const {0: IntrinsicColumnWidth()},
+        children: [
+          for (var option in growableList)
+            TableRow(children: [
+              TableCell(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Text(option.toString()),
+                ],
+              )),
+              for (var val in tempList) Text(val.toString())
+            ])
         ],
       ),
-      Container(
-        color: Colors.white,
-      )
-    ]),
-  );
-}
-
-Widget tableData() {
-  final growableList = <String>[
-    '',
-    'First Choices',
-    'First backup',
-    'Second backup',
-    'Third backup',
-    'Add from BUs',
-    'Drop, bad time',
-    'Drop, dup class',
-    'Drop class full',
-    'Resulting Size'
-  ];
-  final tempList = List<int>.generate(24, (index) => 1);
-  return Container(
-    child: Table(
-      border: TableBorder.symmetric(
-          inside: const BorderSide(width: 1, color: Colors.blue),
-          outside: const BorderSide(width: 1)),
-      columnWidths: {0: IntrinsicColumnWidth()},
-      children: [
-        for (var option in growableList)
-          TableRow(children: [
-            TableCell(
-                child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Text(option.toString()),
-              ],
-            )),
-            for (var val in tempList) Text(val.toString())
-          ])
-      ],
-    ),
-  );
-}
-
-Widget data() {
-  return DataTable(
-    columns: const <DataColumn>[
-      DataColumn(
-        label: Text(
-          'Name',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-        DataColumn(
-          label: Center(
-              child: Text(
-            'First Choices',
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          )),
-        ),
-        DataColumn(
-          label: Text(
-            'First BU',
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Second BU',
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Third BU',
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Add BU\'s',
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Drop, Bad',
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Drop, Dupe',
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Drop, Full',
-            overflow: TextOverflow.clip,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'total',
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-      ],
-      rows: buildTable(),
     );
   }
+
+// Widget data() {
+//   return DataTable(
+//     columns: const <DataColumn>[
+//       DataColumn(
+//         label: Text(
+//           'Name',
+//           softWrap: true,
+//           style: TextStyle(fontStyle: FontStyle.italic),
+//         ),
+//         DataColumn(
+//           label: Center(
+//               child: Text(
+//             'First Choices',
+//             overflow: TextOverflow.fade,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           )),
+//         ),
+//         DataColumn(
+//           label: Text(
+//             'First BU',
+//             overflow: TextOverflow.fade,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Text(
+//             'Second BU',
+//             overflow: TextOverflow.fade,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Text(
+//             'Third BU',
+//             overflow: TextOverflow.fade,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Text(
+//             'Add BU\'s',
+//             overflow: TextOverflow.fade,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Text(
+//             'Drop, Bad',
+//             overflow: TextOverflow.fade,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Text(
+//             'Drop, Dupe',
+//             overflow: TextOverflow.fade,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Text(
+//             'Drop, Full',
+//             overflow: TextOverflow.clip,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Text(
+//             'total',
+//             overflow: TextOverflow.fade,
+//             softWrap: true,
+//             style: TextStyle(fontStyle: FontStyle.italic),
+//           ),
+//         ),
+//       ],
+//       rows: buildTable(),
+//     );
+//   }
 
   List<DataRow> buildTable() {
     List<DataRow> list = <DataRow>[];
