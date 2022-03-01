@@ -75,6 +75,7 @@ class _ScreenState extends State<Screen> {
   int? numPeople;
   final int _currentSortColumn = 0;
   final bool _isAscending = true;
+  Iterable<String> _courseCodes = [];
 
   // String _message = 'Choose a MenuItem.';
   // String _drawerTitle = 'Tap a drawerItem';
@@ -93,7 +94,8 @@ class _ScreenState extends State<Screen> {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
       print(result.files.single.path);
-      return result.files.single.path;
+      String path = result.files.single.path ?? '';
+      numCourses = await schedule.loadCourses(path);
     } else {
       return 'error';
     }
@@ -342,8 +344,47 @@ class _ScreenState extends State<Screen> {
       'Drop class full',
       'Resulting Size'
     ];
+    int arr_size = numCourses ?? 24;
+    final tempList = List<String>.generate(arr_size, (index) => '');
+    //make 2d array
+    int row = 3;
+    int col = 4;
+    var twoDList = List.generate(
+        row, (i) => List.filled(col, null, growable: false),
+        growable: false);
+    var first_choice_arr = List<int>.generate(arr_size, (index) => -1);
+    var second_choice_arr = List<int>.generate(arr_size, (index) => -1);
+    var third_choice_arr = List<int>.generate(arr_size, (index) => -1);
+    var fourth_choice_arr = List<int>.generate(arr_size, (index) => -1);
+    var fromBU = List<int>.generate(arr_size, (index) => -1);
+    int idx = 0;
+    var data_list = List<List<String>>.generate(
+        10, (i) => List<String>.generate(arr_size, (j) => ''));
+    for (String code in schedule.getCourseCodes()) {
+      first_choice_arr[idx] =
+          schedule.overviewData.getNbrForClassRank(code, 0)?.size ?? -1;
 
-    final tempList = List<String>.generate(24, (index) => '');
+      second_choice_arr[idx] =
+          schedule.overviewData.getNbrForClassRank(code, 1)?.size ?? -1;
+      third_choice_arr[idx] =
+          schedule.overviewData.getNbrForClassRank(code, 2)?.size ?? -1;
+      fourth_choice_arr[idx] =
+          schedule.overviewData.getNbrForClassRank(code, 3)?.size ?? -1;
+      fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+      data_list[0][idx] = code;
+      data_list[1][idx] = first_choice_arr[idx].toString();
+      data_list[2][idx] = second_choice_arr[idx].toString();
+      data_list[3][idx] = third_choice_arr[idx].toString();
+      data_list[4][idx] = fourth_choice_arr[idx].toString();
+      data_list[5][idx] = fromBU[idx].toString();
+      data_list[6][idx] = '0';
+      data_list[7][idx] = '0';
+      data_list[8][idx] = '0';
+      data_list[9][idx] = '0';
+      idx++;
+    }
+    print(growableList.length);
+    print(data_list.length);
     return Container(
       child: Table(
         border: TableBorder.symmetric(
@@ -351,16 +392,17 @@ class _ScreenState extends State<Screen> {
             outside: const BorderSide(width: 1)),
         columnWidths: const {0: IntrinsicColumnWidth()},
         children: [
-          for (var option in growableList)
+          for (int i = 0; i < growableList.length; i++)
+            // ignore: avoid_print
             TableRow(children: [
               TableCell(
                   child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  Text(option.toString()),
+                  Text(growableList[i].toString()),
                 ],
               )),
-              for (var val in tempList) Text(val.toString())
+              for (var val in data_list[i]) Text(val.toString())
             ])
         ],
       ),

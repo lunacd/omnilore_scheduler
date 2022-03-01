@@ -45,5 +45,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Windows related 
+
+ /windows/flutter/generated_plugin_registrant.cc
+ /windows/flutter/generated_plugins.cmake
+
+
 doc/
 coverage/
