@@ -73,9 +73,9 @@ class _ScreenState extends State<Screen> {
 
   int? numCourses;
   int? numPeople;
-  final int _currentSortColumn = 0;
-  final bool _isAscending = true;
-  Iterable<String> _courseCodes = [];
+  List<bool> droppedList = List<bool>.filled(24, false,
+      growable:
+          true); // list that coresponds to each column of the table. will be true when column box is checked, otherwise false
 
   // String _message = 'Choose a MenuItem.';
   // String _drawerTitle = 'Tap a drawerItem';
@@ -114,6 +114,8 @@ class _ScreenState extends State<Screen> {
               title: 'Open',
               onPressed: () {
                 _fileExplorer();
+                droppedList =
+                    List<bool>.filled(numCourses ?? 24, false, growable: true);
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
@@ -391,110 +393,48 @@ class _ScreenState extends State<Screen> {
             inside: const BorderSide(width: 1, color: Colors.blue),
             outside: const BorderSide(width: 1)),
         columnWidths: const {0: IntrinsicColumnWidth()},
-        children: [
-          for (int i = 0; i < growableList.length; i++)
-            // ignore: avoid_print
-            TableRow(children: [
-              TableCell(
-                  child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Text(growableList[i].toString()),
-                ],
-              )),
-              for (var val in data_list[i]) Text(val.toString())
-            ])
-        ],
+        children: buildInfo(growableList, data_list),
       ),
     );
   }
 
-// Widget data() {
-//   return DataTable(
-//     columns: const <DataColumn>[
-//       DataColumn(
-//         label: Text(
-//           'Name',
-//           softWrap: true,
-//           style: TextStyle(fontStyle: FontStyle.italic),
-//         ),
-//         DataColumn(
-//           label: Center(
-//               child: Text(
-//             'First Choices',
-//             overflow: TextOverflow.fade,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           )),
-//         ),
-//         DataColumn(
-//           label: Text(
-//             'First BU',
-//             overflow: TextOverflow.fade,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Text(
-//             'Second BU',
-//             overflow: TextOverflow.fade,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Text(
-//             'Third BU',
-//             overflow: TextOverflow.fade,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Text(
-//             'Add BU\'s',
-//             overflow: TextOverflow.fade,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Text(
-//             'Drop, Bad',
-//             overflow: TextOverflow.fade,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Text(
-//             'Drop, Dupe',
-//             overflow: TextOverflow.fade,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Text(
-//             'Drop, Full',
-//             overflow: TextOverflow.clip,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Text(
-//             'total',
-//             overflow: TextOverflow.fade,
-//             softWrap: true,
-//             style: TextStyle(fontStyle: FontStyle.italic),
-//           ),
-//         ),
-//       ],
-//       rows: buildTable(),
-//     );
-//   }
+  List<TableRow> buildInfo(
+      // builds the list of table rows. I had to do it in a function because for some reason state doesnt update if its done the other way
+      List<String> growableList,
+      List<List<String>> data_list) {
+    List<TableRow> result = [];
+    for (int i = 0; i < growableList.length; i++) {
+      result.add(TableRow(children: [
+        TableCell(
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[Text(growableList[i].toString())])),
+        for (var val in data_list[i]) Text(val.toString())
+      ]));
+    }
+    result.add(TableRow(children: [
+      TableCell(
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: const <Widget>[Text('class dropped')])),
+      for (int i = 0; i < droppedList.length; i++) droppedCheck(i)
+    ]));
+    return result;
+  }
+
+  Widget droppedCheck(int i) {
+    // makes a checkmark widget that coresponds to the passed index of dropped list
+    return Checkbox(
+        checkColor: Colors.white,
+        fillColor: null,
+        value: droppedList[i],
+        onChanged: (bool? value) {
+          setState(() {
+            droppedList[i] = value!;
+            print('dropped list index: $i drop list value: ${droppedList[i]}');
+          });
+        });
+  }
 
   List<DataRow> buildTable() {
     List<DataRow> list = <DataRow>[];
