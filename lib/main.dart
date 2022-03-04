@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:omnilore_scheduler/compute/course_control.dart';
+import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -73,7 +75,7 @@ class _ScreenState extends State<Screen> {
 
   int? numCourses;
   int? numPeople;
-  List<bool> droppedList = List<bool>.filled(24, false,
+  List<bool> droppedList = List<bool>.filled(14, false,
       growable:
           true); // list that coresponds to each column of the table. will be true when column box is checked, otherwise false
 
@@ -96,6 +98,7 @@ class _ScreenState extends State<Screen> {
       print(result.files.single.path);
       String path = result.files.single.path ?? '';
       numCourses = await schedule.loadCourses(path);
+      droppedList = List<bool>.filled(numCourses!, false, growable: true);
     } else {
       return 'error';
     }
@@ -116,8 +119,6 @@ class _ScreenState extends State<Screen> {
               title: 'Open',
               onPressed: () {
                 _fileExplorer();
-                droppedList =
-                    List<bool>.filled(numCourses ?? 24, false, growable: true);
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
@@ -422,54 +423,82 @@ class _ScreenState extends State<Screen> {
       'Drop class full',
       'Resulting Size'
     ];
-    int arr_size = numCourses ?? 24;
+    if (kDebugMode) {
+      print('num of course ${numCourses}');
+    }
+    int arr_size = numCourses ?? 14;
     final tempList = List<String>.generate(arr_size, (index) => '');
     //make 2d array
-    int row = 3;
-    int col = 4;
-    var twoDList = List.generate(
-        row, (i) => List.filled(col, null, growable: false),
-        growable: false);
-    var first_choice_arr = List<int>.generate(arr_size, (index) => -1);
-    var second_choice_arr = List<int>.generate(arr_size, (index) => -1);
-    var third_choice_arr = List<int>.generate(arr_size, (index) => -1);
-    var fourth_choice_arr = List<int>.generate(arr_size, (index) => -1);
+
+    var firstChoiceArr = List<int>.generate(arr_size, (index) => -1);
+    var secondChoiceArr = List<int>.generate(arr_size, (index) => -1);
+    var thirdChoiceArr = List<int>.generate(arr_size, (index) => -1);
+    var fourthChoiceArr = List<int>.generate(arr_size, (index) => -1);
     var fromBU = List<int>.generate(arr_size, (index) => -1);
     int idx = 0;
-    var data_list = List<List<String>>.generate(
+    //creating the 2d array
+    var dataList = List<List<String>>.generate(
         10, (i) => List<String>.generate(arr_size, (j) => ''));
+
+    //checking the values of the dropped list and updating the list accordingly
     for (String code in schedule.getCourseCodes()) {
-      first_choice_arr[idx] =
+      dataList[0][idx] = code;
+      idx++;
+    }
+    for (int i = 0; i < droppedList.length; i++) {
+      String courseName = '';
+      if (droppedList[i] == true) {
+        print('hello we got a course that is dropped ${dataList[0][i]}');
+
+        schedule.courseControl.drop(dataList[0][i]);
+      } else {
+        print('hello we are undropping the ${dataList[0][i]}');
+        schedule.courseControl.undrop(dataList[0][i]);
+      }
+    }
+    idx = 0;
+    for (String code in schedule.getCourseCodes()) {
+      firstChoiceArr[idx] =
           schedule.overviewData.getNbrForClassRank(code, 0)?.size ?? -1;
 
-      second_choice_arr[idx] =
+      secondChoiceArr[idx] =
           schedule.overviewData.getNbrForClassRank(code, 1)?.size ?? -1;
-      third_choice_arr[idx] =
+      thirdChoiceArr[idx] =
           schedule.overviewData.getNbrForClassRank(code, 2)?.size ?? -1;
-      fourth_choice_arr[idx] =
+      fourthChoiceArr[idx] =
           schedule.overviewData.getNbrForClassRank(code, 3)?.size ?? -1;
       fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
-      data_list[0][idx] = code;
-      data_list[1][idx] = first_choice_arr[idx].toString();
-      data_list[2][idx] = second_choice_arr[idx].toString();
-      data_list[3][idx] = third_choice_arr[idx].toString();
-      data_list[4][idx] = fourth_choice_arr[idx].toString();
-      data_list[5][idx] = fromBU[idx].toString();
-      data_list[6][idx] = '0';
-      data_list[7][idx] = '0';
-      data_list[8][idx] = '0';
-      data_list[9][idx] = '0';
+      dataList[0][idx] = code;
+      droppedList[idx]
+          ? dataList[1][idx] = '0'
+          : dataList[1][idx] = firstChoiceArr[idx].toString();
+      droppedList[idx]
+          ? dataList[2][idx] = '0'
+          : dataList[2][idx] = secondChoiceArr[idx].toString();
+      droppedList[idx]
+          ? dataList[3][idx] = '0'
+          : dataList[3][idx] = thirdChoiceArr[idx].toString();
+      droppedList[idx]
+          ? dataList[4][idx] = '0'
+          : dataList[4][idx] = fourthChoiceArr[idx].toString();
+      droppedList[idx]
+          ? dataList[5][idx] = '0'
+          : dataList[5][idx] = fromBU[idx].toString();
+      dataList[6][idx] = '0';
+      dataList[7][idx] = '0';
+      dataList[8][idx] = '0';
+      dataList[9][idx] = '0';
       idx++;
     }
     print(growableList.length);
-    print(data_list.length);
+    print(dataList.length);
     return Container(
       child: Table(
         border: TableBorder.symmetric(
             inside: const BorderSide(width: 1, color: Colors.blue),
             outside: const BorderSide(width: 1)),
         columnWidths: const {0: IntrinsicColumnWidth()},
-        children: buildInfo(growableList, data_list),
+        children: buildInfo(growableList, dataList),
       ),
     );
   }
