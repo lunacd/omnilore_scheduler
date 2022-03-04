@@ -1,3 +1,4 @@
+import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
@@ -9,8 +10,14 @@ class AuxiliaryData {
   final Courses _courses;
   final People _people;
 
+  late final CourseControl _courseControl;
+
   int? _nbrRequested;
   int? _nbrCourseTakers;
+
+  void initialize(CourseControl courseControl) {
+    _courseControl = courseControl;
+  }
 
   /// Reset compute state
   void resetState() {
@@ -41,7 +48,7 @@ class AuxiliaryData {
 
   /// Get the total number of courses
   int getNbrGoCourses() {
-    return _courses.getNumCourses();
+    return _courses.getNumCourses() - _courseControl.getNbrDropped();
   }
 
   /// Get the total number of classes asked

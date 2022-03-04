@@ -46,6 +46,11 @@ class CourseControl {
     _oversize = null;
   }
 
+  /// Get the number of dropped courses
+  int getNbrDropped() {
+    return _dropped.length;
+  }
+
   /// Drop class
   ///
   /// Will do nothing if:
