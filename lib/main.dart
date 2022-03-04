@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
-import 'package:omnilore_scheduler/compute/course_control.dart';
-import 'package:omnilore_scheduler/model/course.dart';
+// import 'package:omnilore_scheduler/compute/course_control.dart';
+// import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -95,13 +95,16 @@ class _ScreenState extends State<Screen> {
   Future<String?> _fileExplorer() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
-      print(result.files.single.path);
+      if (kDebugMode) {
+        print(result.files.single.path);
+      }
       String path = result.files.single.path ?? '';
       numCourses = await schedule.loadCourses(path);
       droppedList = List<bool>.filled(numCourses!, false, growable: true);
     } else {
       return 'error';
     }
+    return null;
   }
 
   @override
@@ -199,12 +202,14 @@ class _ScreenState extends State<Screen> {
   }
 
   Widget screen1() {
+    // ignore: sized_box_for_whitespace
     return Container(
       height: 400,
       child: Row(
         children: [
           // State of processing widget and class name display widget
-          SizedBox(
+          // ignore: sized_box_for_whitespace
+          Container(
             width: 700,
             child: Column(
               children: [
@@ -238,7 +243,7 @@ class _ScreenState extends State<Screen> {
           ),
 
           //Select process and Aux data
-          Container(
+          SizedBox(
             width: 200,
             child: Column(
               children: [
@@ -424,22 +429,20 @@ class _ScreenState extends State<Screen> {
       'Resulting Size'
     ];
     if (kDebugMode) {
-      print('num of course ${numCourses}');
+      print('num of course $numCourses');
     }
-    int arr_size = numCourses ?? 14;
-    final tempList = List<String>.generate(arr_size, (index) => '');
-    //make 2d array
+    int arrSize = numCourses ?? 14;
 
-    var firstChoiceArr = List<int>.generate(arr_size, (index) => -1);
-    var secondChoiceArr = List<int>.generate(arr_size, (index) => -1);
-    var thirdChoiceArr = List<int>.generate(arr_size, (index) => -1);
-    var fourthChoiceArr = List<int>.generate(arr_size, (index) => -1);
-    var fromBU = List<int>.generate(arr_size, (index) => -1);
-    var resultingSize = List<int>.generate(arr_size, (index) => -1);
+    var firstChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var secondChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var fromBU = List<int>.generate(arrSize, (index) => -1);
+    var resultingSize = List<int>.generate(arrSize, (index) => -1);
     int idx = 0;
     //creating the 2d array
     var dataList = List<List<String>>.generate(
-        10, (i) => List<String>.generate(arr_size, (j) => ''));
+        10, (i) => List<String>.generate(arrSize, (j) => ''));
 
     //checking the values of the dropped list and updating the list accordingly
     for (String code in schedule.getCourseCodes()) {
@@ -447,13 +450,16 @@ class _ScreenState extends State<Screen> {
       idx++;
     }
     for (int i = 0; i < droppedList.length; i++) {
-      String courseName = '';
       if (droppedList[i] == true) {
-        print('hello we got a course that is dropped ${dataList[0][i]}');
+        if (kDebugMode) {
+          print('hello we got a course that is dropped ${dataList[0][i]}');
+        }
 
         schedule.courseControl.drop(dataList[0][i]);
       } else {
-        print('hello we are undropping the ${dataList[0][i]}');
+        if (kDebugMode) {
+          print('hello we are undropping the ${dataList[0][i]}');
+        }
         schedule.courseControl.undrop(dataList[0][i]);
       }
     }
@@ -495,23 +501,24 @@ class _ScreenState extends State<Screen> {
           : dataList[9][idx] = resultingSize[idx].toString();
       idx++;
     }
-    print(growableList.length);
-    print(dataList.length);
-    return Container(
-      child: Table(
-        border: TableBorder.symmetric(
-            inside: const BorderSide(width: 1, color: Colors.blue),
-            outside: const BorderSide(width: 1)),
-        columnWidths: const {0: IntrinsicColumnWidth()},
-        children: buildInfo(growableList, dataList),
-      ),
+    if (kDebugMode) {
+      print(growableList.length);
+      print(dataList.length);
+    }
+
+    return Table(
+      border: TableBorder.symmetric(
+          inside: const BorderSide(width: 1, color: Colors.blue),
+          outside: const BorderSide(width: 1)),
+      columnWidths: const {0: IntrinsicColumnWidth()},
+      children: buildInfo(growableList, dataList),
     );
   }
 
   List<TableRow> buildInfo(
       // builds the list of table rows. I had to do it in a function because for some reason state doesnt update if its done the other way
       List<String> growableList,
-      List<List<String>> data_list) {
+      List<List<String>> dataList) {
     List<TableRow> result = [];
     for (int i = 0; i < growableList.length; i++) {
       result.add(TableRow(children: [
@@ -519,7 +526,7 @@ class _ScreenState extends State<Screen> {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[Text(growableList[i].toString())])),
-        for (var val in data_list[i]) Text(val.toString())
+        for (var val in dataList[i]) Text(val.toString())
       ]));
     }
     result.add(TableRow(children: [
@@ -541,7 +548,10 @@ class _ScreenState extends State<Screen> {
         onChanged: (bool? value) {
           setState(() {
             droppedList[i] = value!;
-            print('dropped list index: $i drop list value: ${droppedList[i]}');
+            if (kDebugMode) {
+              print(
+                  'dropped list index: $i drop list value: ${droppedList[i]}');
+            }
           });
         });
   }
@@ -633,7 +643,7 @@ class _ScreenState extends State<Screen> {
 }
 
 Widget auxData(Scheduling scheduling) {
-  return Container(
+  return SizedBox(
     height: 200,
     child: DataTable(
       columns: const <DataColumn>[
