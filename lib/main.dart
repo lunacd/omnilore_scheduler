@@ -435,6 +435,7 @@ class _ScreenState extends State<Screen> {
     var thirdChoiceArr = List<int>.generate(arr_size, (index) => -1);
     var fourthChoiceArr = List<int>.generate(arr_size, (index) => -1);
     var fromBU = List<int>.generate(arr_size, (index) => -1);
+    var resultingSize = List<int>.generate(arr_size, (index) => -1);
     int idx = 0;
     //creating the 2d array
     var dataList = List<List<String>>.generate(
@@ -468,6 +469,8 @@ class _ScreenState extends State<Screen> {
       fourthChoiceArr[idx] =
           schedule.overviewData.getNbrForClassRank(code, 3)?.size ?? -1;
       fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+      resultingSize[idx] =
+          schedule.overviewData.getResultingClassSize(code)?.size ?? -1;
       dataList[0][idx] = code;
       droppedList[idx]
           ? dataList[1][idx] = '0'
@@ -487,7 +490,9 @@ class _ScreenState extends State<Screen> {
       dataList[6][idx] = '0';
       dataList[7][idx] = '0';
       dataList[8][idx] = '0';
-      dataList[9][idx] = '0';
+      droppedList[idx]
+          ? dataList[9][idx] = '0'
+          : dataList[9][idx] = resultingSize[idx].toString();
       idx++;
     }
     print(growableList.length);
