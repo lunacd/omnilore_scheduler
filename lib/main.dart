@@ -22,7 +22,7 @@ const Map kColorMap = {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
-    await DesktopWindow.setMinWindowSize(const Size(1000, 1000));
+    await DesktopWindow.setMinWindowSize(const Size(1000, 1100));
   }
   runApp(const MyApp());
 }
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all(Colors.black),
 
-            backgroundColor: MaterialStateProperty.all(Colors.white),
+            backgroundColor: MaterialStateProperty.all(Colors.grey),
             overlayColor: MaterialStateProperty.all(
                 Colors.blueGrey[600]), // Set Button hover color
           ),
@@ -107,6 +107,8 @@ class _ScreenState extends State<Screen> {
       body: AppScreen(
         masterPaneFixedWidth: true,
         detailPaneFlex: 0,
+        // ignore: todo
+        //TODO: Update the menuList
         menuList: [
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
@@ -175,87 +177,6 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Builder detailPane() {
-    return Builder(
-      builder: (BuildContext context) {
-        return Container(
-          color: detailBackgroundColor,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('Class Name display'),
-                const Text(
-                    'Show people in a cell by clicking on a desired cell \nshowing: people assigned to DSC'),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: const [
-                            ElevatedButton(
-                                onPressed: null, child: Text('Enter/Edit Ppl')),
-                            ElevatedButton(
-                                onPressed: null, child: Text('New Curriculum')),
-                            ElevatedButton(
-                                onPressed: null,
-                                child: Text('Cont. Old Curric')),
-                          ],
-                        ),
-                        const Text('Names Display Mode'),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Show BU & CA')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Show Splits')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Imp. Splits')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Show Coord(s)')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Set C or CC2')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Set CC 1')),
-                        auxData(schedule),
-                        const Text('Select Process'),
-                        const ElevatedButton(
-                            // onPressed: () async {
-                            //   numCourses = await schedule.loadCourses(
-                            //       '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/SDGs-1.txt');
-                            //   numPeople = await schedule.loadPeople(
-                            //       '/Users/harrisonforch/omnilore/omnilore_scheduler/lib/PeopleSelections-1.txt');
-                            //   setState(() {});
-                            // },
-                            onPressed: null,
-                            child: Text('Enter/Edit Crs')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Display Courses')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Enter/Edit Ppl')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('New Curriculum')),
-                        const ElevatedButton(
-                            onPressed: null, child: Text('Cont. Old Curric')),
-                      ],
-                    ),
-                  ],
-                ),
-                if (context.appScreen.isCompact())
-                  ElevatedButton(
-                    onPressed: () {
-                      context.appScreen.showOnlyMaster();
-                    },
-                    child: const Text('Show master'),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Builder masterPane() {
     if (kDebugMode) {
       print('BUILD: masterPane');
@@ -267,15 +188,8 @@ class _ScreenState extends State<Screen> {
           color: masterBackgroundColor,
           child: Column(
             children: [
-              Row(
-                children: const [
-                  Text('status: need to import',
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold))
-                ],
-              ),
-              classNameDisplay(),
-              tableData()
+              screen1(),
+              tableData(),
             ],
           ),
         );
@@ -283,33 +197,67 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Builder appContextMenu() {
-    if (kDebugMode) {
-      print('BUILD: appContextMenu');
-    }
-    return Builder(
-      builder: (BuildContext context) {
-        return SizedBox(
-          height: 300,
-          width: 400,
-          child: Container(
-            color: Colors.yellow,
-            child: const Text('AppContextMenu'),
+  Widget screen1() {
+    return Container(
+      height: 400,
+      child: Row(
+        children: [
+          // State of processing widget and class name display widget
+          SizedBox(
+            width: 700,
+            child: Column(
+              children: [
+                // ignore: todo
+                // TODO: Update this to a string that changes based on the state
+                Container(
+                  width: double.infinity,
+                  color: Colors.red,
+                  child: const Text('State of Processing: Need to import',
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                ),
+                Expanded(
+                  child: classNameDisplay(),
+                )
+              ],
+            ),
           ),
-        );
-      },
+
+          //Class size control widget and Names display mode
+          SizedBox(
+            width: 300,
+            child: Column(
+              children: [
+                classSizeControl(),
+                Expanded(
+                  child: namesDisplayMode(),
+                )
+              ],
+            ),
+          ),
+
+          //Select process and Aux data
+          Container(
+            width: 200,
+            child: Column(
+              children: [
+                selectProcess(),
+                Expanded(child: auxiliaryData(schedule)),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 
   Widget classNameDisplay() {
     return Container(
-      height: 400,
-      width: double.infinity,
       color: Colors.blue,
       child: Column(children: [
         Container(
           alignment: Alignment.center,
-          child: const Text('Class Names Display',
+          child: const Text('CLASS NAMES DISPLAY',
               style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
         ),
         Container(
@@ -330,6 +278,134 @@ class _ScreenState extends State<Screen> {
           color: Colors.white,
         )
       ]),
+    );
+  }
+
+  Widget classSizeControl() {
+    return Container(
+      // width: 400,
+      color: Colors.green,
+      child: Column(
+        children: [
+          Container(
+            alignment: Alignment.center,
+            child: const Text('CLASS SIZE CONTROL',
+                style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: const Text('Limit All courses to',
+                style: TextStyle(fontSize: 15)),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: const [
+              SizedBox(
+                  width: 50,
+                  child: TextField(
+                      decoration:
+                          InputDecoration(enabledBorder: OutlineInputBorder()),
+                      style: TextStyle(
+                          fontSize: 20.0, height: 0.5, color: Colors.black))),
+              SizedBox(
+                width: 50,
+                child: Text('min. & '),
+              ),
+              SizedBox(
+                  width: 50,
+                  child: TextField(
+                      decoration:
+                          InputDecoration(enabledBorder: OutlineInputBorder()),
+                      style: TextStyle(
+                          fontSize: 20.0, height: 0.5, color: Colors.grey))),
+              SizedBox(
+                width: 50,
+                child: Text('max. '),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: const [
+              Text('by'),
+              ElevatedButton(
+                onPressed: null,
+                child: Text('splitting.'),
+              ),
+              ElevatedButton(onPressed: null, child: Text('SET')),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget namesDisplayMode() {
+    return Container(
+        // height: double.infinity,
+        color: Colors.yellow,
+        child:
+            Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          Container(
+            alignment: Alignment.center,
+            child: const Text('NAMES DISPLAY MODE',
+                style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
+          ),
+          const ElevatedButton(onPressed: null, child: Text('SHow BU & CA')),
+          const ElevatedButton(onPressed: null, child: Text('Show SPlits')),
+          const ElevatedButton(onPressed: null, child: Text('Imp. Splits')),
+          const ElevatedButton(onPressed: null, child: Text('Show Coord(s)')),
+          const ElevatedButton(onPressed: null, child: Text('Set C or CC2')),
+          const ElevatedButton(onPressed: null, child: Text('Set CC1')),
+        ]));
+  }
+
+  Widget selectProcess() {
+    return Container(
+        color: Colors.deepOrange,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              child: const Text('SELECT PROCESS',
+                  style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
+            ),
+            const ElevatedButton(
+                onPressed: null, child: Text('Enter/Edit Crs')),
+            const ElevatedButton(
+                onPressed: null, child: Text('Display Courses')),
+            const ElevatedButton(
+                onPressed: null, child: Text('Enter/Edit Ppl')),
+            const ElevatedButton(
+                onPressed: null, child: Text('New Curriculum')),
+            const ElevatedButton(
+                onPressed: null, child: Text('Cont. Old Curriculum')),
+          ],
+        ));
+  }
+
+  Widget auxiliaryData(Scheduling scheduling) {
+    return Container(
+      width: 300,
+      color: Colors.green,
+      child: DefaultTextStyle(
+        child: Column(
+          children: [
+            Text(
+                '\nCourse Takers ${scheduling.auxiliaryData.getNbrCourseTakers()}'),
+            Text('Go Courses ${scheduling.auxiliaryData.getNbrGoCourses()}'),
+            Text(
+                'Places Asked ${scheduling.auxiliaryData.getNbrPlacesAsked()}'),
+            Text(
+                'Places Given ${scheduling.auxiliaryData.getNbrPlacesGiven()}'),
+            Text('Un-met Wants ${scheduling.auxiliaryData.getNbrUnmetWants()}'),
+            Text('On Leave ${scheduling.auxiliaryData.getNbrOnLeave()}'),
+            const Text('Missing 0'),
+          ],
+        ),
+        style: const TextStyle(fontSize: 20, color: Colors.black),
+      ),
     );
   }
 
@@ -523,66 +599,69 @@ class _ScreenState extends State<Screen> {
 }
 
 Widget auxData(Scheduling scheduling) {
-  return DataTable(
-    columns: const <DataColumn>[
-      DataColumn(
-        label: Text(
-          'Auxiliary Data',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+  return Container(
+    height: 200,
+    child: DataTable(
+      columns: const <DataColumn>[
+        DataColumn(
+          label: Text(
+            'Auxiliary Data',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-      DataColumn(
-        label: Text(
-          '',
-          softWrap: true,
-          style: TextStyle(fontStyle: FontStyle.italic),
+        DataColumn(
+          label: Text(
+            '',
+            softWrap: true,
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
         ),
-      ),
-    ],
-    rows: <DataRow>[
-      DataRow(
-        cells: <DataCell>[
-          const DataCell(Text('Course Takers')),
-          DataCell(Text('${scheduling.auxiliaryData.getNbrCourseTakers()}')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          const DataCell(Text('Go Courses')),
-          DataCell(Text('${scheduling.auxiliaryData.getNbrGoCourses()}')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          const DataCell(Text('places asked')),
-          DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesAsked()}')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          const DataCell(Text('places given')),
-          DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesGiven()}')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          const DataCell(Text('un-met wants')),
-          DataCell(Text('${scheduling.auxiliaryData.getNbrUnmetWants()}')),
-        ],
-      ),
-      DataRow(
-        cells: <DataCell>[
-          const DataCell(Text('on leave')),
-          DataCell(Text('${scheduling.auxiliaryData.getNbrOnLeave()}')),
-        ],
-      ),
-      const DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Missing')),
-          DataCell(Text('0')),
-        ],
-      ),
-    ],
+      ],
+      rows: <DataRow>[
+        DataRow(
+          cells: <DataCell>[
+            const DataCell(Text('Course Takers')),
+            DataCell(Text('${scheduling.auxiliaryData.getNbrCourseTakers()}')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            const DataCell(Text('Go Courses')),
+            DataCell(Text('${scheduling.auxiliaryData.getNbrGoCourses()}')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            const DataCell(Text('places asked')),
+            DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesAsked()}')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            const DataCell(Text('places given')),
+            DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesGiven()}')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            const DataCell(Text('un-met wants')),
+            DataCell(Text('${scheduling.auxiliaryData.getNbrUnmetWants()}')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            const DataCell(Text('on leave')),
+            DataCell(Text('${scheduling.auxiliaryData.getNbrOnLeave()}')),
+          ],
+        ),
+        const DataRow(
+          cells: <DataCell>[
+            DataCell(Text('Missing')),
+            DataCell(Text('0')),
+          ],
+        ),
+      ],
+    ),
   );
 }
