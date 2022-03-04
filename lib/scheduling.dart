@@ -18,7 +18,7 @@ class Scheduling {
 
     courseControl.initialize(overviewData);
     overviewData.initialize(courseControl);
-    auxiliaryData.initilize(courseControl);
+    auxiliaryData.initialize(courseControl);
   }
 
   // Shared data
