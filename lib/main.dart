@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
-// import 'package:omnilore_scheduler/compute/course_control.dart';
-// import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -77,7 +75,7 @@ class _ScreenState extends State<Screen> {
   int? numPeople;
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
-          true); // list that coresponds to each column of the table. will be true when column box is checked, otherwise false
+          true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
 
   // String _message = 'Choose a MenuItem.';
   // String _drawerTitle = 'Tap a drawerItem';
@@ -85,12 +83,6 @@ class _ScreenState extends State<Screen> {
 
   Color masterBackgroundColor = Colors.white;
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
-
-  void _showMessage(String newMessage) {
-    // setState(() {
-    //   _message = newMessage;
-    // });
-  }
 
   Future<String?> _fileExplorer() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -119,7 +111,7 @@ class _ScreenState extends State<Screen> {
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
               icon: Icons.open_in_new,
-              title: 'Open',
+              title: 'Import Course',
               onPressed: () {
                 _fileExplorer();
               },
@@ -127,6 +119,7 @@ class _ScreenState extends State<Screen> {
             ),
             MenuListItem(
               title: 'Import People',
+              icon: Icons.open_in_new,
               onPressed: () async {
                 FilePickerResult? result =
                     await FilePicker.platform.pickFiles();
@@ -149,16 +142,12 @@ class _ScreenState extends State<Screen> {
             ),
             MenuListItem(
               title: 'Save',
-              onPressed: () {
-                _showMessage('File.save');
-              },
+              onPressed: () {},
             ),
             MenuListItem(
               title: 'Delete',
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, alt: true),
-              onPressed: () {
-                _showMessage('File.delete');
-              },
+              onPressed: () {},
             ),
           ]),
           MenuItem(title: 'View', isActive: true, menuListItems: [
@@ -358,7 +347,7 @@ class _ScreenState extends State<Screen> {
                 style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
           ),
           const ElevatedButton(onPressed: null, child: Text('SHow BU & CA')),
-          const ElevatedButton(onPressed: null, child: Text('Show SPlits')),
+          const ElevatedButton(onPressed: null, child: Text('Show Splits')),
           const ElevatedButton(onPressed: null, child: Text('Imp. Splits')),
           const ElevatedButton(onPressed: null, child: Text('Show Coord(s)')),
           const ElevatedButton(onPressed: null, child: Text('Set C or CC2')),
@@ -516,7 +505,8 @@ class _ScreenState extends State<Screen> {
   }
 
   List<TableRow> buildInfo(
-      // builds the list of table rows. I had to do it in a function because for some reason state doesnt update if its done the other way
+      // builds the list of table rows. I had to do it in a function because for
+      // some reason state doesn't update if its done the other way
       List<String> growableList,
       List<List<String>> dataList) {
     List<TableRow> result = [];
@@ -540,7 +530,8 @@ class _ScreenState extends State<Screen> {
   }
 
   Widget droppedCheck(int i) {
-    // makes a checkmark widget that coresponds to the passed index of dropped list
+    // makes a checkmark widget that corresponds to the passed index of dropped
+    // list
     return Checkbox(
         checkColor: Colors.white,
         fillColor: null,
