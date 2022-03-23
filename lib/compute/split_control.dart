@@ -88,6 +88,7 @@ class SplitControl {
     _moveBases();
     _formGroups();
     _assignRemnants();
+
     var result = List<Set<String>>.filled(_numSplits, {});
     for (var personIndex = 0; personIndex < _people.length; personIndex++) {
       if (_splitMatrix[personIndex][numPeople] != 0) {
