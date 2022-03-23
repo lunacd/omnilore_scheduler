@@ -17,7 +17,7 @@ void main() {
   test('Load courses: Malformed course file', () async {
     var courses = Courses();
     expect(
-        () => courses.loadCourses('test/resources/malformed_course.txt'),
+        () => courses.loadCourses('test/resources/malformed_course_columns.txt'),
         throwsA(allOf([
           isA<MalformedCourseFileException>(),
           hasMessage('The course file is malformed: line 1')
@@ -27,7 +27,7 @@ void main() {
   test('Load courses: Duplicate course code', () {
     var courses = Courses();
     expect(
-        () => courses.loadCourses('test/resources/duplicate_course.txt'),
+        () => courses.loadCourses('test/resources/malformed_duplicate_course.txt'),
         throwsA(allOf([
           isA<DuplicateCourseCodeException>(),
           hasMessage('The course file contains duplicate course codes: COD')

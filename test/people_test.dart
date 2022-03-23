@@ -74,7 +74,7 @@ void main() {
     var people = People();
     expect(
         () => people
-            .loadPeople('test/resources/people_listing_when_wanting_zero.txt'),
+            .loadPeople('test/resources/malformed_people_listing_when_wanting_zero.txt'),
         throwsA(allOf([
           isA<ListingWhenWantingZeroException>(),
           hasMessage('Fran Wielin still listed classes when wanting 0')
@@ -85,7 +85,7 @@ void main() {
     var people = People();
     expect(
         () => people
-            .loadPeople('test/resources/people_wanting_more_than_listed.txt'),
+            .loadPeople('test/resources/malformed_people_wanting_more_than_listed.txt'),
         throwsA(allOf([
           isA<WantingMoreThanListedException>(),
           hasMessage('Elaine Winer wanted more class than they listed')

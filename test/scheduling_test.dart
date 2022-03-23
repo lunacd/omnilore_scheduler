@@ -99,7 +99,7 @@ void main() {
     expect(scheduling.overviewData.getStateOfProcessing(),
         StateOfProcessing.needPeople);
     expect(
-        scheduling.loadPeople('test/resources/people_inconsistent.txt'),
+        scheduling.loadPeople('test/resources/malformed_people_inconsistent.txt'),
         throwsA(allOf([
           isA<InconsistentCourseAndPeopleException>(),
           hasMessage('Invalid class choice: SCI by Judi Jones')
@@ -111,7 +111,7 @@ void main() {
     expect(scheduling.overviewData.getStateOfProcessing(),
         StateOfProcessing.needCourses);
     expect(
-        await scheduling.loadPeople('test/resources/people_inconsistent.txt'),
+        await scheduling.loadPeople('test/resources/malformed_people_inconsistent.txt'),
         267);
     expect(scheduling.overviewData.getStateOfProcessing(),
         StateOfProcessing.needCourses);
