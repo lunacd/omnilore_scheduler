@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:omnilore_scheduler/compute/auxiliary_data.dart';
 import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/compute/overview_data.dart';
+import 'package:omnilore_scheduler/compute/split_control.dart';
 import 'package:omnilore_scheduler/compute/validate.dart';
 import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
@@ -15,10 +16,12 @@ class Scheduling {
     auxiliaryData = AuxiliaryData(_courses, _people);
     overviewData = OverviewData(_courses, _people, _validate);
     courseControl = CourseControl(_courses, _people);
+    splitControl = SplitControl(_people);
 
     courseControl.initialize(overviewData);
     overviewData.initialize(courseControl);
     auxiliaryData.initialize(courseControl);
+    splitControl.initialize(overviewData, courseControl);
   }
 
   // Shared data
@@ -30,6 +33,7 @@ class Scheduling {
   late AuxiliaryData auxiliaryData;
   late OverviewData overviewData;
   late CourseControl courseControl;
+  late SplitControl splitControl;
 
   /// Clear cache and reset compute state
   void resetState() {

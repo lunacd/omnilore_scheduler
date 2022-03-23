@@ -182,6 +182,20 @@ class OverviewData {
     return _getClassSizeFromRaw(course, firstChoice + addFromBackup);
   }
 
+  /// Get a list of people for a resulting course
+  ///
+  ///  Returns null if course code does not exist
+  Iterable<String>? getPeopleForResultingClass(String course) {
+    Iterable<String>? firstChoices = getPeopleForClassRank(course, 0);
+    Iterable<String>? addFromBackups = getPeopleAddFromBackup(course);
+    if (firstChoices == null || addFromBackups == null) {
+      return null;
+    } else {
+      return List.from(firstChoices)..addAll(addFromBackups);
+    }
+  }
+
+  /// Helper function that generates ClassSize object from raw integer
   ClassSize _getClassSizeFromRaw(String course, int size) {
     if (size > _courseControl.getMaxClassSize(course)) {
       return ClassSize(size: size, state: ClassState.oversized);
