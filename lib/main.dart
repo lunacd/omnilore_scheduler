@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:omnilore_scheduler/store/listItem.dart';
 
 const Map kColorMap = {
   'Red': Colors.red,
@@ -70,9 +72,13 @@ class _ScreenState extends State<Screen> {
   // final ScrollController scrollController = ScrollController();
   // TextEditingController controller = TextEditingController();
   Scheduling schedule = Scheduling();
-
+  StateOfProcessing curState = StateOfProcessing.needCourses;
+  bool coursesImported = false;
+  bool peopleImported = false;
   int? numCourses;
   int? numPeople;
+  Iterable<String> curClassRoster = [];
+  Map curSelected = Map<String, bool>();
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
@@ -114,6 +120,7 @@ class _ScreenState extends State<Screen> {
               title: 'Import Course',
               onPressed: () {
                 _fileExplorer();
+                setState(() {});
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
@@ -130,6 +137,7 @@ class _ScreenState extends State<Screen> {
                     try {
                       numPeople = await schedule.loadPeople(path);
                     } catch (e) {
+                      //FormatException s = e.source;
                       _showMyDialog(e.toString(), 'people');
                     }
                   }
@@ -269,6 +277,21 @@ class _ScreenState extends State<Screen> {
             ElevatedButton(onPressed: null, child: Text('Forward')),
           ],
         ),
+        for (var val in curClassRoster)
+          TextButton(
+              style: curSelected[val] == true
+                  ? TextButton.styleFrom(primary: Colors.red)
+                  : TextButton.styleFrom(primary: Colors.black),
+              onPressed: () {
+                setState(() {
+                  if (curSelected[val]) {
+                    curSelected[val] = false;
+                  } else {
+                    curSelected[val] = true;
+                  }
+                });
+              },
+              child: Text(val.toString())),
         Container(
           color: Colors.white,
         )
@@ -511,13 +534,35 @@ class _ScreenState extends State<Screen> {
       List<List<String>> dataList) {
     List<TableRow> result = [];
     for (int i = 0; i < growableList.length; i++) {
-      result.add(TableRow(children: [
-        TableCell(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[Text(growableList[i].toString())])),
-        for (var val in dataList[i]) Text(val.toString())
-      ]));
+      if (i == 0) {
+        result.add(TableRow(children: [
+          TableCell(
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: const <Widget>[Text('Class Codes')])),
+          for (var val in dataList[i])
+            TextButton(
+              child: Text(val.toString()),
+              onPressed: () {
+                setState(() {
+                  curClassRoster = schedule.overviewData
+                          .getPeopleForResultingClass(val.toString()) ??
+                      [];
+                  curClassRoster.forEach((name) => curSelected[name] = false);
+                  print(curClassRoster);
+                });
+              },
+            )
+        ]));
+      } else {
+        result.add(TableRow(children: [
+          TableCell(
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[Text(growableList[i].toString())])),
+          for (var val in dataList[i]) Text(val.toString())
+        ]));
+      }
     }
     result.add(TableRow(children: [
       TableCell(
