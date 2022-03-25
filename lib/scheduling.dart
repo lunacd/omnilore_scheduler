@@ -56,6 +56,11 @@ class Scheduling {
     return _courses.getCourse(code);
   }
 
+  /// need getter for people object for split_control initialization
+  People getPeopleStruct() {
+    return _people;
+  }
+
   /// Loads courses from a text file
   ///
   /// Throws a [FileSystemException] when the given input file does not exist.
