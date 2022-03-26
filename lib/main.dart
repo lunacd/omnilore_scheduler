@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:omnilore_scheduler/compute/split_control.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
@@ -79,6 +80,7 @@ class _ScreenState extends State<Screen> {
   int? numPeople;
   Iterable<String> curClassRoster = [];
   Map curSelected = Map<String, bool>();
+  SplitControl? split_contol;
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
@@ -136,6 +138,9 @@ class _ScreenState extends State<Screen> {
                   if (path != '') {
                     try {
                       numPeople = await schedule.loadPeople(path);
+                      split_contol = SplitControl(schedule.getPeopleStruct());
+                      split_contol!.initialize(
+                          schedule.overviewData, schedule.courseControl);
                     } catch (e) {
                       //FormatException s = e.source;
                       _showMyDialog(e.toString(), 'people');
@@ -270,9 +275,30 @@ class _ScreenState extends State<Screen> {
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: const [
-            ElevatedButton(onPressed: null, child: Text('Dec Clust')),
-            ElevatedButton(onPressed: null, child: Text('Inc Clust')),
+          children: [
+            ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    for (var item
+                        in curSelected.keys.where((element) => true)) {
+                      split_contol!.removeCluster(item);
+                    }
+                  });
+                },
+                child: Text('Dec Clust')),
+            ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    Set<String> result = Set<String>();
+                    for (var item
+                        in curSelected.keys.where((element) => true)) {
+                      result.add(item);
+                    }
+                    split_contol!.addCluster(result);
+                    print(result);
+                  });
+                },
+                child: Text('Inc Clust')),
             ElevatedButton(onPressed: null, child: Text('Back')),
             ElevatedButton(onPressed: null, child: Text('Forward')),
           ],
@@ -463,13 +489,13 @@ class _ScreenState extends State<Screen> {
     }
     for (int i = 0; i < droppedList.length; i++) {
       if (droppedList[i] == true) {
-        if (kDebugMode) {
+        if (false) {
           print('hello we got a course that is dropped ${dataList[0][i]}');
         }
 
         schedule.courseControl.drop(dataList[0][i]);
       } else {
-        if (kDebugMode) {
+        if (false) {
           print('hello we are undropping the ${dataList[0][i]}');
         }
         schedule.courseControl.undrop(dataList[0][i]);
