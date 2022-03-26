@@ -16,7 +16,7 @@ class Scheduling {
     auxiliaryData = AuxiliaryData(_courses, _people);
     overviewData = OverviewData(_courses, _people, _validate);
     courseControl = CourseControl(_courses);
-    splitControl = SplitControl(_people);
+    splitControl = SplitControl(_people, _courses);
 
     courseControl.initialize(overviewData);
     overviewData.initialize(courseControl);
@@ -53,11 +53,6 @@ class Scheduling {
   /// Get course information given a course code
   Course? getCourse(String code) {
     return _courses.getCourse(code);
-  }
-
-  /// need getter for people object for split_control initialization
-  People getPeopleStruct() {
-    return _people;
   }
 
   /// Loads courses from a text file

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
-import 'package:omnilore_scheduler/compute/split_control.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
@@ -79,7 +78,6 @@ class _ScreenState extends State<Screen> {
   int? numPeople;
   Iterable<String> curClassRoster = [];
   Map curSelected = {};
-  SplitControl? splitControl;
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
@@ -137,9 +135,6 @@ class _ScreenState extends State<Screen> {
                   if (path != '') {
                     try {
                       numPeople = await schedule.loadPeople(path);
-                      splitControl = SplitControl(schedule.getPeopleStruct());
-                      splitControl!.initialize(
-                          schedule.overviewData, schedule.courseControl);
                     } catch (e) {
                       //FormatException s = e.source;
                       _showMyDialog(e.toString(), 'people');
@@ -280,7 +275,7 @@ class _ScreenState extends State<Screen> {
                   setState(() {
                     for (var item
                         in curSelected.keys.where((element) => true)) {
-                      splitControl!.removeCluster(item);
+                      schedule.splitControl.removeCluster(item);
                     }
                   });
                 },
@@ -293,7 +288,7 @@ class _ScreenState extends State<Screen> {
                         in curSelected.keys.where((element) => true)) {
                       result.add(item);
                     }
-                    splitControl!.addCluster(result);
+                    schedule.splitControl.addCluster(result);
                     if (kDebugMode) {
                       print(result);
                     }

@@ -70,4 +70,11 @@ class Courses {
     }
     return numLines;
   }
+
+  void splitCourse(String course, int numSplits) {
+    for (var splitIndex = 0; splitIndex < numSplits; splitIndex++) {
+      _courses['$course$splitIndex'] = _courses[course]!;
+    }
+    _courses.remove(course);
+  }
 }
