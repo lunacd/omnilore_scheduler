@@ -3,12 +3,9 @@ import 'dart:collection';
 import 'package:omnilore_scheduler/compute/overview_data.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
-import 'package:omnilore_scheduler/store/people.dart';
 
 class CourseControl {
-  CourseControl(Courses courses, People people)
-      : _courses = courses,
-        _people = people;
+  CourseControl(Courses courses) : _courses = courses;
 
   // Config
   int _classMinSize = 10;
@@ -17,16 +14,12 @@ class CourseControl {
   final HashMap<String, int> _classMinSizeMap = HashMap<String, int>();
 
   // Shared data
-  final People _people;
   final Courses _courses;
 
   // Internal states
   final _dropped = HashSet<String>();
   final _backupAdd = HashMap<String, HashMap<String, int>>();
   final _affectedMembers = HashMap<String, List<String>>();
-
-  bool? _undersize;
-  bool? _oversize;
 
   // Readonly access to OverviewData
   late final OverviewData _overviewData;
@@ -42,8 +35,6 @@ class CourseControl {
       _backupAdd[code] = HashMap<String, int>();
       _affectedMembers[code] = [];
     }
-    _undersize = null;
-    _oversize = null;
   }
 
   /// Get the number of dropped courses
@@ -65,15 +56,6 @@ class CourseControl {
 
   Set<String> getDropped() {
     return _dropped;
-  }
-
-  /// Get a list of people added from backup for a course, accompanied by the
-  /// rank of the current backup course
-  ///
-  /// Returns null if course code does not exist.
-  Iterable<MapEntry<String, int>>? _getPeopleAndDataAddFromBackup(
-      String course) {
-    return _backupAdd[course]?.entries;
   }
 
   /// Get the number of people added from backup for a course
@@ -99,8 +81,6 @@ class CourseControl {
     }
     _classMaxSize = maxSize;
     _classMinSize = minSize;
-    _oversize = null;
-    _undersize = null;
   }
 
   /// Set maximum class size for a specific class
@@ -126,8 +106,6 @@ class CourseControl {
     } else {
       _classMinSizeMap[course] = minSize;
     }
-    _undersize = null;
-    _oversize = null;
   }
 
   /// Get the maximum class size for a class

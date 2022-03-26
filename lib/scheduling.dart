@@ -15,7 +15,7 @@ class Scheduling {
   Scheduling() {
     auxiliaryData = AuxiliaryData(_courses, _people);
     overviewData = OverviewData(_courses, _people, _validate);
-    courseControl = CourseControl(_courses, _people);
+    courseControl = CourseControl(_courses);
     splitControl = SplitControl(_people);
 
     courseControl.initialize(overviewData);

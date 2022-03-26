@@ -8,7 +8,6 @@ import 'package:omnilore_scheduler/compute/split_control.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:omnilore_scheduler/store/listItem.dart';
 
 const Map kColorMap = {
   'Red': Colors.red,
@@ -79,8 +78,8 @@ class _ScreenState extends State<Screen> {
   int? numCourses;
   int? numPeople;
   Iterable<String> curClassRoster = [];
-  Map curSelected = Map<String, bool>();
-  SplitControl? split_contol;
+  Map curSelected = {};
+  SplitControl? splitControl;
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
@@ -138,8 +137,8 @@ class _ScreenState extends State<Screen> {
                   if (path != '') {
                     try {
                       numPeople = await schedule.loadPeople(path);
-                      split_contol = SplitControl(schedule.getPeopleStruct());
-                      split_contol!.initialize(
+                      splitControl = SplitControl(schedule.getPeopleStruct());
+                      splitControl!.initialize(
                           schedule.overviewData, schedule.courseControl);
                     } catch (e) {
                       //FormatException s = e.source;
@@ -281,26 +280,28 @@ class _ScreenState extends State<Screen> {
                   setState(() {
                     for (var item
                         in curSelected.keys.where((element) => true)) {
-                      split_contol!.removeCluster(item);
+                      splitControl!.removeCluster(item);
                     }
                   });
                 },
-                child: Text('Dec Clust')),
+                child: const Text('Dec Clust')),
             ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    Set<String> result = Set<String>();
+                    Set<String> result = {};
                     for (var item
                         in curSelected.keys.where((element) => true)) {
                       result.add(item);
                     }
-                    split_contol!.addCluster(result);
-                    print(result);
+                    splitControl!.addCluster(result);
+                    if (kDebugMode) {
+                      print(result);
+                    }
                   });
                 },
-                child: Text('Inc Clust')),
-            ElevatedButton(onPressed: null, child: Text('Back')),
-            ElevatedButton(onPressed: null, child: Text('Forward')),
+                child: const Text('Inc Clust')),
+            const ElevatedButton(onPressed: null, child: Text('Back')),
+            const ElevatedButton(onPressed: null, child: Text('Forward')),
           ],
         ),
         for (var val in curClassRoster)
@@ -489,32 +490,25 @@ class _ScreenState extends State<Screen> {
     }
     for (int i = 0; i < droppedList.length; i++) {
       if (droppedList[i] == true) {
-        if (false) {
-          print('hello we got a course that is dropped ${dataList[0][i]}');
-        }
-
         schedule.courseControl.drop(dataList[0][i]);
       } else {
-        if (false) {
-          print('hello we are undropping the ${dataList[0][i]}');
-        }
         schedule.courseControl.undrop(dataList[0][i]);
       }
     }
     idx = 0;
     for (String code in schedule.getCourseCodes()) {
       firstChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 0)?.size ?? -1;
+          schedule.overviewData.getNbrForClassRank(code, 0).size;
 
       secondChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 1)?.size ?? -1;
+          schedule.overviewData.getNbrForClassRank(code, 1).size;
       thirdChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 2)?.size ?? -1;
+          schedule.overviewData.getNbrForClassRank(code, 2).size;
       fourthChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 3)?.size ?? -1;
-      fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+          schedule.overviewData.getNbrForClassRank(code, 3).size;
+      fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code);
       resultingSize[idx] =
-          schedule.overviewData.getResultingClassSize(code)?.size ?? -1;
+          schedule.overviewData.getResultingClassSize(code).size;
       dataList[0][idx] = code;
       droppedList[idx]
           ? dataList[1][idx] = '0'
@@ -572,10 +566,13 @@ class _ScreenState extends State<Screen> {
               onPressed: () {
                 setState(() {
                   curClassRoster = schedule.overviewData
-                          .getPeopleForResultingClass(val.toString()) ??
-                      [];
-                  curClassRoster.forEach((name) => curSelected[name] = false);
-                  print(curClassRoster);
+                      .getPeopleForResultingClass(val.toString());
+                  for (var name in curClassRoster) {
+                    curSelected[name] = false;
+                  }
+                  if (kDebugMode) {
+                    print(curClassRoster);
+                  }
                 });
               },
             )
@@ -622,13 +619,11 @@ class _ScreenState extends State<Screen> {
     List<DataRow> list = <DataRow>[];
 
     for (String code in schedule.getCourseCodes()) {
-      int first = schedule.overviewData.getNbrForClassRank(code, 0)?.size ?? -1;
-      int second =
-          schedule.overviewData.getNbrForClassRank(code, 1)?.size ?? -1;
-      int third = schedule.overviewData.getNbrForClassRank(code, 2)?.size ?? -1;
-      int fourth =
-          schedule.overviewData.getNbrForClassRank(code, 3)?.size ?? -1;
-      int fromBU = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+      int first = schedule.overviewData.getNbrForClassRank(code, 0).size;
+      int second = schedule.overviewData.getNbrForClassRank(code, 1).size;
+      int third = schedule.overviewData.getNbrForClassRank(code, 2).size;
+      int fourth = schedule.overviewData.getNbrForClassRank(code, 3).size;
+      int fromBU = schedule.overviewData.getNbrAddFromBackup(code);
       list.add(DataRow(
         cells: <DataCell>[
           DataCell(Text(code)),
