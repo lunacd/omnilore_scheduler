@@ -6,9 +6,10 @@ class Person {
       {required this.fName,
       required this.lName,
       required this.phone,
-      required this.numClassWanted,
+      required this.nbrClassWanted,
       required this.availability,
-      required this.classes,
+      required this.firstChoices,
+      required this.backups,
       required this.submissionOrder});
 
   /// First name
@@ -21,13 +22,16 @@ class Person {
   final String phone;
 
   /// Number of classes wanted
-  final int numClassWanted;
+  final int nbrClassWanted;
 
   /// Availability for class slots
   final Availability availability;
 
-  /// List of classes wanted, in order from first-choice to backups
-  final List<String> classes;
+  /// List of classes wanted as first choices
+  final List<String> firstChoices;
+
+  /// List of classes wanted as backups
+  final List<String> backups;
 
   /// The order of submission, with smaller being submitted earlier
   final int submissionOrder;

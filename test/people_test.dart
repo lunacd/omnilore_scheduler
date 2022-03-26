@@ -73,8 +73,8 @@ void main() {
   test('Load people: Listing class when wanting 0', () async {
     var people = People();
     expect(
-        () => people
-            .loadPeople('test/resources/malformed_people_listing_when_wanting_zero.txt'),
+        () => people.loadPeople(
+            'test/resources/malformed_people_listing_when_wanting_zero.txt'),
         throwsA(allOf([
           isA<ListingWhenWantingZeroException>(),
           hasMessage('Fran Wielin still listed classes when wanting 0')
@@ -84,22 +84,22 @@ void main() {
   test('Load people: Wanting more than listed', () async {
     var people = People();
     expect(
-        () => people
-            .loadPeople('test/resources/malformed_people_wanting_more_than_listed.txt'),
+        () => people.loadPeople(
+            'test/resources/malformed_people_wanting_more_than_listed.txt'),
         throwsA(allOf([
           isA<WantingMoreThanListedException>(),
           hasMessage('Elaine Winer wanted more class than they listed')
         ])));
   });
 
-  test('Load people', () async {
+  test('Load people: success', () async {
     var people = People();
     expect(await people.loadPeople('test/resources/people.txt'), 267);
     var person1 = people.people['Carol Johnson']!;
     expect(person1.lName, 'Johnson');
     expect(person1.fName, 'Carol');
     expect(person1.phone, '372-8535');
-    expect(person1.numClassWanted, 1);
+    expect(person1.nbrClassWanted, 1);
     expect(
         person1.availability
             .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
@@ -108,13 +108,14 @@ void main() {
         person1.availability.get(
             WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
         true);
-    expect(person1.classes, ['CHK', 'FAC', 'IMP', 'ILA', 'PRF']);
+    expect(person1.firstChoices, ['CHK']);
+    expect(person1.backups, ['FAC', 'IMP', 'ILA', 'PRF']);
     expect(person1.submissionOrder, 108);
     var person2 = people.people['Stan Pleatman']!;
     expect(person2.lName, 'Pleatman');
     expect(person2.fName, 'Stan');
     expect(person2.phone, '709-2404');
-    expect(person2.numClassWanted, 0);
+    expect(person2.nbrClassWanted, 0);
     expect(
         person2.availability
             .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
@@ -123,8 +124,24 @@ void main() {
         person2.availability.get(
             WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
         true);
-    expect(person2.classes, []);
+    expect(person2.firstChoices, []);
     expect(person2.submissionOrder, 259);
+    var person3 = people.people['Jean Custer']!;
+    expect(person3.lName, 'Custer');
+    expect(person3.fName, 'Jean');
+    expect(person3.phone, '539-4797');
+    expect(person3.nbrClassWanted, 3);
+    expect(
+        person3.availability
+            .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
+        true);
+    expect(
+        person3.availability.get(
+            WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
+        false);
+    expect(person3.firstChoices, ['OCN', 'CHK', 'REF']);
+    expect(person3.backups, ['IMP', 'SAF']);
+    expect(person3.submissionOrder, 13);
   });
 
   test('Load people: whitespace', () async {
@@ -135,7 +152,7 @@ void main() {
     expect(person1.lName, 'Johnson');
     expect(person1.fName, 'Carol');
     expect(person1.phone, '372-8535');
-    expect(person1.numClassWanted, 1);
+    expect(person1.nbrClassWanted, 1);
     expect(
         person1.availability
             .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
@@ -144,13 +161,14 @@ void main() {
         person1.availability.get(
             WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
         true);
-    expect(person1.classes, ['CHK', 'FAC', 'IMP', 'ILA', 'PRF']);
+    expect(person1.firstChoices, ['CHK']);
+    expect(person1.backups, ['FAC', 'IMP', 'ILA', 'PRF']);
     expect(person1.submissionOrder, 108);
     var person2 = people.people['Stan Pleatman']!;
     expect(person2.lName, 'Pleatman');
     expect(person2.fName, 'Stan');
     expect(person2.phone, '709-2404');
-    expect(person2.numClassWanted, 0);
+    expect(person2.nbrClassWanted, 0);
     expect(
         person2.availability
             .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
@@ -159,7 +177,23 @@ void main() {
         person2.availability.get(
             WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
         true);
-    expect(person2.classes, []);
+    expect(person2.firstChoices, []);
     expect(person2.submissionOrder, 259);
+    var person3 = people.people['Jean Custer']!;
+    expect(person3.lName, 'Custer');
+    expect(person3.fName, 'Jean');
+    expect(person3.phone, '539-4797');
+    expect(person3.nbrClassWanted, 3);
+    expect(
+        person3.availability
+            .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
+        true);
+    expect(
+        person3.availability.get(
+            WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
+        false);
+    expect(person3.firstChoices, ['OCN', 'CHK', 'REF']);
+    expect(person3.backups, ['IMP', 'SAF']);
+    expect(person3.submissionOrder, 13);
   });
 }

@@ -32,7 +32,7 @@ class AuxiliaryData {
     } else {
       _nbrCourseTakers =
           _people.people.values.fold<int>(0, (int previousValue, element) {
-        if (element.numClassWanted > 0) {
+        if (element.nbrClassWanted > 0) {
           return previousValue + 1;
         }
         return previousValue;
@@ -58,7 +58,7 @@ class AuxiliaryData {
     } else {
       _nbrRequested = 0;
       for (var person in _people.people.values) {
-        _nbrRequested = _nbrRequested! + person.numClassWanted;
+        _nbrRequested = _nbrRequested! + person.nbrClassWanted;
       }
       return _nbrRequested!;
     }
@@ -74,7 +74,7 @@ class AuxiliaryData {
     } else {
       _nbrRequested = 0;
       for (var person in _people.people.values) {
-        _nbrRequested = _nbrRequested! + person.numClassWanted;
+        _nbrRequested = _nbrRequested! + person.nbrClassWanted;
       }
       return _nbrRequested!;
     }

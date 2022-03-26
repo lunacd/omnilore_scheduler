@@ -13,7 +13,7 @@ Bally	Joann	372-8213	2			3				3				OCN	HCD	THK		QUR		78
 Balsam	Dick	398-1600	1							1			3	GOO	FAC					119
 Banks	Lindie	937-7996	0																	233
 Bay 	Eddy	547-2580	1	3	3	3								SHK						118
-Bayer	Judith	375-0012	1	3	3	3		3	3			3	3	CHK	ILA	BRX	BAD	QUR		167
+Bayer	Judith	375-0012	0	3	3	3		3	3			3	3							167
 Belonsky	Ruth	679-8209 + cell	1	3		3		3	1	3	1	3		SAF	RAH					79
 Berman	Evelyne	547-4526	0																	214
 Berman	Ira	547-4526	0																	215
@@ -30,7 +30,7 @@ Brashear	Marilyn	907 888-0527	1									3	3	ASA						149
 Brodsky	Clifford	483-3119	2											ASA	HCD					145
 Brown	Elizabeth	318-5191	2			2		1		1				BRX	ILA	CHK	SCH	RWD	EVC	186
 Brown	Fran	377-5252	2	3	2		3	3	1	3	1	3		SCH	BAD					9
-Brown	Ginny	542-3889	2											SCH	CHK	BRX	RAH	OCN		35
+Brown	Ginny	542-3889	2											SCH	BRX	RAH	OCN			35
 Brown	Janet	379-8346	2					1						SCH	LES	ILA	SAF			112
 Brown	Larry	379-8346	2											SCH	HCD	BIG	QUR			111
 Brown	Ralph	541-7077	2											SCH	EVC	REF	BIG	ILA	IMP	101
@@ -82,7 +82,7 @@ Galbraith	Tom	707-5094	0																	191
 Gallipeau	Cathy	376-5759	1	3								3		ILA	SCH					140
 Gargaro	Bill	316-1588	1					3			2			OCN						158
 Geittmann	Lori	316-1729	1	3		3		3		3		3		ILA	IMP	BAD				183
-Gleerup	Marie	562 743-3262	2	3		3								RAH	IMP	ILA				56
+Gleerup	Marie	562 743-3262	2	3		3								RAH	ILA					56
 Gleerup	Rich	753-4135	2			3	3			1				GOO	FAC	BIG	HCD			62
 Gleichman	Adele	376-7579	1	3						3	3			OCN	IMP	GOO	LES			125
 Gluck	Mary	259-1028	1			3		3	3					RAH						89
@@ -93,12 +93,12 @@ Gray	Chuck	214-9640	0																	217
 Green	Zelda	377-9704	1	3		3	3	3		3	3	3	3	HCD	REF	ILA	LES	EVC	QUR	201
 Griffith-Gee	Peggy	831-5926	0																	234
 Guneau	Laura	318-1163	2											LES	SHK					98
-Gura	Mary Jo	545-3113	2											SHK	IMP	ILA				99
+Gura	Mary Jo	545-3113	0																	99
 Hart	Gary	408-3443	0																	41
-Hart	Hal	375-1851	1	3	3	3				1	1		3	SHK	LES		IMP			2
+Hart	Hal	375-1851	0	3	3	3				1	1		3							2
 Hart	Ruth	375-1851	2			1	1					3	3	GOO	EVC	BAD				194
 Hawkins	Deborah	383-7840 	2											FAC	RAH					202
-Hawkins	Gary	383-5203	2											FAC	LES					203
+Hawkins	Gary	383-5203	1											FAC	LES					203
 Hoersch	Bob	318-5620	0	3		3		3		3		3								132
 Ialongo	Patti	641-7906	1					3	3			3	3	BIG	ILA	REF				24
 Irizarry	Art	422-8693	0																	218

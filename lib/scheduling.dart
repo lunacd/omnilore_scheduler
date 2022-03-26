@@ -38,7 +38,6 @@ class Scheduling {
   /// Clear cache and reset compute state
   void resetState() {
     auxiliaryData.resetState();
-    overviewData.resetState();
     courseControl.resetState();
   }
 
@@ -71,17 +70,14 @@ class Scheduling {
   /// int numCourses = await scheduling.loadCourses('/path/to/file');
   /// ```
   Future<int> loadCourses(String inputFile) async {
+    if (_courses.getNumCourses() != 0) {
+      throw UnexpectedFatalException();
+    }
     int numCourses;
     numCourses = await _courses.loadCourses(inputFile);
     if (numCourses != 0) {
       resetState();
-    }
-    if (numCourses != 0 && _people.people.isNotEmpty) {
-      var result =
-          _validate.validatePeopleAgainstCourses(_people.people, _courses);
-      if (result != null) {
-        throw InconsistentCourseAndPeopleException(message: result);
-      }
+      overviewData.reloadCourses();
     }
     return numCourses;
   }
@@ -110,22 +106,27 @@ class Scheduling {
   /// Throws a [InconsistentCourseAndPeopleException] when people and the course
   /// schedule are inconsistent.
   ///
+  /// Throws a [UnexpectedFatalException] if loaded people before course or if
+  /// has loaded people already.
+  ///
   /// Asynchronously returns the number of people successfully read.
   ///
   /// ```dart
   /// int numPeople = await people.loadPeople('/path/to/file');
   /// ```
   Future<int> loadPeople(String inputFile) async {
+    if (_courses.getNumCourses() == 0 || _people.people.isNotEmpty) {
+      throw UnexpectedFatalException();
+    }
     var numPeople = await _people.loadPeople(inputFile);
     if (numPeople != 0) {
-      resetState();
-    }
-    if (numPeople != 0 && _courses.getNumCourses() != 0) {
       var result =
-          _validate.validatePeopleAgainstCourses(_people.people, _courses);
+      _validate.validatePeopleAgainstCourses(_people.people, _courses);
       if (result != null) {
         throw InconsistentCourseAndPeopleException(message: result);
       }
+      overviewData.compute();
+      resetState();
     }
     return numPeople;
   }

@@ -10,10 +10,5 @@ void main() {
     expect(scheduling.auxiliaryData.getNbrOnLeave(), 39);
     expect(scheduling.auxiliaryData.getNbrPlacesAsked(), 306);
     expect(scheduling.auxiliaryData.getNbrPlacesGiven(), 306);
-    await scheduling.loadCourses('test/resources/course.txt');
-    expect(scheduling.auxiliaryData.getNbrPlacesGiven(), 306);
-    expect(scheduling.auxiliaryData.getNbrPlacesAsked(), 306);
-    expect(scheduling.auxiliaryData.getNbrUnmetWants(), 0);
-    expect(scheduling.auxiliaryData.getNbrGoCourses(), 24);
   });
 }

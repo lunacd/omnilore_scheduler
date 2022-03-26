@@ -8,10 +8,22 @@ import 'package:omnilore_scheduler/scheduling.dart';
 import 'test_util.dart';
 
 void main() {
+  test('Wrong order', () async {
+    var scheduling = Scheduling();
+    expect(() => scheduling.loadPeople('test/resources/people.txt'),
+        throwsA(isA<UnexpectedFatalException>()));
+    expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
+    expect(() => scheduling.loadCourses('test/resources/course.txt'),
+        throwsA(isA<UnexpectedFatalException>()));
+    expect(await scheduling.loadPeople('test/resources/people.txt'), 267);
+    expect(() => scheduling.loadPeople('test/resources/people.txt'),
+        throwsA(isA<UnexpectedFatalException>()));
+  });
+
   test('Get course info', () async {
     var scheduling = Scheduling();
-    expect(await scheduling.loadPeople('test/resources/people.txt'), 267);
     expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
+    expect(await scheduling.loadPeople('test/resources/people.txt'), 267);
     expect(scheduling.getCourseCodes().length, 24);
     expect(
         scheduling.getCourseCodes(),
@@ -52,8 +64,8 @@ void main() {
 
   test('Get people', () async {
     var scheduling = Scheduling();
-    expect(await scheduling.loadPeople('test/resources/people.txt'), 267);
     expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
+    expect(await scheduling.loadPeople('test/resources/people.txt'), 267);
     expect(scheduling.getNumPeople(), 267);
     var person1 = scheduling
         .getPeople()
@@ -61,7 +73,7 @@ void main() {
     expect(person1.lName, 'Johnson');
     expect(person1.fName, 'Carol');
     expect(person1.phone, '372-8535');
-    expect(person1.numClassWanted, 1);
+    expect(person1.nbrClassWanted, 1);
     expect(
         person1.availability
             .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
@@ -70,7 +82,8 @@ void main() {
         person1.availability.get(
             WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
         true);
-    expect(person1.classes, ['CHK', 'FAC', 'IMP', 'ILA', 'PRF']);
+    expect(person1.firstChoices, ['CHK']);
+    expect(person1.backups, ['FAC', 'IMP', 'ILA', 'PRF']);
     expect(person1.submissionOrder, 108);
     var person2 = scheduling
         .getPeople()
@@ -78,7 +91,7 @@ void main() {
     expect(person2.lName, 'Pleatman');
     expect(person2.fName, 'Stan');
     expect(person2.phone, '709-2404');
-    expect(person2.numClassWanted, 0);
+    expect(person2.nbrClassWanted, 0);
     expect(
         person2.availability
             .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
@@ -87,7 +100,8 @@ void main() {
         person2.availability.get(
             WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
         true);
-    expect(person2.classes, []);
+    expect(person2.firstChoices, []);
+    expect(person2.backups, []);
     expect(person2.submissionOrder, 259);
   });
 
@@ -99,24 +113,8 @@ void main() {
     expect(scheduling.overviewData.getStateOfProcessing(),
         StateOfProcessing.needPeople);
     expect(
-        scheduling.loadPeople('test/resources/malformed_people_inconsistent.txt'),
-        throwsA(allOf([
-          isA<InconsistentCourseAndPeopleException>(),
-          hasMessage('Invalid class choice: SCI by Judi Jones')
-        ])));
-  });
-
-  test('Inconsistent people and course: people first', () async {
-    var scheduling = Scheduling();
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.needCourses);
-    expect(
-        await scheduling.loadPeople('test/resources/malformed_people_inconsistent.txt'),
-        267);
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.needCourses);
-    expect(
-        scheduling.loadCourses('test/resources/course.txt'),
+        scheduling
+            .loadPeople('test/resources/malformed_people_inconsistent.txt'),
         throwsA(allOf([
           isA<InconsistentCourseAndPeopleException>(),
           hasMessage('Invalid class choice: SCI by Judi Jones')

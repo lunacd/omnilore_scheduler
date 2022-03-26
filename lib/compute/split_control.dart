@@ -68,7 +68,7 @@ class SplitControl {
   /// The given course MUST be a valid 3-digit course code
   List<Set<String>> split(String course) {
     if (course.length != 3) throw UnexpectedFatalException();
-    _people = List.from(_overviewData.getPeopleForResultingClass(course)!);
+    _people = List.from(_overviewData.getPeopleForResultingClass(course));
     _max = _courseControl.getMaxClassSize(course);
     _numSplits = (_people.length / _max).ceil();
     _maxSplitSize = (_people.length / _numSplits).ceil();

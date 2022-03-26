@@ -52,73 +52,19 @@ class CourseControl {
   }
 
   /// Drop class
-  ///
-  /// Will do nothing if:
-  /// 1. the course is already dropped
-  /// 2. the given course does not exist
   void drop(String course) {
-    if (_dropped.contains(course)) return;
     _dropped.add(course);
-    var affectedFirstChoice = _overviewData.getPeopleForClassRank(course, 0);
-    if (affectedFirstChoice == null) {
-      return;
-    }
-    var affectedBackup = List<MapEntry<String, int>>.from(
-        _getPeopleAndDataAddFromBackup(course)!);
-
-    for (var name in affectedFirstChoice) {
-      var person = _people.people[name]!;
-      var index = 1;
-      while (index < person.classes.length &&
-          _dropped.contains(person.classes[index])) {
-        _affectedMembers[person.classes[index]]!.add(name);
-        index++;
-      }
-      if (index < person.classes.length) {
-        _backupAdd[person.classes[index]]![name] = index;
-      }
-      _affectedMembers[course]!.add(name);
-    }
-    for (var entry in affectedBackup) {
-      var person = _people.people[entry.key]!;
-      var index = entry.value + 1;
-      while (index < person.classes.length &&
-          _dropped.contains(person.classes[index])) {
-        _affectedMembers[person.classes[index]]!.add(entry.key);
-        index++;
-      }
-      if (index < person.classes.length) {
-        _backupAdd[person.classes[index]]![entry.key] = index;
-      }
-      _backupAdd[course]!.remove(entry.key);
-      _affectedMembers[course]!.add(entry.key);
-    }
+    _overviewData.compute();
   }
 
   /// Undrop class
-  ///
-  /// Will do nothing if:
-  /// 1. the course is already dropped
-  /// 2. the given course does not exist
   void undrop(String course) {
-    if (!_dropped.contains(course)) return;
     _dropped.remove(course);
-    for (var name in _affectedMembers[course]!) {
-      var person = _people.people[name]!;
-      for (var index = 0; index < person.classes.length; index++) {
-        if (!_dropped.contains(person.classes[index])) {
-          if (person.classes[index] == course) {
-            if (index > 0) {
-              _backupAdd[person.classes[index]]![name] = index;
-            }
-          } else {
-            _backupAdd[person.classes[index]]!.remove(name);
-            break;
-          }
-        }
-      }
-    }
-    _affectedMembers[course]!.clear();
+    _overviewData.compute();
+  }
+
+  Set<String> getDropped() {
+    return _dropped;
   }
 
   /// Get a list of people added from backup for a course, accompanied by the
@@ -142,38 +88,6 @@ class CourseControl {
   /// Returns null if course code does not exist.
   Iterable<String>? getPeopleAddFromBackup(String course) {
     return _backupAdd[course]?.keys;
-  }
-
-  /// Get whether there is class to split
-  bool hasOversizeClasses(Courses courses, People people) {
-    if (_oversize != null) {
-      return _oversize!;
-    } else {
-      for (var course in courses.getCodes()) {
-        if (_overviewData.getNbrForClassRank(course, 0)!.size > _classMaxSize) {
-          _oversize = true;
-          return true;
-        }
-      }
-      _oversize = false;
-      return false;
-    }
-  }
-
-  /// Get whether there is class to drop
-  bool hasUndersizeClasses(Courses courses, People people) {
-    if (_undersize != null) {
-      return _undersize!;
-    } else {
-      for (var course in courses.getCodes()) {
-        if (_overviewData.getNbrForClassRank(course, 0)!.size < _classMinSize) {
-          _undersize = true;
-          return true;
-        }
-      }
-      _undersize = false;
-      return false;
-    }
   }
 
   /// Set global minimum and maximum class size

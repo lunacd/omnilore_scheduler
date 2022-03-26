@@ -20,7 +20,8 @@ class OverviewData {
   final Validate _validate;
 
   // Internal states
-  final _choices = HashMap<String, List<HashSet<String>?>>();
+  final _data = HashMap<String, CourseData>();
+  int _unmetWants = 0;
 
   // Readonly access to CourseControl
   late final CourseControl _courseControl;
@@ -30,11 +31,43 @@ class OverviewData {
     _courseControl = courseControl;
   }
 
-  /// Reset computing state
-  void resetState() {
-    _choices.clear();
-    for (var code in _courses.getCodes()) {
-      _choices[code] = List<HashSet<String>?>.filled(6, null, growable: false);
+  /// Reload courses
+  void reloadCourses() {
+    _data.clear();
+    for (var course in _courses.getCodes()) {
+      _data[course] = CourseData();
+    }
+    compute();
+  }
+
+  /// Compute overview data
+  void compute() {
+    // Clear data
+    for (var courseData in _data.values) {
+      courseData.reset();
+    }
+
+    // Compute
+    var dropped = _courseControl.getDropped();
+    for (var person in _people.people.values) {
+      var wanted = person.nbrClassWanted;
+      for (var course in person.firstChoices) {
+        _data[course]!.firstChoices += 1;
+        if (!dropped.contains(course)) {
+          wanted -= 1;
+          _data[course]!.peopleFirstChoice.add(person.getName());
+        }
+      }
+      for (var i = 0; i < person.backups.length; i++) {
+        _data[person.backups[i]]!.backups[i] += 1;
+        if (wanted > 0 && !dropped.contains(person.backups[i])) {
+          wanted -= 1;
+          _data[person.backups[i]]!.peopleBackUp.add(person.getName());
+        }
+      }
+      if (wanted > 0) {
+        _unmetWants += wanted;
+      }
     }
   }
 
@@ -43,66 +76,31 @@ class OverviewData {
   ///
   /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
   /// inclusive.
-  /// Throws [UnexpectedFatalException] if the people and course files are not
-  /// consistent. This might happen if trying to query choices despite a
-  /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
-  /// [loadCourses]. Frontend should prevent this.
   ///
-  /// Returns null if course code does not exist.
+  /// Will crash if course code does not exist.
   ///
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
   /// instantaneously.
-  ClassSize? getNbrForClassRank(String course, int rank) {
+  ClassSize getNbrForClassRank(String course, int rank) {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
     }
-    if (!_choices.containsKey(course)) {
-      return null;
+    int count;
+    if (rank == 0) {
+      count = _data[course]!.firstChoices;
     } else {
-      var choices = _choices[course]![rank];
-      if (choices == null) {
-        _computeChoices(rank, _people);
-        return _getClassSizeFromRaw(course, _choices[course]![rank]!.length);
-      } else {
-        return _getClassSizeFromRaw(course, choices.length);
-      }
+      count = _data[course]!.backups[rank - 1];
     }
-  }
-
-  /// Compute number of choices for all classes at at given rank
-  void _computeChoices(int rank, People people) {
-    for (var person in people.people.values) {
-      if (rank < person.classes.length) {
-        var course = person.classes[rank];
-        if (_choices.containsKey(course)) {
-          if (_choices[course]![rank] == null) {
-            _choices[course]![rank] = HashSet<String>();
-          }
-          _choices[course]![rank]!.add(person.getName());
-        } else {
-          // This should never happen
-          throw UnexpectedFatalException(); // coverage:ignore-line
-        }
-      }
-    }
-    for (var course in _choices.keys) {
-      if (_choices[course]![rank] == null) {
-        _choices[course]![rank] = HashSet<String>();
-      }
-    }
+    return _getClassSizeFromRaw(course, count);
   }
 
   /// Get a list of people who selected a given class as their nth choice (rank)
   ///
   /// Throws [InvalidClassRankException] if the given rank is not in 0 to 5,
   /// inclusive.
-  /// Throws [UnexpectedFatalException] if the people and course files are not
-  /// consistent. This might happen if trying to query choices despite a
-  /// [InconsistentCourseAndPeopleException] thrown in [loadPeople] or
-  /// [loadCourses]. Frontend should prevent this.
   ///
-  /// Returns null if course code does not exist.
+  /// Will crash if course code does not exist.
   ///
   /// The first call to this function after a course/people load might take
   /// longer. All subsequent calls use cached results and will return
@@ -112,21 +110,56 @@ class OverviewData {
   /// length of the iterable as the number of choices. Query this only when the
   /// user want to see this info. This function is slower than
   /// [getNumChoicesForClassRank].
-  Iterable<String>? getPeopleForClassRank(String course, int rank) {
+  Set<String> getPeopleForClassRank(String course, int rank) {
     if (rank < 0 || rank > 5) {
       throw InvalidClassRankException(rank: rank);
     }
-    if (!_choices.containsKey(course)) {
-      return null;
+    if (rank == 0) {
+      return _data[course]!.peopleFirstChoice;
     } else {
-      var choices = _choices[course]![rank];
-      if (choices == null) {
-        _computeChoices(rank, _people);
-        return _choices[course]![rank]!.toList(growable: false);
-      } else {
-        return choices.toList(growable: false);
-      }
+      return _data[course]!.peopleBackUp;
     }
+  }
+
+  /// Get the number of people added from backup for a course
+  ///
+  /// Will crash if course code does not exist.
+  ///
+  /// This is an alias to the function of the same name under CourseControl.
+  /// Alias provided for consistency.
+  int getNbrAddFromBackup(String course) {
+    return _data[course]!.peopleBackUp.length;
+  }
+
+  /// Get a list of people added from backup for a course
+  ///
+  /// Will crash if course code does not exist.
+  ///
+  /// This is an alias to the function of the same name under CourseControl.
+  /// Alias provided for consistency.
+  Set<String> getPeopleAddFromBackup(String course) {
+    return _data[course]!.peopleBackUp;
+  }
+
+  /// Get the resulting class size
+  ///
+  /// DO NOT call this on a dropped class. It will not return 0, which is the
+  /// correct resulting class size. That edge case is not handled because the
+  /// frontend should not ever need to know the resulting class size of a
+  /// dropped class.
+  ClassSize getResultingClassSize(String course) {
+    return _getClassSizeFromRaw(course, _data[course]!.getResultingSize());
+  }
+
+  /// Get a list of people for a resulting course
+  ///
+  /// Will crash if course code does not exist
+  Set<String> getPeopleForResultingClass(String course) {
+    return _data[course]!.getResultingClass();
+  }
+
+  int getUnmetWants() {
+    return _unmetWants;
   }
 
   /// Get the current status of processing
@@ -140,59 +173,13 @@ class OverviewData {
     if (_people.people.isEmpty) {
       return StateOfProcessing.needPeople;
     }
-    if (_courseControl.hasUndersizeClasses(_courses, _people)) {
+    if (_hasUndersizeClasses(_courses)) {
       return StateOfProcessing.drop;
     }
-    if (_courseControl.hasOversizeClasses(_courses, _people)) {
+    if (_hasOversizeClasses(_courses)) {
       return StateOfProcessing.split;
     }
     return StateOfProcessing.schedule;
-  }
-
-  /// Get the number of people added from backup for a course
-  ///
-  /// Returns null if course code does not exist.
-  ///
-  /// This is an alias to the function of the same name under CourseControl.
-  /// Alias provided for consistency.
-  int? getNbrAddFromBackup(String course) {
-    return _courseControl.getNbrAddFromBackup(course);
-  }
-
-  /// Get a list of people added from backup for a course
-  ///
-  /// Returns null if course code does not exist.
-  ///
-  /// This is an alias to the function of the same name under CourseControl.
-  /// Alias provided for consistency.
-  Iterable<String>? getPeopleAddFromBackup(String course) {
-    return _courseControl.getPeopleAddFromBackup(course);
-  }
-
-  /// Get the resulting class size
-  ///
-  /// DO NOT call this on a dropped class. It will not return 0, which is the
-  /// correct resulting class size. That edge case is not handled because the
-  /// frontend should not ever need to know the resulting class size of a
-  /// dropped class.
-  ClassSize? getResultingClassSize(String course) {
-    int? firstChoice = getNbrForClassRank(course, 0)?.size;
-    if (firstChoice == null) return null;
-    int addFromBackup = getNbrAddFromBackup(course)!;
-    return _getClassSizeFromRaw(course, firstChoice + addFromBackup);
-  }
-
-  /// Get a list of people for a resulting course
-  ///
-  ///  Returns null if course code does not exist
-  Iterable<String>? getPeopleForResultingClass(String course) {
-    Iterable<String>? firstChoices = getPeopleForClassRank(course, 0);
-    Iterable<String>? addFromBackups = getPeopleAddFromBackup(course);
-    if (firstChoices == null || addFromBackups == null) {
-      return null;
-    } else {
-      return List.from(firstChoices)..addAll(addFromBackups);
-    }
   }
 
   /// Helper function that generates ClassSize object from raw integer
@@ -203,5 +190,50 @@ class OverviewData {
       return ClassSize(size: size, state: ClassState.undersized);
     }
     return ClassSize(size: size, state: ClassState.normal);
+  }
+
+  /// Get whether there is class to split
+  bool _hasOversizeClasses(Courses courses) {
+    for (var course in courses.getCodes()) {
+      if (getNbrForClassRank(course, 0).state == ClassState.oversized) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Get whether there is class to drop
+  bool _hasUndersizeClasses(Courses courses) {
+    for (var course in courses.getCodes()) {
+      if (getNbrForClassRank(course, 0).state == ClassState.undersized) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+class CourseData {
+  int firstChoices = 0;
+  List<int> backups = [0, 0, 0, 0, 0];
+  Set<String> peopleFirstChoice = {};
+  Set<String> peopleBackUp = {};
+
+  /// Reset course data to zeros
+  void reset() {
+    peopleBackUp = {};
+    peopleFirstChoice = {};
+    backups = [0, 0, 0, 0, 0];
+    firstChoices = 0;
+  }
+
+  /// Get the number of people in the resulting class
+  int getResultingSize() {
+    return firstChoices + peopleBackUp.length;
+  }
+
+  /// Get a set of people in the resulting class
+  Set<String> getResultingClass() {
+    return peopleFirstChoice.union(peopleBackUp);
   }
 }

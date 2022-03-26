@@ -54,7 +54,8 @@ class People {
             malformedLine: numLines + 1, numClassWanted: numClassWanted);
       }
       var availability = Availability();
-      List<String> classes = [];
+      List<String> firstChoices = [];
+      List<String> backups = [];
       var submissionOrder = int.parse(tokens[20]);
 
       // Parse availability
@@ -99,15 +100,19 @@ class People {
             throw DuplicateClassSelectionException(
                 malformedLine: numLines + 1, classCode: chosenClass);
           } else {
-            classes.add(chosenClass);
+            if (firstChoices.length < numClassWanted) {
+              firstChoices.add(chosenClass);
+            } else {
+              backups.add(chosenClass);
+            }
             chosenClassesSet.add(chosenClass);
           }
         }
       }
-      if (classes.length < numClassWanted) {
+      if (firstChoices.length < numClassWanted) {
         throw WantingMoreThanListedException(fName: fName, lName: lName);
       }
-      if (numClassWanted == 0 && classes.isNotEmpty) {
+      if (numClassWanted == 0 && backups.isNotEmpty) {
         throw ListingWhenWantingZeroException(fName: fName, lName: lName);
       }
 
@@ -118,9 +123,10 @@ class People {
           fName: fName,
           lName: lName,
           phone: phone,
-          numClassWanted: numClassWanted,
+          nbrClassWanted: numClassWanted,
           availability: availability,
-          classes: classes,
+          firstChoices: firstChoices,
+          backups: backups,
           submissionOrder: submissionOrder));
 
       numLines++;
