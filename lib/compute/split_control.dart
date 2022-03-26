@@ -66,7 +66,7 @@ class SplitControl {
   /// MUST call [resetState] before preceding.
   ///
   /// The given course MUST be a valid 3-digit course code
-  List<Set<String>> split(String course) {
+  void split(String course) {
     if (course.length != 3) throw UnexpectedFatalException();
     _people = List.from(_overviewData.getPeopleForResultingClass(course));
     _max = _courseControl.getMaxClassSize(course);
@@ -96,7 +96,6 @@ class SplitControl {
       }
       result[_splitMatrix[personIndex][numUnavail]].add(_people[personIndex]);
     }
-    return result;
   }
 
   int _max = 0;
