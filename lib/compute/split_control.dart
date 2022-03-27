@@ -108,6 +108,28 @@ class SplitControl {
   int _baseOffset = 0;
   int _saveTest = 0;
 
+  bool isClustured(String person) {
+    for (var clust in _clusters) {
+      if (clust.contains(person)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool validCluster(Set<String> cluster) {
+    return _clusters.contains(cluster);
+  }
+
+  Set<String>? getClustByPerson(String person) {
+    for (var cluster in _clusters) {
+      if (cluster.contains(person)) {
+        return cluster;
+      }
+    }
+    return null;
+  }
+
   /// Each person has a row
   /// Second last column holds the number of people in this row
   /// Last column holds the total number of can't attends

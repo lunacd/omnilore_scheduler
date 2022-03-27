@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -81,6 +82,9 @@ class _ScreenState extends State<Screen> {
   Iterable<String> curClassRoster = [];
   Map curSelected = Map<String, bool>();
   SplitControl? split_contol;
+  List<List<String>> curClusters = [];
+  Map<Set<String>, Color> clustColors = Map<Set<String>, Color>();
+  bool resultingClass = false;
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
@@ -277,52 +281,78 @@ class _ScreenState extends State<Screen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    for (var item
-                        in curSelected.keys.where((element) => true)) {
-                      split_contol!.removeCluster(item);
-                    }
-                  });
-                },
+                onPressed: resultingClass == true
+                    ? () {
+                        setState(() {
+                          for (var item in curSelected.keys.where(
+                              (element) => curSelected[element] == true)) {
+                            split_contol!.removeCluster(item);
+                          }
+                        });
+                      }
+                    : null,
                 child: Text('Dec Clust')),
             ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    Set<String> result = Set<String>();
-                    for (var item
-                        in curSelected.keys.where((element) => true)) {
-                      result.add(item);
-                    }
-                    split_contol!.addCluster(result);
-                    print(result);
-                  });
-                },
+                onPressed: resultingClass == true
+                    ? () {
+                        setState(() {
+                          Set<String> result = Set<String>();
+                          for (var item in curSelected.keys.where(
+                              (element) => curSelected[element] == true)) {
+                            result.add(item);
+                          }
+                          split_contol!.addCluster(result);
+                          clustColors[result.toSet()] = randomColor();
+                          print(result);
+                        });
+                      }
+                    : null,
                 child: Text('Inc Clust')),
             ElevatedButton(onPressed: null, child: Text('Back')),
             ElevatedButton(onPressed: null, child: Text('Forward')),
           ],
         ),
-        for (var val in curClassRoster)
-          TextButton(
-              style: curSelected[val] == true
-                  ? TextButton.styleFrom(primary: Colors.red)
-                  : TextButton.styleFrom(primary: Colors.black),
-              onPressed: () {
-                setState(() {
-                  if (curSelected[val]) {
-                    curSelected[val] = false;
-                  } else {
-                    curSelected[val] = true;
-                  }
-                });
-              },
-              child: Text(val.toString())),
+        Wrap(
+          direction: Axis.horizontal,
+          children: [
+            for (var val in curClassRoster)
+              ElevatedButton(
+                  style: (() {
+                    if (curSelected[val] == true) {
+                      return ElevatedButton.styleFrom(primary: Colors.red);
+                    } else {
+                      if (split_contol!.isClustured(val.toString()) == true) {
+                        return ElevatedButton.styleFrom(
+                            primary: clustColors[split_contol!
+                                .getClustByPerson(val.toString())]);
+                      } else {
+                        return ElevatedButton.styleFrom(primary: Colors.white);
+                      }
+                    }
+                  }()),
+                  onPressed: () {
+                    setState(() {
+                      if (curSelected[val]) {
+                        curSelected[val] = false;
+                      } else {
+                        curSelected[val] = true;
+                      }
+                    });
+                  },
+                  child: Text(val.toString()))
+          ],
+        ),
         Container(
           color: Colors.white,
         )
       ]),
     );
+  }
+
+  Color randomColor() {
+    int r = Random().nextInt(Colors.primaries.length);
+    print('random color is $r');
+    return Colors.primaries[r];
   }
 
   Widget classSizeControl() {
@@ -560,35 +590,71 @@ class _ScreenState extends State<Screen> {
       List<List<String>> dataList) {
     List<TableRow> result = [];
     for (int i = 0; i < growableList.length; i++) {
-      if (i == 0) {
-        result.add(TableRow(children: [
-          TableCell(
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const <Widget>[Text('Class Codes')])),
-          for (var val in dataList[i])
-            TextButton(
-              child: Text(val.toString()),
-              onPressed: () {
-                setState(() {
+      result.add(TableRow(children: [
+        TableCell(
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[Text(growableList[i].toString())])),
+        for (int j = 0; j < dataList[i].length; j++)
+          TextButton(
+            child: Text(dataList[i][j].toString()),
+            onPressed: () {
+              setState(() {
+                if (i == 0) {
                   curClassRoster = schedule.overviewData
-                          .getPeopleForResultingClass(val.toString()) ??
+                          .getPeopleForResultingClass(
+                              dataList[0][j].toString()) ??
                       [];
-                  curClassRoster.forEach((name) => curSelected[name] = false);
-                  print(curClassRoster);
-                });
-              },
-            )
-        ]));
-      } else {
-        result.add(TableRow(children: [
-          TableCell(
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[Text(growableList[i].toString())])),
-          for (var val in dataList[i]) Text(val.toString())
-        ]));
-      }
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'First Choices') {
+                  curClassRoster = schedule.overviewData.getPeopleForClassRank(
+                          dataList[0][j].toString(), 0) ??
+                      [];
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'First backup') {
+                  curClassRoster = schedule.overviewData.getPeopleForClassRank(
+                          dataList[0][j].toString(), 1) ??
+                      [];
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'second backup') {
+                  curClassRoster = schedule.overviewData.getPeopleForClassRank(
+                          dataList[0][j].toString(), 2) ??
+                      [];
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'Third backup') {
+                  curClassRoster = schedule.overviewData.getPeopleForClassRank(
+                          dataList[0][j].toString(), 3) ??
+                      [];
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'Add from BU\'s') {
+                  curClassRoster = schedule.overviewData
+                          .getPeopleAddFromBackup(dataList[0][j].toString()) ??
+                      [];
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'Drop, bad time') {
+                  curClassRoster = [];
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'Drop, dup class') {
+                  curClassRoster = [];
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'Drop class full') {
+                  curClassRoster = [];
+                  resultingClass = false;
+                } else if (growableList[i].toString() == 'Resulting Size') {
+                  curClassRoster = schedule.overviewData
+                          .getPeopleForResultingClass(
+                              dataList[0][j].toString()) ??
+                      [];
+                  resultingClass = true;
+                }
+                curSelected.clear();
+                clustColors.clear();
+                curClassRoster.forEach((name) => curSelected[name] = false);
+                print(curClassRoster);
+              });
+            },
+          )
+      ]));
     }
     result.add(TableRow(children: [
       TableCell(
