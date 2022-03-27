@@ -89,21 +89,6 @@ class _ScreenState extends State<Screen> {
   Color masterBackgroundColor = Colors.white;
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
 
-  Future<String?> _fileExplorer() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      if (kDebugMode) {
-        print(result.files.single.path);
-      }
-      String path = result.files.single.path ?? '';
-      numCourses = await schedule.loadCourses(path);
-      droppedList = List<bool>.filled(numCourses!, false, growable: true);
-    } else {
-      return 'error';
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,8 +102,25 @@ class _ScreenState extends State<Screen> {
             MenuListItem(
               icon: Icons.open_in_new,
               title: 'Import Course',
-              onPressed: () {
-                _fileExplorer();
+              onPressed: () async {
+                FilePickerResult? result =
+                    await FilePicker.platform.pickFiles();
+
+                if (result != null) {
+                  String path = result.files.single.path ?? '';
+                  if (path != '') {
+                    try {
+                      numCourses = await schedule.loadCourses(path);
+                      droppedList =
+                          List<bool>.filled(numCourses!, false, growable: true);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'courses');
+                    }
+                  } else {
+                    //user canceled
+                  }
+                }
+                // _fileExplorer();
                 setState(() {});
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
