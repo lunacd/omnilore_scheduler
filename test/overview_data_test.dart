@@ -6,6 +6,7 @@ import 'package:omnilore_scheduler/scheduling.dart';
 
 import 'test_util.dart';
 
+/// This file tests the overview data table.
 void main() {
   test('Status of processing: drop', () async {
     var scheduling = Scheduling();

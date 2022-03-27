@@ -24,11 +24,6 @@ class CourseControl {
     _scheduling = scheduling;
   }
 
-  /// Get the number of dropped courses
-  int getNbrDropped() {
-    return _dropped.length;
-  }
-
   /// Drop class
   void drop(String course) {
     _dropped.add(course);

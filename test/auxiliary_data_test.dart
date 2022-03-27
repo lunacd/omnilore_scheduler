@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 
+/// This file has basic tests for items on the auxiliary data panel.
 void main() {
   test('Get auxiliary data', () async {
     var scheduling = Scheduling();

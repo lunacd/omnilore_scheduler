@@ -7,6 +7,8 @@ import 'package:omnilore_scheduler/scheduling.dart';
 
 import 'test_util.dart';
 
+/// This file tests the coordination between submodules, mostly laoding people
+/// and course.
 void main() {
   test('Wrong order', () async {
     var scheduling = Scheduling();

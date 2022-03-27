@@ -4,24 +4,82 @@ import 'package:omnilore_scheduler/scheduling.dart';
 
 import 'test_util.dart';
 
+/// This file tests course control functionalities, i.e. drop and undrop.
 void main() {
   test('Drop classes: no backup dropped', () async {
     var scheduling = Scheduling();
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
     scheduling.courseControl.drop('LES');
+
     expect(scheduling.overviewData.getNbrAddFromBackup('BIG'), 2);
     expect(scheduling.overviewData.getPeopleAddFromBackup('BIG').length, 2);
     expect(scheduling.overviewData.getPeopleAddFromBackup('BIG'),
         containsAll(['Pettina Long', 'Leslie Schettler']));
+
     expect(scheduling.overviewData.getNbrAddFromBackup('FAC'), 2);
     expect(scheduling.overviewData.getPeopleAddFromBackup('FAC').length, 2);
     expect(scheduling.overviewData.getPeopleAddFromBackup('FAC'),
         containsAll(['Sarah Jones', 'Sydell Weiner']));
+    expect(scheduling.overviewData.getNbrForClassRank('FAC', 0).size, 19);
+    expect(scheduling.overviewData.getPeopleForClassRank('FAC', 0).length, 19);
+    expect(
+        scheduling.overviewData.getPeopleForClassRank('FAC', 0),
+        containsAll([
+          'Deborah Hawkins',
+          'Sharon Bohner',
+          'Jim Jetton',
+          'Paul McCaul',
+          'Joy Jurena',
+          'Gary Hawkins',
+          'James O\'Connor',
+          'Sally Moite',
+          'Dennis Eggert',
+          'Kent McDonald',
+          'Rich Mansfield',
+          'Brian Bailey',
+          'Connie Siegel',
+          'Ralph Ford',
+          'Donald Tlougan',
+          'Barbara Case',
+          'Karol McQueary',
+          'Rich Gleerup',
+          'Claire Damecour',
+        ]));
+    expect(scheduling.overviewData.getResultingClassSize('FAC').size, 21);
+    expect(
+        scheduling.overviewData.getPeopleForResultingClass('FAC').length, 21);
+    expect(
+        scheduling.overviewData.getPeopleForResultingClass('FAC'),
+        containsAll([
+          'Deborah Hawkins',
+          'Sharon Bohner',
+          'Jim Jetton',
+          'Paul McCaul',
+          'Joy Jurena',
+          'Gary Hawkins',
+          'James O\'Connor',
+          'Sally Moite',
+          'Dennis Eggert',
+          'Kent McDonald',
+          'Rich Mansfield',
+          'Brian Bailey',
+          'Connie Siegel',
+          'Ralph Ford',
+          'Donald Tlougan',
+          'Barbara Case',
+          'Karol McQueary',
+          'Rich Gleerup',
+          'Claire Damecour',
+          'Sarah Jones',
+          'Sydell Weiner',
+        ]));
+
     expect(scheduling.overviewData.getNbrAddFromBackup('GOO'), 3);
     expect(scheduling.overviewData.getPeopleAddFromBackup('GOO').length, 3);
     expect(scheduling.overviewData.getPeopleAddFromBackup('GOO'),
         containsAll(['Ray Destabelle', 'Suzanne Mann', 'Bob Bacinski']));
+
     expect(scheduling.overviewData.getNbrAddFromBackup('LES'), 0);
     expect(scheduling.overviewData.getPeopleAddFromBackup('LES').length, 0);
     expect(scheduling.overviewData.getNbrAddFromBackup('HCD'), 0);

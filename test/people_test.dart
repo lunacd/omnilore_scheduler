@@ -7,6 +7,7 @@ import 'package:omnilore_scheduler/store/people.dart';
 
 import 'test_util.dart';
 
+/// This file tests functionalities regarding loading people.
 void main() {
   test('Load people: file not found', () {
     var people = People();
