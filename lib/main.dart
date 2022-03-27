@@ -9,15 +9,12 @@ import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 
 const Map kColorMap = {
-  'Red': Colors.red,
-  'Blue': Colors.blue,
-  'Purple': Colors.purple,
-  'Black': Colors.black,
-  'Pink': Colors.pink,
-  'Yellow': Colors.yellow,
-  'Orange': Colors.orange,
-  'White': Colors.white,
-  'BlueGrey': Colors.blueGrey,
+  'DarkBlue': Color.fromARGB(255, 45, 83, 86),
+  'MediumBlue': Color.fromARGB(255, 39, 136, 142),
+  'LightBlue': Color.fromARGB(255, 103, 183, 192),
+  'KindaBlue': Color.fromARGB(255, 170, 205, 209),
+  'MoreBlue': Color.fromARGB(255, 195, 223, 226),
+  'WhiteBlue': Color.fromARGB(255, 231, 226, 220),
 };
 
 void main() async {
@@ -48,7 +45,7 @@ class MyApp extends StatelessWidget {
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all(Colors.black),
 
-            backgroundColor: MaterialStateProperty.all(Colors.grey),
+            backgroundColor: MaterialStateProperty.all(kColorMap['MediumBlue']),
             overlayColor: MaterialStateProperty.all(
                 Colors.blueGrey[600]), // Set Button hover color
           ),
@@ -86,7 +83,7 @@ class _ScreenState extends State<Screen> {
   // String _drawerTitle = 'Tap a drawerItem';
   // IconData _drawerIcon = Icons.menu;
 
-  Color masterBackgroundColor = Colors.white;
+  Color masterBackgroundColor = kColorMap['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
 
   Future<String?> _fileExplorer() async {
@@ -213,8 +210,8 @@ class _ScreenState extends State<Screen> {
                 // TODO: Update this to a string that changes based on the state
                 Container(
                   width: double.infinity,
-                  color: Colors.red,
-                  child: const Text('State of Processing: Need to import',
+                  color: kColorMap['MediumBlue'],
+                  child: const Text(' State of Processing: Need to import',
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
                 ),
@@ -255,7 +252,7 @@ class _ScreenState extends State<Screen> {
 
   Widget classNameDisplay() {
     return Container(
-      color: Colors.blue,
+      color: kColorMap['MoreBlue'],
       child: Column(children: [
         Container(
           alignment: Alignment.center,
@@ -324,7 +321,7 @@ class _ScreenState extends State<Screen> {
   Widget classSizeControl() {
     return Container(
       // width: 400,
-      color: Colors.green,
+      color: kColorMap['LightBlue'],
       child: Column(
         children: [
           Container(
@@ -383,7 +380,7 @@ class _ScreenState extends State<Screen> {
   Widget namesDisplayMode() {
     return Container(
         // height: double.infinity,
-        color: Colors.yellow,
+        color: kColorMap['KindaBlue'],
         child:
             Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           Container(
@@ -402,7 +399,7 @@ class _ScreenState extends State<Screen> {
 
   Widget selectProcess() {
     return Container(
-        color: Colors.deepOrange,
+        color: kColorMap['MoreBlue'],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -428,7 +425,7 @@ class _ScreenState extends State<Screen> {
   Widget auxiliaryData(Scheduling scheduling) {
     return Container(
       width: 300,
-      color: Colors.green,
+      color: kColorMap['LightBlue'],
       child: DefaultTextStyle(
         child: Column(
           children: [
