@@ -76,7 +76,7 @@ class _ScreenState extends State<Screen> {
   int? numPeople;
   Iterable<String> curClassRoster = [];
   Map curSelected = Map<String, bool>();
-  SplitControl? split_contol;
+  //SplitControl? split_contol;
   List<List<String>> curClusters = [];
   Map<Set<String>, Color> clustColors = Map<Set<String>, Color>();
   bool resultingClass = false;
@@ -280,7 +280,7 @@ class _ScreenState extends State<Screen> {
                         setState(() {
                           for (var item in curSelected.keys.where(
                               (element) => curSelected[element] == true)) {
-                            split_contol!.removeCluster(item);
+                            schedule.splitControl.removeCluster(item);
                           }
                         });
                       }
@@ -295,7 +295,7 @@ class _ScreenState extends State<Screen> {
                               (element) => curSelected[element] == true)) {
                             result.add(item);
                           }
-                          split_contol!.addCluster(result);
+                          schedule.splitControl.addCluster(result);
                           clustColors[result.toSet()] = randomColor();
                           print(result);
                         });
@@ -315,9 +315,10 @@ class _ScreenState extends State<Screen> {
                     if (curSelected[val] == true) {
                       return ElevatedButton.styleFrom(primary: Colors.red);
                     } else {
-                      if (split_contol!.isClustured(val.toString()) == true) {
+                      if (schedule.splitControl.isClustured(val.toString()) ==
+                          true) {
                         return ElevatedButton.styleFrom(
-                            primary: clustColors[split_contol!
+                            primary: clustColors[schedule.splitControl
                                 .getClustByPerson(val.toString())]);
                       } else {
                         return ElevatedButton.styleFrom(primary: Colors.white);
@@ -587,34 +588,27 @@ class _ScreenState extends State<Screen> {
               setState(() {
                 if (i == 0) {
                   curClassRoster = schedule.overviewData
-                          .getPeopleForResultingClass(
-                              dataList[0][j].toString()) ??
-                      [];
+                      .getPeopleForResultingClass(dataList[0][j].toString());
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'First Choices') {
-                  curClassRoster = schedule.overviewData.getPeopleForClassRank(
-                          dataList[0][j].toString(), 0) ??
-                      [];
+                  curClassRoster = schedule.overviewData
+                      .getPeopleForClassRank(dataList[0][j].toString(), 0);
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'First backup') {
-                  curClassRoster = schedule.overviewData.getPeopleForClassRank(
-                          dataList[0][j].toString(), 1) ??
-                      [];
+                  curClassRoster = schedule.overviewData
+                      .getPeopleForClassRank(dataList[0][j].toString(), 1);
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'second backup') {
-                  curClassRoster = schedule.overviewData.getPeopleForClassRank(
-                          dataList[0][j].toString(), 2) ??
-                      [];
+                  curClassRoster = schedule.overviewData
+                      .getPeopleForClassRank(dataList[0][j].toString(), 2);
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Third backup') {
-                  curClassRoster = schedule.overviewData.getPeopleForClassRank(
-                          dataList[0][j].toString(), 3) ??
-                      [];
+                  curClassRoster = schedule.overviewData
+                      .getPeopleForClassRank(dataList[0][j].toString(), 3);
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Add from BU\'s') {
                   curClassRoster = schedule.overviewData
-                          .getPeopleAddFromBackup(dataList[0][j].toString()) ??
-                      [];
+                      .getPeopleAddFromBackup(dataList[0][j].toString());
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Drop, bad time') {
                   curClassRoster = [];
@@ -627,9 +621,7 @@ class _ScreenState extends State<Screen> {
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Resulting Size') {
                   curClassRoster = schedule.overviewData
-                          .getPeopleForResultingClass(
-                              dataList[0][j].toString()) ??
-                      [];
+                      .getPeopleForResultingClass(dataList[0][j].toString());
                   resultingClass = true;
                 }
                 curSelected.clear();
