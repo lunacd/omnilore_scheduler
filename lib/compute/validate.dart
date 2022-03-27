@@ -13,7 +13,13 @@ class Validate {
   String? validatePeopleAgainstCourses(
       HashMap<String, Person> people, Courses courses) {
     for (var person in people.values) {
-      for (var classCode in person.classes) {
+      for (var classCode in person.firstChoices) {
+        if (!courses.hasCourse(classCode)) {
+          _isValid = false;
+          return 'Invalid class choice: $classCode by ${person.fName} ${person.lName}';
+        }
+      }
+      for (var classCode in person.backups) {
         if (!courses.hasCourse(classCode)) {
           _isValid = false;
           return 'Invalid class choice: $classCode by ${person.fName} ${person.lName}';

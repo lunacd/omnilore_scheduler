@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:omnilore_scheduler/compute/auxiliary_data.dart';
 import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/compute/overview_data.dart';
 import 'package:omnilore_scheduler/compute/split_control.dart';
 import 'package:omnilore_scheduler/compute/validate.dart';
+import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/person.dart';
@@ -13,14 +13,12 @@ import 'package:omnilore_scheduler/store/people.dart';
 
 class Scheduling {
   Scheduling() {
-    auxiliaryData = AuxiliaryData(_courses, _people);
     overviewData = OverviewData(_courses, _people, _validate);
-    courseControl = CourseControl(_courses, _people);
-    splitControl = SplitControl(_people);
+    courseControl = CourseControl();
+    splitControl = SplitControl(_people, _courses);
 
-    courseControl.initialize(overviewData);
+    courseControl.initialize(this);
     overviewData.initialize(courseControl);
-    auxiliaryData.initialize(courseControl);
     splitControl.initialize(overviewData, courseControl);
   }
 
@@ -30,16 +28,13 @@ class Scheduling {
   final _validate = Validate();
 
   // Compute modules
-  late AuxiliaryData auxiliaryData;
   late OverviewData overviewData;
   late CourseControl courseControl;
   late SplitControl splitControl;
 
-  /// Clear cache and reset compute state
-  void resetState() {
-    auxiliaryData.resetState();
-    overviewData.resetState();
-    courseControl.resetState();
+  /// Compute all submodules
+  void compute(Change change) {
+    overviewData.compute(change);
   }
 
   /// Get an iterable list of course codes
@@ -54,11 +49,6 @@ class Scheduling {
   /// Get course information given a course code
   Course? getCourse(String code) {
     return _courses.getCourse(code);
-  }
-
-  /// need getter for people object for split_control initialization
-  People getPeopleStruct() {
-    return _people;
   }
 
   /// Loads courses from a text file
@@ -76,17 +66,13 @@ class Scheduling {
   /// int numCourses = await scheduling.loadCourses('/path/to/file');
   /// ```
   Future<int> loadCourses(String inputFile) async {
+    if (_courses.getNumCourses() != 0) {
+      throw UnexpectedFatalException();
+    }
     int numCourses;
     numCourses = await _courses.loadCourses(inputFile);
     if (numCourses != 0) {
-      resetState();
-    }
-    if (numCourses != 0 && _people.people.isNotEmpty) {
-      var result =
-          _validate.validatePeopleAgainstCourses(_people.people, _courses);
-      if (result != null) {
-        throw InconsistentCourseAndPeopleException(message: result);
-      }
+      compute(Change(course: true));
     }
     return numCourses;
   }
@@ -115,22 +101,26 @@ class Scheduling {
   /// Throws a [InconsistentCourseAndPeopleException] when people and the course
   /// schedule are inconsistent.
   ///
+  /// Throws a [UnexpectedFatalException] if loaded people before course or if
+  /// has loaded people already.
+  ///
   /// Asynchronously returns the number of people successfully read.
   ///
   /// ```dart
   /// int numPeople = await people.loadPeople('/path/to/file');
   /// ```
   Future<int> loadPeople(String inputFile) async {
+    if (_courses.getNumCourses() == 0 || _people.people.isNotEmpty) {
+      throw UnexpectedFatalException();
+    }
     var numPeople = await _people.loadPeople(inputFile);
     if (numPeople != 0) {
-      resetState();
-    }
-    if (numPeople != 0 && _courses.getNumCourses() != 0) {
       var result =
           _validate.validatePeopleAgainstCourses(_people.people, _courses);
       if (result != null) {
         throw InconsistentCourseAndPeopleException(message: result);
       }
+      compute(Change(people: true));
     }
     return numPeople;
   }

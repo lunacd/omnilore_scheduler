@@ -5,7 +5,7 @@ import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/compute/overview_data.dart';
 import 'package:omnilore_scheduler/model/availability.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
-import 'package:omnilore_scheduler/model/person.dart';
+import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
 /// This class implements an algorithm to find good and equal split among
@@ -23,10 +23,46 @@ class SplitControl {
   /// this person is currently in
   static const numUnavail = 21;
 
-  SplitControl(People people) : _peopleData = people.people;
+  SplitControl(People people, Courses courses)
+      : _people = people,
+        _courses = courses;
 
   late final OverviewData _overviewData;
   late final CourseControl _courseControl;
+
+  int _max = 0;
+  final List<Set<String>> _clusters = [];
+  late List<String> _peopleToSplit;
+  final People _people;
+  final Courses _courses;
+  late final int _numSplits;
+  late final int _maxSplitSize;
+  int _baseOffset = 0;
+  int _saveTest = 0;
+
+  /// Each person has a row
+  /// Second last column holds the number of people in this row
+  /// Last column holds the total number of can't attends
+  late final List<List<int>> _splitMatrix;
+
+  /// 0 index holds the index before (including) which the number of can't
+  /// attends are 0
+  late final List<int> _clusterArray;
+
+  /// Matrix that stores the correlation between each pair of people
+  /// Only half of the matrix is used but that's okay
+  late final List<List<int>> _correlateMatrix;
+
+  /// Sorted array of people's number of availabilities
+  final List<int> _sortArray = [];
+
+  /// Array of correlations
+  late final List<int> _testArray;
+
+  /// Currently discovered best _testArray
+  List<int> _bestTestArray = [];
+
+  int _rotNum = 0;
 
   /// Late initialize overview data
   void initialize(OverviewData overviewData, CourseControl courseControl) {
@@ -66,19 +102,20 @@ class SplitControl {
   /// MUST call [resetState] before preceding.
   ///
   /// The given course MUST be a valid 3-digit course code
-  List<Set<String>> split(String course) {
+  void split(String course) {
     if (course.length != 3) throw UnexpectedFatalException();
-    _people = List.from(_overviewData.getPeopleForResultingClass(course)!);
+    _peopleToSplit =
+        List.from(_overviewData.getPeopleForResultingClass(course));
     _max = _courseControl.getMaxClassSize(course);
-    _numSplits = (_people.length / _max).ceil();
-    _maxSplitSize = (_people.length / _numSplits).ceil();
+    _numSplits = (_peopleToSplit.length / _max).ceil();
+    _maxSplitSize = (_peopleToSplit.length / _numSplits).ceil();
     _splitMatrix = List<List<int>>.filled(
-        _people.length + _numSplits, List<int>.filled(22, 0));
+        _peopleToSplit.length + _numSplits, List<int>.filled(22, 0));
     _clusterArray = List<int>.filled(_clusters.length, -1);
     _correlateMatrix = List<List<int>>.filled(
-        _people.length, List<int>.filled(_people.length, 0));
+        _peopleToSplit.length, List<int>.filled(_peopleToSplit.length, 0));
     _testArray = List<int>.filled(_numSplits, 0);
-    _baseOffset = _people.length;
+    _baseOffset = _peopleToSplit.length;
 
     _loadSplitMatrix();
     _loadClusterArray();
@@ -90,23 +127,40 @@ class SplitControl {
     _assignRemnants();
 
     var result = List<Set<String>>.filled(_numSplits, {});
-    for (var personIndex = 0; personIndex < _people.length; personIndex++) {
+    for (var personIndex = 0;
+        personIndex < _peopleToSplit.length;
+        personIndex++) {
       if (_splitMatrix[personIndex][numPeople] != 0) {
         throw UnexpectedFatalException();
       }
-      result[_splitMatrix[personIndex][numUnavail]].add(_people[personIndex]);
+      result[_splitMatrix[personIndex][numUnavail]]
+          .add(_peopleToSplit[personIndex]);
     }
-    return result;
-  }
 
-  int _max = 0;
-  final List<Set<String>> _clusters = [];
-  late List<String> _people;
-  final Map<String, Person> _peopleData;
-  late final int _numSplits;
-  late final int _maxSplitSize;
-  int _baseOffset = 0;
-  int _saveTest = 0;
+    // Update people's choices
+    for (var splitIndex = 0; splitIndex < result.length; splitIndex++) {
+      for (var person in result[splitIndex]) {
+        var classIndex = _people.people[person]!.firstChoices
+            .indexWhere((element) => element == course);
+        _people.people[person]!.firstChoices
+            .replaceRange(classIndex, classIndex + 1, ['$course$splitIndex']);
+      }
+    }
+
+    // Update backups
+    // TODO: use correlation
+    for (var person in _people.people.values) {
+      var classIndex = _people.people[person]!.firstChoices
+          .indexWhere((element) => element == course);
+      if (classIndex != -1) {
+        _people.people[person]!.firstChoices
+            .replaceRange(classIndex, classIndex + 1, ['${course}1']);
+      }
+    }
+
+    // Update course data
+    _courses.splitCourse(course, result.length);
+  }
 
   bool isClustured(String person) {
     for (var clust in _clusters) {
@@ -130,34 +184,10 @@ class SplitControl {
     return null;
   }
 
-  /// Each person has a row
-  /// Second last column holds the number of people in this row
-  /// Last column holds the total number of can't attends
-  late final List<List<int>> _splitMatrix;
-
-  /// 0 index holds the index before (including) which the number of can't
-  /// attends are 0
-  late final List<int> _clusterArray;
-
-  /// Matrix that stores the correlation between each pair of people
-  /// Only half of the matrix is used but that's okay
-  late final List<List<int>> _correlateMatrix;
-
-  /// Sorted array of people's number of availabilities
-  final List<int> _sortArray = [];
-
-  /// Array of correlations
-  late final List<int> _testArray;
-
-  /// Currently discovered best _testArray
-  List<int> _bestTestArray = [];
-
-  int _rotNum = 0;
-
   /// Initializes _splitMatrix with people's can't attends
   void _loadSplitMatrix() {
-    for (int i = 0; i < _people.length; i++) {
-      var personData = _peopleData[_people[i]]!;
+    for (int i = 0; i < _peopleToSplit.length; i++) {
+      var personData = _people.people[_peopleToSplit[i]]!;
       var unavailableCount = 0;
       for (var week in WeekOfMonth.values) {
         for (var day in DayOfWeek.values) {
@@ -180,7 +210,7 @@ class SplitControl {
         clusterIndex < _clusters.length;
         clusterIndex++) {
       for (var person in _clusters[clusterIndex]) {
-        var personIndex = _people.indexOf(person);
+        var personIndex = _peopleToSplit.indexOf(person);
         if (personIndex == -1) throw UnexpectedFatalException();
         var clusterPosition = _clusterArray[clusterIndex];
         if (clusterPosition == -1) {
@@ -208,7 +238,7 @@ class SplitControl {
     _splitMatrix[clusterPosition][numPeople] += 1;
     _splitMatrix[personIndex][numPeople] = 0;
     _splitMatrix[personIndex][numUnavail] = clusterPosition;
-    for (var i = 0; i < _people.length; i++) {
+    for (var i = 0; i < _peopleToSplit.length; i++) {
       if (_splitMatrix[i][numPeople] == 0 &&
           _splitMatrix[i][numUnavail] == personIndex) {
         _splitMatrix[i][numUnavail] = clusterPosition;
@@ -317,7 +347,7 @@ class SplitControl {
       _splitMatrix.add(List<int>.from(_splitMatrix[person]));
       _splitMatrix[person][numPeople] = 0;
       _splitMatrix[person][numUnavail] = _baseOffset + personIndex;
-      for (var i = 0; i < _people.length; i++) {
+      for (var i = 0; i < _peopleToSplit.length; i++) {
         if (_splitMatrix[i][numPeople] == 0 &&
             _splitMatrix[i][numUnavail] == person) {
           _splitMatrix[i][numUnavail] = _baseOffset + personIndex;
@@ -356,7 +386,7 @@ class SplitControl {
   /// firstRound = true
   int _findBestCluster(int person, bool firstRound) {
     // 21 is used as "infinity" as the count below is 20 max
-    var baseOffset = _people.length;
+    var baseOffset = _peopleToSplit.length;
 
     // Store the two least increase in the number of availabilities
     var splitAffected = List<int>.filled(2, 21, growable: false);
@@ -464,7 +494,7 @@ class SplitControl {
           personIndex++) {
         if (_splitMatrix[personIndex][numPeople] == maxNum &&
             _splitMatrix[personIndex][numUnavail] == 0) {
-          var minSize = _people.length;
+          var minSize = _peopleToSplit.length;
           for (var splitIndex = 0; splitIndex < _numSplits; splitIndex++) {
             var theSplit = splitIndex + _baseOffset;
             var splitSize = _splitMatrix[theSplit][numPeople];

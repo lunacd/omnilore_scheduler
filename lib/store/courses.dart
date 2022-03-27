@@ -14,7 +14,9 @@ class Courses {
   /// for (var code in courses.getCodes()) {}
   /// ```
   Iterable<String> getCodes() {
-    return _courses.keys;
+    var result = _courses.keys.toList(growable: false);
+    result.sort((String a, String b) => a.compareTo(b));
+    return result;
   }
 
   /// Get course information given a course code
@@ -69,5 +71,12 @@ class Courses {
       numLines++;
     }
     return numLines;
+  }
+
+  void splitCourse(String course, int numSplits) {
+    for (var splitIndex = 0; splitIndex < numSplits; splitIndex++) {
+      _courses['$course$splitIndex'] = _courses[course]!;
+    }
+    _courses.remove(course);
   }
 }

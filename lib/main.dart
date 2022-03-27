@@ -5,22 +5,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
-import 'package:omnilore_scheduler/compute/split_control.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:omnilore_scheduler/store/listItem.dart';
 
 const Map kColorMap = {
-  'Red': Colors.red,
-  'Blue': Colors.blue,
-  'Purple': Colors.purple,
-  'Black': Colors.black,
-  'Pink': Colors.pink,
-  'Yellow': Colors.yellow,
-  'Orange': Colors.orange,
-  'White': Colors.white,
-  'BlueGrey': Colors.blueGrey,
+  'DarkBlue': Color.fromARGB(255, 45, 83, 86),
+  'MediumBlue': Color.fromARGB(255, 39, 136, 142),
+  'LightBlue': Color.fromARGB(255, 103, 183, 192),
+  'KindaBlue': Color.fromARGB(255, 170, 205, 209),
+  'MoreBlue': Color.fromARGB(255, 195, 223, 226),
+  'WhiteBlue': Color.fromARGB(255, 231, 226, 220),
 };
 
 void main() async {
@@ -51,7 +46,7 @@ class MyApp extends StatelessWidget {
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all(Colors.black),
 
-            backgroundColor: MaterialStateProperty.all(Colors.grey),
+            backgroundColor: MaterialStateProperty.all(kColorMap['MediumBlue']),
             overlayColor: MaterialStateProperty.all(
                 Colors.blueGrey[600]), // Set Button hover color
           ),
@@ -93,23 +88,8 @@ class _ScreenState extends State<Screen> {
   // String _drawerTitle = 'Tap a drawerItem';
   // IconData _drawerIcon = Icons.menu;
 
-  Color masterBackgroundColor = Colors.white;
+  Color masterBackgroundColor = kColorMap['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
-
-  Future<String?> _fileExplorer() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      if (kDebugMode) {
-        print(result.files.single.path);
-      }
-      String path = result.files.single.path ?? '';
-      numCourses = await schedule.loadCourses(path);
-      droppedList = List<bool>.filled(numCourses!, false, growable: true);
-    } else {
-      return 'error';
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,8 +104,25 @@ class _ScreenState extends State<Screen> {
             MenuListItem(
               icon: Icons.open_in_new,
               title: 'Import Course',
-              onPressed: () {
-                _fileExplorer();
+              onPressed: () async {
+                FilePickerResult? result =
+                    await FilePicker.platform.pickFiles();
+
+                if (result != null) {
+                  String path = result.files.single.path ?? '';
+                  if (path != '') {
+                    try {
+                      numCourses = await schedule.loadCourses(path);
+                      droppedList =
+                          List<bool>.filled(numCourses!, false, growable: true);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'courses');
+                    }
+                  } else {
+                    //user canceled
+                  }
+                }
+                // _fileExplorer();
                 setState(() {});
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
@@ -142,9 +139,6 @@ class _ScreenState extends State<Screen> {
                   if (path != '') {
                     try {
                       numPeople = await schedule.loadPeople(path);
-                      split_contol = SplitControl(schedule.getPeopleStruct());
-                      split_contol!.initialize(
-                          schedule.overviewData, schedule.courseControl);
                     } catch (e) {
                       //FormatException s = e.source;
                       _showMyDialog(e.toString(), 'people');
@@ -223,8 +217,8 @@ class _ScreenState extends State<Screen> {
                 // TODO: Update this to a string that changes based on the state
                 Container(
                   width: double.infinity,
-                  color: Colors.red,
-                  child: const Text('State of Processing: Need to import',
+                  color: kColorMap['MediumBlue'],
+                  child: const Text(' State of Processing: Need to import',
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
                 ),
@@ -254,7 +248,7 @@ class _ScreenState extends State<Screen> {
             child: Column(
               children: [
                 selectProcess(),
-                Expanded(child: auxiliaryData(schedule)),
+                Expanded(child: overviewData(schedule)),
               ],
             ),
           )
@@ -265,7 +259,7 @@ class _ScreenState extends State<Screen> {
 
   Widget classNameDisplay() {
     return Container(
-      color: Colors.blue,
+      color: kColorMap['MoreBlue'],
       child: Column(children: [
         Container(
           alignment: Alignment.center,
@@ -358,7 +352,7 @@ class _ScreenState extends State<Screen> {
   Widget classSizeControl() {
     return Container(
       // width: 400,
-      color: Colors.green,
+      color: kColorMap['LightBlue'],
       child: Column(
         children: [
           Container(
@@ -417,7 +411,7 @@ class _ScreenState extends State<Screen> {
   Widget namesDisplayMode() {
     return Container(
         // height: double.infinity,
-        color: Colors.yellow,
+        color: kColorMap['KindaBlue'],
         child:
             Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           Container(
@@ -436,7 +430,7 @@ class _ScreenState extends State<Screen> {
 
   Widget selectProcess() {
     return Container(
-        color: Colors.deepOrange,
+        color: kColorMap['MoreBlue'],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -459,22 +453,20 @@ class _ScreenState extends State<Screen> {
         ));
   }
 
-  Widget auxiliaryData(Scheduling scheduling) {
+  Widget overviewData(Scheduling scheduling) {
     return Container(
       width: 300,
-      color: Colors.green,
+      color: kColorMap['LightBlue'],
       child: DefaultTextStyle(
         child: Column(
           children: [
             Text(
-                '\nCourse Takers ${scheduling.auxiliaryData.getNbrCourseTakers()}'),
-            Text('Go Courses ${scheduling.auxiliaryData.getNbrGoCourses()}'),
-            Text(
-                'Places Asked ${scheduling.auxiliaryData.getNbrPlacesAsked()}'),
-            Text(
-                'Places Given ${scheduling.auxiliaryData.getNbrPlacesGiven()}'),
-            Text('Un-met Wants ${scheduling.auxiliaryData.getNbrUnmetWants()}'),
-            Text('On Leave ${scheduling.auxiliaryData.getNbrOnLeave()}'),
+                '\nCourse Takers ${scheduling.overviewData.getNbrCourseTakers()}'),
+            Text('Go Courses ${scheduling.overviewData.getNbrGoCourses()}'),
+            Text('Places Asked ${scheduling.overviewData.getNbrPlacesAsked()}'),
+            Text('Places Given ${scheduling.overviewData.getNbrPlacesGiven()}'),
+            Text('Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}'),
+            Text('On Leave ${scheduling.overviewData.getNbrOnLeave()}'),
             const Text('Missing 0'),
           ],
         ),
@@ -519,32 +511,25 @@ class _ScreenState extends State<Screen> {
     }
     for (int i = 0; i < droppedList.length; i++) {
       if (droppedList[i] == true) {
-        if (false) {
-          print('hello we got a course that is dropped ${dataList[0][i]}');
-        }
-
         schedule.courseControl.drop(dataList[0][i]);
       } else {
-        if (false) {
-          print('hello we are undropping the ${dataList[0][i]}');
-        }
         schedule.courseControl.undrop(dataList[0][i]);
       }
     }
     idx = 0;
     for (String code in schedule.getCourseCodes()) {
       firstChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 0)?.size ?? -1;
+          schedule.overviewData.getNbrForClassRank(code, 0).size;
 
       secondChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 1)?.size ?? -1;
+          schedule.overviewData.getNbrForClassRank(code, 1).size;
       thirdChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 2)?.size ?? -1;
+          schedule.overviewData.getNbrForClassRank(code, 2).size;
       fourthChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 3)?.size ?? -1;
-      fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+          schedule.overviewData.getNbrForClassRank(code, 3).size;
+      fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code);
       resultingSize[idx] =
-          schedule.overviewData.getResultingClassSize(code)?.size ?? -1;
+          schedule.overviewData.getResultingClassSize(code).size;
       dataList[0][idx] = code;
       droppedList[idx]
           ? dataList[1][idx] = '0'
@@ -688,13 +673,11 @@ class _ScreenState extends State<Screen> {
     List<DataRow> list = <DataRow>[];
 
     for (String code in schedule.getCourseCodes()) {
-      int first = schedule.overviewData.getNbrForClassRank(code, 0)?.size ?? -1;
-      int second =
-          schedule.overviewData.getNbrForClassRank(code, 1)?.size ?? -1;
-      int third = schedule.overviewData.getNbrForClassRank(code, 2)?.size ?? -1;
-      int fourth =
-          schedule.overviewData.getNbrForClassRank(code, 3)?.size ?? -1;
-      int fromBU = schedule.overviewData.getNbrAddFromBackup(code) ?? -1;
+      int first = schedule.overviewData.getNbrForClassRank(code, 0).size;
+      int second = schedule.overviewData.getNbrForClassRank(code, 1).size;
+      int third = schedule.overviewData.getNbrForClassRank(code, 2).size;
+      int fourth = schedule.overviewData.getNbrForClassRank(code, 3).size;
+      int fromBU = schedule.overviewData.getNbrAddFromBackup(code);
       list.add(DataRow(
         cells: <DataCell>[
           DataCell(Text(code)),
@@ -794,37 +777,37 @@ Widget auxData(Scheduling scheduling) {
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('Course Takers')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrCourseTakers()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrCourseTakers()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('Go Courses')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrGoCourses()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrGoCourses()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('places asked')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesAsked()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrPlacesAsked()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('places given')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesGiven()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrPlacesGiven()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('un-met wants')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrUnmetWants()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrUnmetWants()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('on leave')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrOnLeave()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrOnLeave()}')),
           ],
         ),
         const DataRow(

@@ -16,9 +16,10 @@ void main() {
         fName: 'test',
         lName: 'test',
         phone: 'test',
-        numClassWanted: 1,
+        nbrClassWanted: 1,
         availability: Availability(),
-        classes: ['SIS'],
+        firstChoices: ['SIS'],
+        backups: [],
         submissionOrder: 1);
     expect(validator.validatePeopleAgainstCourses(people, courses), null);
   });
@@ -32,9 +33,21 @@ void main() {
         fName: 'test',
         lName: 'test',
         phone: 'test',
-        numClassWanted: 1,
+        nbrClassWanted: 1,
         availability: Availability(),
-        classes: ['SCI'],
+        firstChoices: ['SCI'],
+        backups: [],
+        submissionOrder: 1);
+    expect(validator.validatePeopleAgainstCourses(people, courses),
+        'Invalid class choice: SCI by test test');
+    people['test test'] = Person(
+        fName: 'test',
+        lName: 'test',
+        phone: 'test',
+        nbrClassWanted: 1,
+        availability: Availability(),
+        firstChoices: [],
+        backups: ['SCI'],
         submissionOrder: 1);
     expect(validator.validatePeopleAgainstCourses(people, courses),
         'Invalid class choice: SCI by test test');

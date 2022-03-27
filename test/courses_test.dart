@@ -7,6 +7,7 @@ import 'package:omnilore_scheduler/store/courses.dart';
 
 import 'test_util.dart';
 
+/// This file tests functionalities regarding loading courses.
 void main() {
   test('Load courses: File not found', () {
     var courses = Courses();
