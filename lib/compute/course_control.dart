@@ -1,12 +1,11 @@
 import 'dart:collection';
 
-import 'package:omnilore_scheduler/compute/overview_data.dart';
 import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
-import 'package:omnilore_scheduler/store/courses.dart';
+import 'package:omnilore_scheduler/scheduling.dart';
 
 class CourseControl {
-  CourseControl(Courses courses) : _courses = courses;
+  CourseControl();
 
   // Config
   int _classMinSize = 10;
@@ -14,28 +13,15 @@ class CourseControl {
   final HashMap<String, int> _classMaxSizeMap = HashMap<String, int>();
   final HashMap<String, int> _classMinSizeMap = HashMap<String, int>();
 
-  // Shared data
-  final Courses _courses;
-
   // Internal states
   final _dropped = HashSet<String>();
-  final _backupAdd = HashMap<String, HashMap<String, int>>();
-  final _affectedMembers = HashMap<String, List<String>>();
 
   // Readonly access to OverviewData
-  late final OverviewData _overviewData;
+  late final Scheduling _scheduling;
 
   /// Late initialize pointer to overviewData
-  void initialize(OverviewData overviewData) {
-    _overviewData = overviewData;
-  }
-
-  /// Reset computing state
-  void resetState() {
-    for (var code in _courses.getCodes()) {
-      _backupAdd[code] = HashMap<String, int>();
-      _affectedMembers[code] = [];
-    }
+  void initialize(Scheduling scheduling) {
+    _scheduling = scheduling;
   }
 
   /// Get the number of dropped courses
@@ -46,31 +32,17 @@ class CourseControl {
   /// Drop class
   void drop(String course) {
     _dropped.add(course);
-    _overviewData.compute(Change(drop: true));
+    _scheduling.compute(Change(drop: true));
   }
 
   /// Undrop class
   void undrop(String course) {
     _dropped.remove(course);
-    _overviewData.compute(Change(drop: true));
+    _scheduling.compute(Change(drop: true));
   }
 
   Set<String> getDropped() {
     return _dropped;
-  }
-
-  /// Get the number of people added from backup for a course
-  ///
-  /// Returns null if course code does not exist.
-  int? getNbrAddFromBackup(String course) {
-    return _backupAdd[course]?.length;
-  }
-
-  /// Get a list of people added from backup for a course
-  ///
-  /// Returns null if course code does not exist.
-  Iterable<String>? getPeopleAddFromBackup(String course) {
-    return _backupAdd[course]?.keys;
   }
 
   /// Set global minimum and maximum class size

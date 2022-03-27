@@ -22,7 +22,12 @@ class OverviewData {
 
   // Internal states
   final _data = HashMap<String, CourseData>();
-  int _unmetWants = 0;
+
+  int _nbrRequested = 0;
+  int _nbrOnLeave = 0;
+  int _nbrCourseTakers = 0;
+  int _nbrGoCourse = 0;
+  int _nbrUnmetWants = 0;
 
   // Readonly access to CourseControl
   late final CourseControl _courseControl;
@@ -36,6 +41,7 @@ class OverviewData {
   ///
   /// Depends on course, people, drop
   void compute(Change change) {
+    // Update course data
     if (change.course) {
       _data.clear();
       for (var course in _courses.getCodes()) {
@@ -43,16 +49,38 @@ class OverviewData {
       }
     }
 
+    var dropped = _courseControl.getDropped();
+
+    // Compute go courses
+    if (change.course || change.drop) {
+      _nbrGoCourse = 0;
+      for (var course in _courses.getCodes()) {
+        if (!dropped.contains(course)) {
+          _nbrGoCourse += 1;
+        }
+      }
+    }
+
+    // Compute all statistics
     if (change.course || change.people || change.drop) {
       // Clear data
       for (var courseData in _data.values) {
         courseData.reset();
       }
+      _nbrUnmetWants = 0;
+      _nbrOnLeave = 0;
+      _nbrCourseTakers = 0;
+      _nbrRequested = 0;
 
-      // Compute
-      var dropped = _courseControl.getDropped();
+      // Compute people stats
       for (var person in _people.people.values) {
         var wanted = person.nbrClassWanted;
+        _nbrRequested += wanted;
+        if (wanted == 0) {
+          _nbrOnLeave += 1;
+        } else {
+          _nbrCourseTakers += 1;
+        }
         for (var i = 0; i < person.backups.length; i++) {
           _data[person.backups[i]]!.backups[i].add(person.getName());
         }
@@ -69,7 +97,7 @@ class OverviewData {
           }
         }
         if (wanted > 0) {
-          _unmetWants += wanted;
+          _nbrUnmetWants += wanted;
         }
       }
     }
@@ -162,8 +190,37 @@ class OverviewData {
     return _data[course]!.getResultingClass();
   }
 
-  int getUnmetWants() {
-    return _unmetWants;
+  /// Get the total number of course takers
+  int getNbrCourseTakers() {
+    return _nbrCourseTakers;
+  }
+
+  /// Get number of people on leave (not taking classes)
+  int getNbrOnLeave() {
+    return _nbrOnLeave;
+  }
+
+  /// Get the total number of courses
+  int getNbrGoCourses() {
+    return _nbrGoCourse;
+  }
+
+  /// Get the total number of classes asked
+  int getNbrPlacesAsked() {
+    return _nbrRequested;
+  }
+
+  /// Get the total number of classes given
+  ///
+  /// Before scheduling classes, this is always equal to the number of classes
+  /// wanted.
+  int getNbrPlacesGiven() {
+    return _nbrRequested;
+  }
+
+  /// Get the total number of unmet wants
+  int getNbrUnmetWants() {
+    return _nbrUnmetWants;
   }
 
   /// Get the current status of processing

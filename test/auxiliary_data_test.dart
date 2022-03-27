@@ -6,9 +6,15 @@ void main() {
     var scheduling = Scheduling();
     await scheduling.loadCourses('test/resources/course.txt');
     await scheduling.loadPeople('test/resources/people.txt');
-    expect(scheduling.auxiliaryData.getNbrCourseTakers(), 228);
-    expect(scheduling.auxiliaryData.getNbrOnLeave(), 39);
-    expect(scheduling.auxiliaryData.getNbrPlacesAsked(), 306);
-    expect(scheduling.auxiliaryData.getNbrPlacesGiven(), 306);
+    expect(scheduling.overviewData.getNbrCourseTakers(), 228);
+    expect(scheduling.overviewData.getNbrOnLeave(), 39);
+    expect(scheduling.overviewData.getNbrPlacesAsked(), 306);
+    expect(scheduling.overviewData.getNbrPlacesGiven(), 306);
+    expect(scheduling.overviewData.getNbrGoCourses(), 24);
+    scheduling.courseControl.drop('HCD');
+    expect(scheduling.overviewData.getNbrGoCourses(), 23);
+    scheduling.courseControl.undrop('HCD');
+    expect(scheduling.overviewData.getNbrGoCourses(), 24);
+    expect(scheduling.overviewData.getNbrUnmetWants(), 0);
   });
 }

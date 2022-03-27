@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:omnilore_scheduler/compute/auxiliary_data.dart';
 import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/compute/overview_data.dart';
 import 'package:omnilore_scheduler/compute/split_control.dart';
@@ -14,14 +13,12 @@ import 'package:omnilore_scheduler/store/people.dart';
 
 class Scheduling {
   Scheduling() {
-    auxiliaryData = AuxiliaryData(_courses, _people);
     overviewData = OverviewData(_courses, _people, _validate);
-    courseControl = CourseControl(_courses);
+    courseControl = CourseControl();
     splitControl = SplitControl(_people, _courses);
 
-    courseControl.initialize(overviewData);
+    courseControl.initialize(this);
     overviewData.initialize(courseControl);
-    auxiliaryData.initialize(this);
     splitControl.initialize(overviewData, courseControl);
   }
 
@@ -31,20 +28,13 @@ class Scheduling {
   final _validate = Validate();
 
   // Compute modules
-  late AuxiliaryData auxiliaryData;
   late OverviewData overviewData;
   late CourseControl courseControl;
   late SplitControl splitControl;
 
-  /// Clear cache and reset compute state
-  void resetState() {
-    courseControl.resetState();
-  }
-
   /// Compute all submodules
   void compute(Change change) {
     overviewData.compute(change);
-    auxiliaryData.compute(change);
   }
 
   /// Get an iterable list of course codes
@@ -82,7 +72,6 @@ class Scheduling {
     int numCourses;
     numCourses = await _courses.loadCourses(inputFile);
     if (numCourses != 0) {
-      resetState();
       compute(Change(course: true));
     }
     return numCourses;
@@ -132,7 +121,6 @@ class Scheduling {
         throw InconsistentCourseAndPeopleException(message: result);
       }
       compute(Change(people: true));
-      resetState();
     }
     return numPeople;
   }

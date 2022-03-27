@@ -244,7 +244,7 @@ class _ScreenState extends State<Screen> {
             child: Column(
               children: [
                 selectProcess(),
-                Expanded(child: auxiliaryData(schedule)),
+                Expanded(child: overviewData(schedule)),
               ],
             ),
           )
@@ -425,7 +425,7 @@ class _ScreenState extends State<Screen> {
         ));
   }
 
-  Widget auxiliaryData(Scheduling scheduling) {
+  Widget overviewData(Scheduling scheduling) {
     return Container(
       width: 300,
       color: Colors.green,
@@ -433,14 +433,14 @@ class _ScreenState extends State<Screen> {
         child: Column(
           children: [
             Text(
-                '\nCourse Takers ${scheduling.auxiliaryData.getNbrCourseTakers()}'),
-            Text('Go Courses ${scheduling.auxiliaryData.getNbrGoCourses()}'),
+                '\nCourse Takers ${scheduling.overviewData.getNbrCourseTakers()}'),
+            Text('Go Courses ${scheduling.overviewData.getNbrGoCourses()}'),
             Text(
-                'Places Asked ${scheduling.auxiliaryData.getNbrPlacesAsked()}'),
+                'Places Asked ${scheduling.overviewData.getNbrPlacesAsked()}'),
             Text(
-                'Places Given ${scheduling.auxiliaryData.getNbrPlacesGiven()}'),
-            Text('Un-met Wants ${scheduling.auxiliaryData.getNbrUnmetWants()}'),
-            Text('On Leave ${scheduling.auxiliaryData.getNbrOnLeave()}'),
+                'Places Given ${scheduling.overviewData.getNbrPlacesGiven()}'),
+            Text('Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}'),
+            Text('On Leave ${scheduling.overviewData.getNbrOnLeave()}'),
             const Text('Missing 0'),
           ],
         ),
@@ -718,37 +718,37 @@ Widget auxData(Scheduling scheduling) {
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('Course Takers')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrCourseTakers()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrCourseTakers()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('Go Courses')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrGoCourses()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrGoCourses()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('places asked')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesAsked()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrPlacesAsked()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('places given')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrPlacesGiven()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrPlacesGiven()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('un-met wants')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrUnmetWants()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrUnmetWants()}')),
           ],
         ),
         DataRow(
           cells: <DataCell>[
             const DataCell(Text('on leave')),
-            DataCell(Text('${scheduling.auxiliaryData.getNbrOnLeave()}')),
+            DataCell(Text('${scheduling.overviewData.getNbrOnLeave()}')),
           ],
         ),
         const DataRow(
