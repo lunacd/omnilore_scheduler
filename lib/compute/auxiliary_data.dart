@@ -1,4 +1,5 @@
-import 'package:omnilore_scheduler/compute/course_control.dart';
+import 'package:omnilore_scheduler/model/change.dart';
+import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
@@ -10,26 +11,22 @@ class AuxiliaryData {
   final Courses _courses;
   final People _people;
 
-  late final CourseControl _courseControl;
+  late final Scheduling _scheduling;
 
-  int? _nbrRequested;
-  int? _nbrCourseTakers;
+  int _nbrRequested = 0;
+  int _nbrOnLeave = 0;
+  int _nbrCourseTakers = 0;
+  int _nbrGoCourse = 0;
 
-  void initialize(CourseControl courseControl) {
-    _courseControl = courseControl;
+  void initialize(Scheduling scheduling) {
+    _scheduling = scheduling;
   }
 
-  /// Reset compute state
-  void resetState() {
-    _nbrRequested = null;
-    _nbrCourseTakers = null;
-  }
-
-  /// Get the total number of course takers
-  int getNbrCourseTakers() {
-    if (_nbrCourseTakers != null) {
-      return _nbrCourseTakers!;
-    } else {
+  /// Compute auxiliary data
+  ///
+  /// Depends on course, people, drop, and schedule
+  void compute(Change change) {
+    if (change.people || change.course) {
       _nbrCourseTakers =
           _people.people.values.fold<int>(0, (int previousValue, element) {
         if (element.nbrClassWanted > 0) {
@@ -37,31 +34,39 @@ class AuxiliaryData {
         }
         return previousValue;
       });
-      return _nbrCourseTakers!;
+      _nbrOnLeave = _people.people.length - _nbrCourseTakers;
+      _nbrRequested = 0;
+      for (var person in _people.people.values) {
+        _nbrRequested = _nbrRequested + person.nbrClassWanted;
+      }
     }
+    if (change.drop) {
+      _nbrGoCourse =
+          _courses.getNumCourses() - _scheduling.courseControl.getNbrDropped();
+    }
+    if (change.schedule) {
+      // TODO: Update num course given
+    }
+  }
+
+  /// Get the total number of course takers
+  int getNbrCourseTakers() {
+    return _nbrCourseTakers;
   }
 
   /// Get number of people on leave (not taking classes)
   int getNbrOnLeave() {
-    return _people.people.length - getNbrCourseTakers();
+    return _nbrOnLeave;
   }
 
   /// Get the total number of courses
   int getNbrGoCourses() {
-    return _courses.getNumCourses() - _courseControl.getNbrDropped();
+    return _nbrGoCourse;
   }
 
   /// Get the total number of classes asked
   int getNbrPlacesAsked() {
-    if (_nbrRequested != null) {
-      return _nbrRequested!;
-    } else {
-      _nbrRequested = 0;
-      for (var person in _people.people.values) {
-        _nbrRequested = _nbrRequested! + person.nbrClassWanted;
-      }
-      return _nbrRequested!;
-    }
+    return _nbrRequested;
   }
 
   /// Get the total number of classes given
@@ -69,15 +74,7 @@ class AuxiliaryData {
   /// Before scheduling classes, this is always equal to the number of classes
   /// wanted.
   int getNbrPlacesGiven() {
-    if (_nbrRequested != null) {
-      return _nbrRequested!;
-    } else {
-      _nbrRequested = 0;
-      for (var person in _people.people.values) {
-        _nbrRequested = _nbrRequested! + person.nbrClassWanted;
-      }
-      return _nbrRequested!;
-    }
+    return _nbrRequested;
   }
 
   /// Get the total number of unmet wants

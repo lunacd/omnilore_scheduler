@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/compute/validate.dart';
+import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/class_size.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
@@ -31,42 +32,45 @@ class OverviewData {
     _courseControl = courseControl;
   }
 
-  /// Reload courses
-  void reloadCourses() {
-    _data.clear();
-    for (var course in _courses.getCodes()) {
-      _data[course] = CourseData();
-    }
-    compute();
-  }
-
   /// Compute overview data
-  void compute() {
-    // Clear data
-    for (var courseData in _data.values) {
-      courseData.reset();
+  ///
+  /// Depends on course, people, drop
+  void compute(Change change) {
+    if (change.course) {
+      _data.clear();
+      for (var course in _courses.getCodes()) {
+        _data[course] = CourseData();
+      }
     }
 
-    // Compute
-    var dropped = _courseControl.getDropped();
-    for (var person in _people.people.values) {
-      var wanted = person.nbrClassWanted;
-      for (var course in person.firstChoices) {
-        _data[course]!.firstChoices += 1;
-        if (!dropped.contains(course)) {
-          wanted -= 1;
-          _data[course]!.peopleFirstChoice.add(person.getName());
-        }
+    if (change.course || change.people || change.drop) {
+      // Clear data
+      for (var courseData in _data.values) {
+        courseData.reset();
       }
-      for (var i = 0; i < person.backups.length; i++) {
-        _data[person.backups[i]]!.backups[i] += 1;
-        if (wanted > 0 && !dropped.contains(person.backups[i])) {
-          wanted -= 1;
-          _data[person.backups[i]]!.peopleBackUp.add(person.getName());
+
+      // Compute
+      var dropped = _courseControl.getDropped();
+      for (var person in _people.people.values) {
+        var wanted = person.nbrClassWanted;
+        for (var i = 0; i < person.backups.length; i++) {
+          _data[person.backups[i]]!.backups[i].add(person.getName());
         }
-      }
-      if (wanted > 0) {
-        _unmetWants += wanted;
+        for (var course in person.firstChoices) {
+          if (!dropped.contains(course)) {
+            wanted -= 1;
+            _data[course]!.firstChoices.add(person.getName());
+          }
+        }
+        for (var i = 0; i < person.backups.length; i++) {
+          if (wanted > 0 && !dropped.contains(person.backups[i])) {
+            wanted -= 1;
+            _data[person.backups[i]]!.addFromBackup.add(person.getName());
+          }
+        }
+        if (wanted > 0) {
+          _unmetWants += wanted;
+        }
       }
     }
   }
@@ -88,9 +92,9 @@ class OverviewData {
     }
     int count;
     if (rank == 0) {
-      count = _data[course]!.firstChoices;
+      count = _data[course]!.firstChoices.length;
     } else {
-      count = _data[course]!.backups[rank - 1];
+      count = _data[course]!.backups[rank - 1].length;
     }
     return _getClassSizeFromRaw(course, count);
   }
@@ -115,9 +119,9 @@ class OverviewData {
       throw InvalidClassRankException(rank: rank);
     }
     if (rank == 0) {
-      return _data[course]!.peopleFirstChoice;
+      return _data[course]!.firstChoices;
     } else {
-      return _data[course]!.peopleBackUp;
+      return _data[course]!.backups[rank - 1];
     }
   }
 
@@ -128,7 +132,7 @@ class OverviewData {
   /// This is an alias to the function of the same name under CourseControl.
   /// Alias provided for consistency.
   int getNbrAddFromBackup(String course) {
-    return _data[course]!.peopleBackUp.length;
+    return _data[course]!.addFromBackup.length;
   }
 
   /// Get a list of people added from backup for a course
@@ -138,7 +142,7 @@ class OverviewData {
   /// This is an alias to the function of the same name under CourseControl.
   /// Alias provided for consistency.
   Set<String> getPeopleAddFromBackup(String course) {
-    return _data[course]!.peopleBackUp;
+    return _data[course]!.addFromBackup;
   }
 
   /// Get the resulting class size
@@ -214,26 +218,24 @@ class OverviewData {
 }
 
 class CourseData {
-  int firstChoices = 0;
-  List<int> backups = [0, 0, 0, 0, 0];
-  Set<String> peopleFirstChoice = {};
-  Set<String> peopleBackUp = {};
+  Set<String> firstChoices = {};
+  List<Set<String>> backups = [{}, {}, {}, {}, {}];
+  Set<String> addFromBackup = {};
 
   /// Reset course data to zeros
   void reset() {
-    peopleBackUp = {};
-    peopleFirstChoice = {};
-    backups = [0, 0, 0, 0, 0];
-    firstChoices = 0;
+    backups = [{}, {}, {}, {}, {}];
+    addFromBackup = {};
+    firstChoices = {};
   }
 
   /// Get the number of people in the resulting class
   int getResultingSize() {
-    return firstChoices + peopleBackUp.length;
+    return firstChoices.length + addFromBackup.length;
   }
 
   /// Get a set of people in the resulting class
   Set<String> getResultingClass() {
-    return peopleFirstChoice.union(peopleBackUp);
+    return firstChoices.union(addFromBackup);
   }
 }

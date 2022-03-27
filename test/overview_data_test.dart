@@ -128,7 +128,7 @@ void main() {
     scheduling.courseControl.drop('GOO');
     expect(scheduling.overviewData.getResultingClassSize('BIG').size, 13);
     expect(scheduling.overviewData.getResultingClassSize('HCD').size, 14);
-    expect(scheduling.overviewData.getResultingClassSize('GOO').size, 20);
+    expect(scheduling.overviewData.getResultingClassSize('GOO').size, 0);
 
     scheduling.courseControl.undrop('FOO');
     scheduling.courseControl.undrop('GOO');

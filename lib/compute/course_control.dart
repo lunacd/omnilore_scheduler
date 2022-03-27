@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:omnilore_scheduler/compute/overview_data.dart';
+import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 
@@ -45,13 +46,13 @@ class CourseControl {
   /// Drop class
   void drop(String course) {
     _dropped.add(course);
-    _overviewData.compute();
+    _overviewData.compute(Change(drop: true));
   }
 
   /// Undrop class
   void undrop(String course) {
     _dropped.remove(course);
-    _overviewData.compute();
+    _overviewData.compute(Change(drop: true));
   }
 
   Set<String> getDropped() {
