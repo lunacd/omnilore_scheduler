@@ -18,6 +18,19 @@ const Map kColorMap = {
   'WhiteBlue': Color.fromARGB(255, 231, 226, 220),
 };
 
+const List<Color> cluster_colors = [
+  Colors.green,
+  Colors.purple,
+  Colors.yellow,
+  Colors.brown,
+  Colors.deepOrange,
+  Colors.amber,
+  Colors.pinkAccent,
+  Colors.blue
+];
+
+int colorNum = 0;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
@@ -317,9 +330,8 @@ class _ScreenState extends State<Screen> {
                     } else {
                       if (schedule.splitControl.isClustured(val.toString()) ==
                           true) {
-                        return ElevatedButton.styleFrom(
-                            primary: clustColors[schedule.splitControl
-                                .getClustByPerson(val.toString())]);
+                        Color r = getColorKey(val);
+                        return ElevatedButton.styleFrom(primary: r);
                       } else {
                         return ElevatedButton.styleFrom(primary: Colors.white);
                       }
@@ -345,9 +357,19 @@ class _ScreenState extends State<Screen> {
   }
 
   Color randomColor() {
-    int r = Random().nextInt(Colors.primaries.length);
-    print('random color is $r');
-    return Colors.primaries[r];
+    colorNum++;
+    return cluster_colors[colorNum % cluster_colors.length];
+  }
+
+  Color getColorKey(String person) {
+    Set<String> test =
+        schedule.splitControl.getClustByPerson(person) ?? Set<String>();
+    for (Set<String> item in clustColors.keys) {
+      if (item.length == test.length && test.containsAll(item)) {
+        return clustColors[item] ?? Colors.black;
+      }
+    }
+    return Colors.black;
   }
 
   Widget classSizeControl() {
