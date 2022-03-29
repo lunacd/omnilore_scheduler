@@ -18,6 +18,7 @@ const Map kColorMap = {
   'WhiteBlue': Color.fromARGB(255, 231, 226, 220),
 };
 
+// ignore: constant_identifier_names
 const List<Color> cluster_colors = [
   Colors.green,
   Colors.purple,
@@ -27,6 +28,16 @@ const List<Color> cluster_colors = [
   Colors.amber,
   Colors.pinkAccent,
   Colors.blue
+];
+
+// ignore: constant_identifier_names
+const List<String> StateProcessing = [
+  'Need Courses',
+  'Need People',
+  'Inconsistent',
+  'Drop',
+  'Split',
+  'Schedule'
 ];
 
 int colorNum = 0;
@@ -87,6 +98,7 @@ class _ScreenState extends State<Screen> {
   bool peopleImported = false;
   int? numCourses;
   int? numPeople;
+
   Iterable<String> curClassRoster = [];
   Map curSelected = Map<String, bool>();
   //SplitControl? split_contol;
@@ -231,9 +243,10 @@ class _ScreenState extends State<Screen> {
                 Container(
                   width: double.infinity,
                   color: kColorMap['MediumBlue'],
-                  child: const Text(' State of Processing: Need to import',
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                  child: Text(
+                      'State of Processing: ${StateProcessing[schedule.overviewData.getStateOfProcessing().index]}',
+                      style: const TextStyle(
+                          fontSize: 25, fontWeight: FontWeight.bold)),
                 ),
                 Expanded(
                   child: classNameDisplay(),
