@@ -139,7 +139,7 @@ void main() {
     expect(
         person3.availability.get(
             WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
-        false);
+        true);
     expect(person3.firstChoices, ['OCN', 'CHK', 'REF']);
     expect(person3.backups, ['IMP', 'SAF']);
     expect(person3.submissionOrder, 13);
@@ -192,7 +192,7 @@ void main() {
     expect(
         person3.availability.get(
             WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
-        false);
+        true);
     expect(person3.firstChoices, ['OCN', 'CHK', 'REF']);
     expect(person3.backups, ['IMP', 'SAF']);
     expect(person3.submissionOrder, 13);

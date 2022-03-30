@@ -55,6 +55,7 @@ class SplitControl {
 
   /// Sorted array of people's number of availabilities
   final List<int> _sortArray = [];
+  int _nonZeroCount = 0;
 
   /// Array of correlations
   late final List<int> _testArray;
@@ -109,12 +110,14 @@ class SplitControl {
     _max = _courseControl.getMaxClassSize(course);
     _numSplits = (_peopleToSplit.length / _max).ceil();
     _maxSplitSize = (_peopleToSplit.length / _numSplits).ceil();
-    _splitMatrix = List<List<int>>.filled(
-        _peopleToSplit.length + _numSplits, List<int>.filled(22, 0));
-    _clusterArray = List<int>.filled(_clusters.length, -1);
-    _correlateMatrix = List<List<int>>.filled(
-        _peopleToSplit.length, List<int>.filled(_peopleToSplit.length, 0));
-    _testArray = List<int>.filled(_numSplits, 0);
+    _splitMatrix = List<List<int>>.generate(_peopleToSplit.length + _numSplits,
+        (_) => List<int>.filled(22, 0, growable: false),
+        growable: false);
+    _clusterArray = List<int>.filled(_clusters.length, -1, growable: false);
+    _correlateMatrix = List<List<int>>.generate(_peopleToSplit.length,
+        (_) => List<int>.filled(_peopleToSplit.length, 0, growable: false),
+        growable: false);
+    _testArray = List<int>.filled(_numSplits, 0, growable: false);
     _baseOffset = _peopleToSplit.length;
 
     _loadSplitMatrix();
@@ -126,14 +129,14 @@ class SplitControl {
     _formGroups();
     _assignRemnants();
 
-    var result = List<Set<String>>.filled(_numSplits, {});
+    var result = List<Set<String>>.generate(_numSplits, (_) => <String>{});
     for (var personIndex = 0;
         personIndex < _peopleToSplit.length;
         personIndex++) {
       if (_splitMatrix[personIndex][numPeople] != 0) {
         throw UnexpectedFatalException();
       }
-      result[_splitMatrix[personIndex][numUnavail]]
+      result[_splitMatrix[personIndex][numUnavail] - _baseOffset]
           .add(_peopleToSplit[personIndex]);
     }
 
@@ -142,14 +145,21 @@ class SplitControl {
       for (var person in result[splitIndex]) {
         var classIndex = _people.people[person]!.firstChoices
             .indexWhere((element) => element == course);
-        _people.people[person]!.firstChoices
-            .replaceRange(classIndex, classIndex + 1, ['$course$splitIndex']);
+        if (classIndex != -1) {
+          _people.people[person]!.firstChoices
+              .replaceRange(classIndex, classIndex + 1, ['$course$splitIndex']);
+        } else {
+          classIndex = _people.people[person]!.backups
+              .indexWhere((element) => element == course);
+          _people.people[person]!.backups
+              .replaceRange(classIndex, classIndex + 1, ['$course$splitIndex']);
+        }
       }
     }
 
     // Update backups
     // TODO: use correlation
-    for (var person in _people.people.values) {
+    for (var person in _people.people.keys) {
       var classIndex = _people.people[person]!.firstChoices
           .indexWhere((element) => element == course);
       if (classIndex != -1) {
@@ -193,7 +203,9 @@ class SplitControl {
         for (var day in DayOfWeek.values) {
           for (var time in TimeOfDay.values) {
             if (!personData.availability.get(week, day, time)) {
-              _splitMatrix[i][_getAvailabilityIndex(week, day, time)] = 1;
+              var availabilityIndex = _getAvailabilityIndex(week, day, time);
+              assert(availabilityIndex >= 0 && availabilityIndex <= 19);
+              _splitMatrix[i][availabilityIndex] = 1;
               unavailableCount += 1;
             }
           }
@@ -249,7 +261,6 @@ class SplitControl {
   /// Sort the split array by the number of can't attends
   void _sortSplitArray() {
     _sortArray.clear();
-    _sortArray.add(0);
     for (var splitIndex = 0; splitIndex < _splitMatrix.length; splitIndex++) {
       if (_splitMatrix[splitIndex][numPeople] > 0) {
         _sortArray.add(_splitMatrix[splitIndex][numUnavail] * 256 + splitIndex);
@@ -264,7 +275,7 @@ class SplitControl {
     // Find the index before which can't attends are all non-zero
     for (var i = _sortArray.length - 1; i > 0; i--) {
       if ((_sortArray[i] / 256).floor() != 0) {
-        _sortArray[0] = i;
+        _nonZeroCount = i + 1;
         break;
       }
     }
@@ -272,9 +283,9 @@ class SplitControl {
 
   /// Generate a correlation matrix for each pair of people
   void _genPairMatrix() {
-    for (var i = 1; i < _sortArray[0]; i++) {
+    for (var i = 0; i < _nonZeroCount; i++) {
       var person1 = _sortArray[i] % 256;
-      for (var j = i + 1; j <= _sortArray[0]; j++) {
+      for (var j = i + 1; j < _nonZeroCount; j++) {
         var person2 = _sortArray[j] % 256;
         var value = _correlatePair(person1, person2);
         _correlateMatrix[min(person1, person2)][max(person1, person2)] = value;
@@ -306,7 +317,7 @@ class SplitControl {
   ///
   /// It aims for people with the most diverse can't attend patterns
   void _generalCorrelate(int startIndex, int level) {
-    var end = _sortArray[0] - _numSplits + level;
+    var end = _nonZeroCount - _numSplits + level;
     for (var i = startIndex; i <= end; i++) {
       var person = _sortArray[i] % 256;
       _testArray[level] = person;
@@ -330,9 +341,9 @@ class SplitControl {
   /// Calculate the total "negative" correlation between a group of people
   int _correlateMultiple() {
     var size = 0;
-    for (var i = 1; i < _numSplits; i++) {
+    for (var i = 0; i < _numSplits; i++) {
       var person1 = _testArray[i];
-      for (var j = i + 1; j <= _numSplits; j++) {
+      for (var j = i + 1; j < _numSplits; j++) {
         var person2 = _testArray[j];
         size += _correlateMatrix[min(person1, person2)][max(person1, person2)];
       }
@@ -344,15 +355,7 @@ class SplitControl {
   void _moveBases() {
     for (var personIndex = 0; personIndex < _numSplits; personIndex++) {
       var person = _bestTestArray[personIndex];
-      _splitMatrix.add(List<int>.from(_splitMatrix[person]));
-      _splitMatrix[person][numPeople] = 0;
-      _splitMatrix[person][numUnavail] = _baseOffset + personIndex;
-      for (var i = 0; i < _peopleToSplit.length; i++) {
-        if (_splitMatrix[i][numPeople] == 0 &&
-            _splitMatrix[i][numUnavail] == person) {
-          _splitMatrix[i][numUnavail] = _baseOffset + personIndex;
-        }
-      }
+      _putPersonInCluster(person, personIndex + _baseOffset);
     }
   }
 
@@ -364,7 +367,7 @@ class SplitControl {
 
     while (!finished) {
       finished = true;
-      for (var i = 1; i < _sortArray[0]; i++) {
+      for (var i = 0; i < _nonZeroCount; i++) {
         var person = _sortArray[i] % 256;
         if (_splitMatrix[person][numPeople] != 0) {
           // Person has not been assigned yet
@@ -432,7 +435,7 @@ class SplitControl {
     }
 
     // Determine split
-    if (splitAffected[0] == 0 && splitAffected[2] != 0) {
+    if (splitAffected[0] == 0 && splitAffected[1] != 0) {
       // If addition of this person does not affect a split's availability and
       // such a split is unambiguous
       return lastSplit[0];
