@@ -23,6 +23,6 @@ void main() {
     expect(scheduling.overviewData.getResultingClassSize('GFT').size, 13);
     expect(scheduling.overviewData.getResultingClassSize('GHG').size, 14);
     expect(scheduling.overviewData.getResultingClassSize('TED').size, 35);
-    var result = scheduling.splitControl.split('TED');
+    scheduling.splitControl.split('TED');
   });
 }

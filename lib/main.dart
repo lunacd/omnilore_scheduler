@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,7 @@ const Map kColorMap = {
   'WhiteBlue': Color.fromARGB(255, 231, 226, 220),
 };
 
-const List<Color> cluster_colors = [
+const List<Color> clusterColors = [
   Colors.green,
   Colors.purple,
   Colors.yellow,
@@ -88,10 +87,9 @@ class _ScreenState extends State<Screen> {
   int? numCourses;
   int? numPeople;
   Iterable<String> curClassRoster = [];
-  Map curSelected = Map<String, bool>();
-  //SplitControl? split_contol;
+  Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
-  Map<Set<String>, Color> clustColors = Map<Set<String>, Color>();
+  Map<Set<String>, Color> clustColors = <Set<String>, Color>{};
   bool resultingClass = false;
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
@@ -298,25 +296,27 @@ class _ScreenState extends State<Screen> {
                         });
                       }
                     : null,
-                child: Text('Dec Clust')),
+                child: const Text('Dec Clust')),
             ElevatedButton(
                 onPressed: resultingClass == true
                     ? () {
                         setState(() {
-                          Set<String> result = Set<String>();
+                          Set<String> result = <String>{};
                           for (var item in curSelected.keys.where(
                               (element) => curSelected[element] == true)) {
                             result.add(item);
                           }
                           schedule.splitControl.addCluster(result);
                           clustColors[result.toSet()] = randomColor();
-                          print(result);
+                          if (kDebugMode) {
+                            print(result);
+                          }
                         });
                       }
                     : null,
-                child: Text('Inc Clust')),
-            ElevatedButton(onPressed: null, child: Text('Back')),
-            ElevatedButton(onPressed: null, child: Text('Forward')),
+                child: const Text('Inc Clust')),
+            const ElevatedButton(onPressed: null, child: Text('Back')),
+            const ElevatedButton(onPressed: null, child: Text('Forward')),
           ],
         ),
         Wrap(
@@ -358,12 +358,12 @@ class _ScreenState extends State<Screen> {
 
   Color randomColor() {
     colorNum++;
-    return cluster_colors[colorNum % cluster_colors.length];
+    return clusterColors[colorNum % clusterColors.length];
   }
 
   Color getColorKey(String person) {
     Set<String> test =
-        schedule.splitControl.getClustByPerson(person) ?? Set<String>();
+        schedule.splitControl.getClustByPerson(person) ?? <String>{};
     for (Set<String> item in clustColors.keys) {
       if (item.length == test.length && test.containsAll(item)) {
         return clustColors[item] ?? Colors.black;
@@ -648,8 +648,12 @@ class _ScreenState extends State<Screen> {
                 }
                 curSelected.clear();
                 clustColors.clear();
-                curClassRoster.forEach((name) => curSelected[name] = false);
-                print(curClassRoster);
+                for (var name in curClassRoster) {
+                  curSelected[name] = false;
+                }
+                if (kDebugMode) {
+                  print(curClassRoster);
+                }
               });
             },
           )
