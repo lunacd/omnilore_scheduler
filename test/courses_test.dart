@@ -18,7 +18,8 @@ void main() {
   test('Load courses: Malformed course file', () async {
     var courses = Courses();
     expect(
-        () => courses.loadCourses('test/resources/malformed_course_columns.txt'),
+        () =>
+            courses.loadCourses('test/resources/malformed_course_columns.txt'),
         throwsA(allOf([
           isA<MalformedCourseFileException>(),
           hasMessage('The course file is malformed: line 1')
@@ -28,7 +29,8 @@ void main() {
   test('Load courses: Duplicate course code', () {
     var courses = Courses();
     expect(
-        () => courses.loadCourses('test/resources/malformed_duplicate_course.txt'),
+        () => courses
+            .loadCourses('test/resources/malformed_duplicate_course.txt'),
         throwsA(allOf([
           isA<DuplicateCourseCodeException>(),
           hasMessage('The course file contains duplicate course codes: COD')
@@ -84,29 +86,29 @@ void main() {
     expect(
         courses.getCodes(),
         equals([
+          'ASA',
           'BAD',
-          'THK',
           'BIG',
           'BRX',
-          'SCH',
           'CHK',
-          'ASA',
-          'RAH',
-          'OCN',
-          'IMP',
-          'REF',
           'EVC',
-          'HCD',
-          'QUR',
-          'SAF',
+          'FAC',
           'GOO',
+          'HCD',
+          'ILA',
+          'IMP',
+          'LES',
+          'OCN',
+          'PRF',
+          'QUR',
+          'RAH',
+          'REF',
+          'RWD',
+          'SAF',
+          'SCH',
           'SHK',
           'SIS',
-          'LES',
-          'RWD',
-          'PRF',
-          'FAC',
-          'ILA'
+          'THK'
         ]));
     expect(
         courses.getCourse('ILA'),

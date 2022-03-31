@@ -12,12 +12,11 @@ enum TimeOfDay { morning, afternoon }
 /// The constructed availability object defaults to being available for all time
 /// slots.
 class Availability {
-  final List<List<List<bool>>> _availability =
-      List.filled(2, List.filled(5, List.filled(2, true)));
+  final List<bool> _availability = List.filled(20, true, growable: false);
 
   /// Set an availability for week of month, day of week, and time of day
   void set(WeekOfMonth week, DayOfWeek day, TimeOfDay time, bool available) {
-    _availability[week.index][day.index][time.index] = available;
+    _availability[week.index * 10 + day.index * 2 + time.index] = available;
   }
 
   /// Get an availability for week of month, day of week, and time of day
@@ -33,6 +32,6 @@ class Availability {
   /// }
   /// ```
   bool get(WeekOfMonth week, DayOfWeek day, TimeOfDay time) {
-    return _availability[week.index][day.index][time.index];
+    return _availability[week.index * 10 + day.index * 2 + time.index];
   }
 }
