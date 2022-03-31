@@ -19,7 +19,7 @@ class Scheduling {
 
     courseControl.initialize(this);
     overviewData.initialize(courseControl);
-    splitControl.initialize(overviewData, courseControl);
+    splitControl.initialize(this);
   }
 
   // Shared data
