@@ -293,6 +293,9 @@ class _ScreenState extends State<Screen> {
                               (element) => curSelected[element] == true)) {
                             schedule.splitControl.removeCluster(item);
                           }
+                          curSelected.forEach((key, value) {
+                            curSelected[key] = false;
+                          });
                         });
                       }
                     : null,
@@ -308,6 +311,9 @@ class _ScreenState extends State<Screen> {
                           }
                           schedule.splitControl.addCluster(result);
                           clustColors[result.toSet()] = randomColor();
+                          curSelected.forEach((key, value) {
+                            curSelected[key] = false;
+                          });
                           if (kDebugMode) {
                             print(result);
                           }
@@ -316,7 +322,15 @@ class _ScreenState extends State<Screen> {
                     : null,
                 child: const Text('Inc Clust')),
             const ElevatedButton(onPressed: null, child: Text('Back')),
-            const ElevatedButton(onPressed: null, child: Text('Forward')),
+            ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    numCourses = numCourses! + 1;
+                    droppedList.add(false);
+                    schedule.splitControl.split('BAD');
+                  });
+                },
+                child: const Text('Forward')),
           ],
         ),
         Wrap(
