@@ -87,6 +87,7 @@ class _ScreenState extends State<Screen> {
   int? numCourses;
   int? numPeople;
   String curClass = '';
+  String curCell = '';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -327,7 +328,7 @@ class _ScreenState extends State<Screen> {
           ],
         ),
         Row(
-          children: [Text(curClass)],
+          children: [Text('$curCell of $curClass')],
           mainAxisAlignment: MainAxisAlignment.start,
         ),
         Wrap(
@@ -465,6 +466,7 @@ class _ScreenState extends State<Screen> {
                         schedule.splitControl.resetState();
                         curClass = '';
 
+                        curCell = '';
                         curClassRoster = [];
                       });
                     }
@@ -675,6 +677,7 @@ class _ScreenState extends State<Screen> {
                 curClass = dataList[0][j].toString();
                 curSelected.clear();
                 clustColors.clear();
+                curCell = growableList[i];
                 List<String> tempList = curClassRoster.toList();
                 tempList
                     .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
