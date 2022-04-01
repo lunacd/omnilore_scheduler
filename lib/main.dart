@@ -463,6 +463,9 @@ class _ScreenState extends State<Screen> {
                         droppedList.add(false);
                         schedule.splitControl.split(curClass);
                         schedule.splitControl.resetState();
+                        curClass = '';
+
+                        curClassRoster = [];
                       });
                     }
                   : null,
@@ -668,10 +671,14 @@ class _ScreenState extends State<Screen> {
                       .getPeopleForResultingClass(dataList[0][j].toString());
                   resultingClass = true;
                 }
+
                 curClass = dataList[0][j].toString();
                 curSelected.clear();
                 clustColors.clear();
-
+                List<String> tempList = curClassRoster.toList();
+                tempList
+                    .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
+                curClassRoster = tempList;
                 for (var name in curClassRoster) {
                   curSelected[name] = false;
                 }
