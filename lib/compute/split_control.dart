@@ -1,10 +1,10 @@
 import 'dart:core';
 import 'dart:math';
 
-import 'package:omnilore_scheduler/compute/course_control.dart';
-import 'package:omnilore_scheduler/compute/overview_data.dart';
 import 'package:omnilore_scheduler/model/availability.dart';
+import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
+import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
@@ -27,8 +27,7 @@ class SplitControl {
       : _people = people,
         _courses = courses;
 
-  late final OverviewData _overviewData;
-  late final CourseControl _courseControl;
+  late final Scheduling _scheduling;
 
   int _max = 0;
   final List<Set<String>> _clusters = [];
@@ -68,9 +67,8 @@ class SplitControl {
   int _rotNum = 0;
 
   /// Late initialize overview data
-  void initialize(OverviewData overviewData, CourseControl courseControl) {
-    _overviewData = overviewData;
-    _courseControl = courseControl;
+  void initialize(Scheduling scheduling) {
+    _scheduling = scheduling;
   }
 
   /// Reset internal compute state, including clusters
@@ -107,7 +105,8 @@ class SplitControl {
   /// The given course MUST be a valid 3-digit course code
   void split(String course) {
     if (course.length != 3) throw UnexpectedFatalException();
-    _peopleToSplit = List.from(_overviewData.getPeopleForResultingClass(course),
+    _peopleToSplit = List.from(
+        _scheduling.overviewData.getPeopleForResultingClass(course),
         growable: false);
     _peopleInBackup = _people.people.values
         .where((person) =>
@@ -116,7 +115,7 @@ class SplitControl {
         .map((person) => person.getName())
         .where((name) => !_peopleToSplit.contains(name))
         .toList(growable: false);
-    _max = _courseControl.getMaxClassSize(course);
+    _max = _scheduling.courseControl.getMaxClassSize(course);
     _numSplits = (_peopleToSplit.length / _max).ceil();
     _maxSplitSize = (_peopleToSplit.length / _numSplits).ceil();
     _splitMatrix = List<List<int>>.generate(
@@ -179,6 +178,8 @@ class SplitControl {
 
     // Update course data
     _courses.splitCourse(course, result.length);
+
+    _scheduling.compute(Change(course: true));
   }
 
   bool isClustured(String person) {
@@ -427,6 +428,9 @@ class SplitControl {
     List<int> lastSplit = [0, _rotNum % _numSplits + _baseOffset];
 
     for (var splitIndex = 0; splitIndex < _numSplits; splitIndex++) {
+      if (_splitMatrix[splitIndex + _baseOffset][numPeople] >= _maxSplitSize) {
+        continue;
+      }
       var currentSplit = (splitIndex + _rotNum) % _numSplits + _baseOffset;
       var tempCount = _splitMatrix[currentSplit][numPeople] +
           _splitMatrix[person][numPeople];
@@ -466,7 +470,7 @@ class SplitControl {
       return lastSplit[0];
     } else if (splitAffected[0] == 0 && splitAffected[1] == 0) {
       // If addition of this person does not affect a split's availability but
-      // such a split is unambiguous
+      // such a split is ambiguous
       if (totSplit[0] < totSplit[1]) {
         // If total amount of availabilities are unambiguous
         return lastSplit[1];
