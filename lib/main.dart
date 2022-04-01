@@ -9,11 +9,11 @@ import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 
 const Map kColorMap = {
-  'DarkBlue': Color.fromARGB(255, 45, 83, 86),
-  'MediumBlue': Color.fromARGB(255, 39, 136, 142),
-  'LightBlue': Color.fromARGB(255, 103, 183, 192),
-  'KindaBlue': Color.fromARGB(255, 170, 205, 209),
-  'MoreBlue': Color.fromARGB(255, 195, 223, 226),
+  'DarkBlue': Color.fromARGB(255, 69, 91, 138),
+  'MediumBlue': Color.fromARGB(255, 124, 172, 223),
+  'LightBlue': Color.fromARGB(255, 189, 209, 247),
+  'KindaBlue': Color.fromARGB(255, 204, 219, 242),
+  'MoreBlue': Color.fromARGB(255, 217, 223, 248),
   'WhiteBlue': Color.fromARGB(255, 231, 226, 220),
 };
 
@@ -67,8 +67,7 @@ class MyApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all(Colors.black),
-
-            backgroundColor: MaterialStateProperty.all(kColorMap['MediumBlue']),
+            backgroundColor: MaterialStateProperty.all(kColorMap['WhiteBlue']),
             overlayColor: MaterialStateProperty.all(
                 Colors.blueGrey[600]), // Set Button hover color
           ),
@@ -255,7 +254,7 @@ class _ScreenState extends State<Screen> {
           // State of processing widget and class name display widget
           // ignore: sized_box_for_whitespace
           Container(
-            width: 700,
+            width: MediaQuery.of(context).size.width / 2,
             child: Column(
               children: [
                 // ignore: todo
@@ -277,7 +276,7 @@ class _ScreenState extends State<Screen> {
 
           //Class size control widget and Names display mode
           SizedBox(
-            width: 300,
+            width: MediaQuery.of(context).size.width / 4,
             child: Column(
               children: [
                 classSizeControl(),
@@ -290,7 +289,7 @@ class _ScreenState extends State<Screen> {
 
           //Select process and Aux data
           SizedBox(
-            width: 200,
+            width: MediaQuery.of(context).size.width / 4 - 5,
             child: Column(
               children: [
                 selectProcess(),
@@ -423,7 +422,6 @@ class _ScreenState extends State<Screen> {
 
   Widget classSizeControl() {
     return Container(
-      // width: 400,
       color: kColorMap['LightBlue'],
       child: Column(
         children: [
@@ -438,44 +436,66 @@ class _ScreenState extends State<Screen> {
                 style: TextStyle(fontSize: 15)),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SizedBox(
-                  width: 50,
-                  child: TextField(
-                      onChanged: (value) => minVal = value,
-                      decoration: const InputDecoration(
-                          enabledBorder: OutlineInputBorder()),
-                      style: const TextStyle(
-                          fontSize: 20.0, height: 0.5, color: Colors.black))),
-              const SizedBox(
-                width: 50,
-                child: Text('min. & '),
-              ),
-              SizedBox(
-                  width: 50,
-                  child: TextField(
-                      onChanged: (value) => maxVal = value,
-                      decoration: const InputDecoration(
-                          enabledBorder: OutlineInputBorder()),
-                      style: const TextStyle(
-                          fontSize: 20.0, height: 0.5, color: Colors.grey))),
-              const SizedBox(
-                width: 50,
-                child: Text('max. '),
-              ),
+              SizedBox(height: 10),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const Text('by'),
+              SizedBox(
+                  width: 100,
+                  child: TextField(
+                      onChanged: (value) => minVal = value,
+                      decoration: const InputDecoration(
+                        enabledBorder: OutlineInputBorder(),
+                        hintText: 'Min',
+                      ),
+                      style: const TextStyle(
+                        fontSize: 15.0,
+                        height: 1.25,
+                        color: Colors.grey,
+                      ))),
+              /*const SizedBox(
+                width: 50,
+                child: Text('min. & '),
+              ),*/
+              SizedBox(
+                  width: 100,
+                  child: TextField(
+                      onChanged: (value) => maxVal = value,
+                      decoration: const InputDecoration(
+                        enabledBorder: OutlineInputBorder(),
+                        hintText: 'Max',
+                      ),
+                      style: const TextStyle(
+                          fontSize: 15.0, height: 1.25, color: Colors.grey))),
+              /*const SizedBox(
+                width: 50,
+                child: Text('max. '),
+              ),*/
+            ],
+          ),
+          Row(
+            children: [
+              SizedBox(height: 10),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              //const Text('by'),
               const ElevatedButton(
                 onPressed: null,
-                child: Text('splitting.'),
+                child: Text('splitting'),
               ),
               ElevatedButton(
-                  onPressed: _setMinMaxClass, child: const Text('SET')),
+                  onPressed: _setMinMaxClass, child: const Text('   set   ')),
+            ],
+          ),
+          Row(
+            children: [
+              SizedBox(height: 10),
             ],
           )
         ],
@@ -494,7 +514,7 @@ class _ScreenState extends State<Screen> {
             child: const Text('NAMES DISPLAY MODE',
                 style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
           ),
-          const ElevatedButton(onPressed: null, child: Text('SHow BU & CA')),
+          const ElevatedButton(onPressed: null, child: Text('Show BU & CA')),
           const ElevatedButton(onPressed: null, child: Text('Show Splits')),
           const ElevatedButton(onPressed: null, child: Text('Imp. Splits')),
           const ElevatedButton(onPressed: null, child: Text('Show Coord(s)')),
@@ -505,7 +525,7 @@ class _ScreenState extends State<Screen> {
 
   Widget selectProcess() {
     return Container(
-        color: kColorMap['MoreBlue'],
+        color: kColorMap['KindaBlue'],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -530,8 +550,8 @@ class _ScreenState extends State<Screen> {
 
   Widget overviewData(Scheduling scheduling) {
     return Container(
-      width: 300,
       color: kColorMap['LightBlue'],
+      constraints: BoxConstraints.expand(),
       child: DefaultTextStyle(
         child: Column(
           children: [
