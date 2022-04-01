@@ -35,8 +35,8 @@ class SplitControl {
   late List<String> _peopleInBackup;
   final People _people;
   final Courses _courses;
-  late final int _numSplits;
-  late final int _maxSplitSize;
+  late int _numSplits;
+  late int _maxSplitSize;
   int _baseOffset = 0;
   int _backupOffset = 0;
   int _saveTest = 0;
@@ -44,22 +44,22 @@ class SplitControl {
   /// Each person has a row
   /// Second last column holds the number of people in this row
   /// Last column holds the total number of can't attends
-  late final List<List<int>> _splitMatrix;
+  late List<List<int>> _splitMatrix;
 
   /// 0 index holds the index before (including) which the number of can't
   /// attends are 0
-  late final List<int> _clusterArray;
+  late List<int> _clusterArray;
 
   /// Matrix that stores the correlation between each pair of people
   /// Only half of the matrix is used but that's okay
-  late final List<List<int>> _correlateMatrix;
+  late List<List<int>> _correlateMatrix;
 
   /// Sorted array of people's number of availabilities
   final List<int> _sortArray = [];
   int _nonZeroCount = 0;
 
   /// Array of correlations
-  late final List<int> _testArray;
+  late List<int> _testArray;
 
   /// Currently discovered best _testArray
   List<int> _bestTestArray = [];
