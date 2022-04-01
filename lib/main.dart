@@ -96,9 +96,13 @@ class _ScreenState extends State<Screen> {
   bool peopleImported = false;
   int? numCourses;
   int? numPeople;
+<<<<<<< HEAD
 
   String minVal = '', maxVal = '';
 
+=======
+  String curClass = '';
+>>>>>>> main
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -357,16 +361,12 @@ class _ScreenState extends State<Screen> {
                     : null,
                 child: const Text('Inc Clust')),
             const ElevatedButton(onPressed: null, child: Text('Back')),
-            ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    numCourses = numCourses! + 1;
-                    droppedList.add(false);
-                    schedule.splitControl.split('BAD');
-                  });
-                },
-                child: const Text('Forward')),
+            const ElevatedButton(onPressed: null, child: Text('Forward')),
           ],
+        ),
+        Row(
+          children: [Text(curClass)],
+          mainAxisAlignment: MainAxisAlignment.start,
         ),
         Wrap(
           direction: Axis.horizontal,
@@ -496,7 +496,21 @@ class _ScreenState extends State<Screen> {
           ),
           const ElevatedButton(onPressed: null, child: Text('SHow BU & CA')),
           const ElevatedButton(onPressed: null, child: Text('Show Splits')),
-          const ElevatedButton(onPressed: null, child: Text('Imp. Splits')),
+          ElevatedButton(
+              onPressed: resultingClass == true && curClass != ''
+                  ? () {
+                      setState(() {
+                        numCourses = numCourses! + 1;
+                        droppedList.add(false);
+                        schedule.splitControl.split(curClass);
+                        schedule.splitControl.resetState();
+                        curClass = '';
+
+                        curClassRoster = [];
+                      });
+                    }
+                  : null,
+              child: const Text('Imp. Splits')),
           const ElevatedButton(onPressed: null, child: Text('Show Coord(s)')),
           const ElevatedButton(onPressed: null, child: Text('Set C or CC2')),
           const ElevatedButton(onPressed: null, child: Text('Set CC1')),
@@ -698,8 +712,14 @@ class _ScreenState extends State<Screen> {
                       .getPeopleForResultingClass(dataList[0][j].toString());
                   resultingClass = true;
                 }
+
+                curClass = dataList[0][j].toString();
                 curSelected.clear();
                 clustColors.clear();
+                List<String> tempList = curClassRoster.toList();
+                tempList
+                    .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
+                curClassRoster = tempList;
                 for (var name in curClassRoster) {
                   curSelected[name] = false;
                 }
