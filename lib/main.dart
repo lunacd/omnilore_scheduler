@@ -96,13 +96,10 @@ class _ScreenState extends State<Screen> {
   bool peopleImported = false;
   int? numCourses;
   int? numPeople;
-<<<<<<< HEAD
 
   String minVal = '', maxVal = '';
 
-=======
   String curClass = '';
->>>>>>> main
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
