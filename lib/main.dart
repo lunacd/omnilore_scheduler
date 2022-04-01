@@ -17,12 +17,7 @@ const Map kColorMap = {
   'WhiteBlue': Color.fromARGB(255, 231, 226, 220),
 };
 
-<<<<<<< HEAD
-// ignore: constant_identifier_names
-const List<Color> cluster_colors = [
-=======
 const List<Color> clusterColors = [
->>>>>>> main
   Colors.green,
   Colors.purple,
   Colors.yellow,
@@ -102,6 +97,8 @@ class _ScreenState extends State<Screen> {
   int? numCourses;
   int? numPeople;
 
+  String minVal = '', maxVal = '';
+
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -117,6 +114,27 @@ class _ScreenState extends State<Screen> {
 
   Color masterBackgroundColor = kColorMap['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
+
+  void _setMinMaxClass() {
+    setState(() {
+      if (minVal != '' || maxVal != '') {
+        try {
+          int minV = int.parse(minVal);
+          int maxV = int.parse(maxVal);
+          schedule.courseControl.setMinMaxClassSize(minV, maxV);
+          if (kDebugMode) {
+            print('Min and max set with vals $minV $maxV');
+          }
+        } on Exception {
+          // ignore: todo
+          //TODO: Add the pop up alert to show the error
+          if (kDebugMode) {
+            print('Error parsing the int');
+          }
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -407,26 +425,28 @@ class _ScreenState extends State<Screen> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: const [
+            children: [
               SizedBox(
                   width: 50,
                   child: TextField(
-                      decoration:
-                          InputDecoration(enabledBorder: OutlineInputBorder()),
-                      style: TextStyle(
+                      onChanged: (value) => minVal = value,
+                      decoration: const InputDecoration(
+                          enabledBorder: OutlineInputBorder()),
+                      style: const TextStyle(
                           fontSize: 20.0, height: 0.5, color: Colors.black))),
-              SizedBox(
+              const SizedBox(
                 width: 50,
                 child: Text('min. & '),
               ),
               SizedBox(
                   width: 50,
                   child: TextField(
-                      decoration:
-                          InputDecoration(enabledBorder: OutlineInputBorder()),
-                      style: TextStyle(
+                      onChanged: (value) => maxVal = value,
+                      decoration: const InputDecoration(
+                          enabledBorder: OutlineInputBorder()),
+                      style: const TextStyle(
                           fontSize: 20.0, height: 0.5, color: Colors.grey))),
-              SizedBox(
+              const SizedBox(
                 width: 50,
                 child: Text('max. '),
               ),
@@ -434,13 +454,14 @@ class _ScreenState extends State<Screen> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: const [
-              Text('by'),
-              ElevatedButton(
+            children: [
+              const Text('by'),
+              const ElevatedButton(
                 onPressed: null,
                 child: Text('splitting.'),
               ),
-              ElevatedButton(onPressed: null, child: Text('SET')),
+              ElevatedButton(
+                  onPressed: _setMinMaxClass, child: const Text('SET')),
             ],
           )
         ],
