@@ -43,7 +43,7 @@ int colorNum = 0;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
-    await DesktopWindow.setMinWindowSize(const Size(1000, 1100));
+    await DesktopWindow.setMinWindowSize(const Size(1200, 1300));
   }
   runApp(const MyApp());
 }
@@ -97,9 +97,9 @@ class _ScreenState extends State<Screen> {
   int? numPeople;
 
   String minVal = '', maxVal = '';
-
   String curClass = '';
   String curCell = '';
+  String dropDownVal = '';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -430,14 +430,22 @@ class _ScreenState extends State<Screen> {
           ),
           Container(
             alignment: Alignment.center,
-            child: const Text('Limit All courses to',
-                style: TextStyle(fontSize: 15)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Text('Limit ', style: TextStyle(fontSize: 15)),
+                classDropDownMenu(),
+                Text('courses to(Chosen: $dropDownVal)',
+                    style: const TextStyle(fontSize: 15))
+              ],
+            ),
           ),
-          Row(
-            children: [
-              SizedBox(height: 10),
-            ],
-          ),
+          // Container(alignment: Alignment.center, child: classDropDownMenu()),
+          // Row(
+          //   children: [
+          //     const SizedBox(height: 10),
+          //   ],
+          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -474,11 +482,11 @@ class _ScreenState extends State<Screen> {
               ),*/
             ],
           ),
-          Row(
-            children: [
-              SizedBox(height: 10),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     SizedBox(height: 10),
+          //   ],
+          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -491,11 +499,11 @@ class _ScreenState extends State<Screen> {
                   onPressed: _setMinMaxClass, child: const Text('   set   ')),
             ],
           ),
-          Row(
-            children: [
-              SizedBox(height: 10),
-            ],
-          )
+          // Row(
+          //   children: [
+          //     SizedBox(height: 10),
+          //   ],
+          // )
         ],
       ),
     );
@@ -583,7 +591,23 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  Widget classDropDownMenu() {
+    return DropdownButton(
+        items: schedule.getCourseCodes().map((String value) {
+          return DropdownMenuItem(
+            child: Text(value),
+            value: value,
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            dropDownVal = newValue!;
+          });
+        });
+  }
+
   Widget tableData() {
+    // courseCodes = schedule.getCourseCodes().toList();
     final growableList = <String>[
       '',
       'First Choices',
