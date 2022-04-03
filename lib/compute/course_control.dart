@@ -41,12 +41,16 @@ class CourseControl {
   }
 
   /// Set global minimum and maximum class size
+  /// Calling this function will overwrite all previously added class-specific
+  /// min/max sizes
   ///
   /// Throws [MinLargerThanMaxException] if minSize is larger than maxSize
-  void setMinMaxClassSize(int minSize, int maxSize) {
+  void setGlobalMinMaxClassSize(int minSize, int maxSize) {
     if (minSize > maxSize) {
       throw MinLargerThanMaxException(min: minSize, max: maxSize);
     }
+    _classMaxSizeMap.clear();
+    _classMinSizeMap.clear();
     _classMaxSize = maxSize;
     _classMinSize = minSize;
   }
@@ -74,6 +78,16 @@ class CourseControl {
     } else {
       _classMinSizeMap[course] = minSize;
     }
+  }
+
+  /// Determine whether the min class size is mixed for current classes
+  bool isMinSizeMixed() {
+    return _classMinSizeMap.isNotEmpty;
+  }
+
+  /// Determine whether the max class size is mixed for current classes
+  bool isMaxSizeMixed() {
+    return _classMaxSizeMap.isNotEmpty;
   }
 
   /// Get the maximum class size for a class

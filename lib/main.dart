@@ -122,7 +122,7 @@ class _ScreenState extends State<Screen> {
         try {
           int minV = int.parse(minVal);
           int maxV = int.parse(maxVal);
-          schedule.courseControl.setMinMaxClassSize(minV, maxV);
+          schedule.courseControl.setGlobalMinMaxClassSize(minV, maxV);
           if (kDebugMode) {
             print('Min and max set with vals $minV $maxV');
           }
@@ -434,7 +434,7 @@ class _ScreenState extends State<Screen> {
                 style: TextStyle(fontSize: 15)),
           ),
           Row(
-            children: [
+            children: const [
               SizedBox(height: 10),
             ],
           ),
@@ -475,7 +475,7 @@ class _ScreenState extends State<Screen> {
             ],
           ),
           Row(
-            children: [
+            children: const [
               SizedBox(height: 10),
             ],
           ),
@@ -492,7 +492,7 @@ class _ScreenState extends State<Screen> {
             ],
           ),
           Row(
-            children: [
+            children: const [
               SizedBox(height: 10),
             ],
           )
@@ -564,7 +564,7 @@ class _ScreenState extends State<Screen> {
   Widget overviewData(Scheduling scheduling) {
     return Container(
       color: kColorMap['LightBlue'],
-      constraints: BoxConstraints.expand(),
+      constraints: const BoxConstraints.expand(),
       child: DefaultTextStyle(
         child: Column(
           children: [

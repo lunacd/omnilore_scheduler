@@ -157,7 +157,7 @@ void main() {
     expect(scheduling.courseControl.getMaxClassSize('GOO'), 19);
     expect(scheduling.courseControl.getMinClassSize('GOO'), 10);
 
-    scheduling.courseControl.setMinMaxClassSize(0, 2000);
+    scheduling.courseControl.setGlobalMinMaxClassSize(0, 2000);
     expect(scheduling.courseControl.getMaxClassSize('SIS'), 2000);
     expect(scheduling.courseControl.getMinClassSize('SIS'), 0);
     expect(scheduling.courseControl.getMaxClassSize('GOO'), 2000);
@@ -174,7 +174,7 @@ void main() {
     expect(scheduling.courseControl.getMinClassSize('SIS'), 0);
 
     expect(
-        () => scheduling.courseControl.setMinMaxClassSize(20, 10),
+        () => scheduling.courseControl.setGlobalMinMaxClassSize(20, 10),
         throwsA(allOf([
           isA<MinLargerThanMaxException>(),
           hasMessage('Min: 20 is larger than max: 10')
