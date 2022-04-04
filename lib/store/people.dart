@@ -2,7 +2,6 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:omnilore_scheduler/model/availability.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/person.dart';
 
@@ -53,37 +52,21 @@ class People {
         throw InvalidNumClassWantedException(
             malformedLine: numLines + 1, numClassWanted: numClassWanted);
       }
-      var availability = Availability();
       List<String> firstChoices = [];
       List<String> backups = [];
       var submissionOrder = int.parse(tokens[20]);
 
+      List<bool> availability = List<bool>.filled(20, true, growable: false);
       // Parse availability
       for (int i = 0; i < 10; i++) {
         var avail = tokens[i + 4];
         if (avail == '1') {
-          availability.set(
-              WeekOfMonth.firstThird,
-              DayOfWeek.values[(i / 2).floor()],
-              TimeOfDay.values[i % 2],
-              false);
+          availability[i] = false;
         } else if (avail == '2') {
-          availability.set(
-              WeekOfMonth.secondFourth,
-              DayOfWeek.values[(i / 2).floor()],
-              TimeOfDay.values[i % 2],
-              false);
+          availability[10 + i] = false;
         } else if (avail == '3') {
-          availability.set(
-              WeekOfMonth.firstThird,
-              DayOfWeek.values[(i / 2).floor()],
-              TimeOfDay.values[i % 2],
-              false);
-          availability.set(
-              WeekOfMonth.secondFourth,
-              DayOfWeek.values[(i / 2).floor()],
-              TimeOfDay.values[i % 2],
-              false);
+          availability[i] = false;
+          availability[10 + i] = false;
         } else if (avail != '') {
           people.clear();
           throw UnrecognizedAvailabilityException(

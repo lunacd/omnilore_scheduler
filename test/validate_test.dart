@@ -2,7 +2,6 @@ import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:omnilore_scheduler/compute/validate.dart';
-import 'package:omnilore_scheduler/model/availability.dart';
 import 'package:omnilore_scheduler/model/person.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 
@@ -17,7 +16,7 @@ void main() {
         lName: 'test',
         phone: 'test',
         nbrClassWanted: 1,
-        availability: Availability(),
+        availability: List<bool>.filled(20, true, growable: false),
         firstChoices: ['SIS'],
         backups: [],
         submissionOrder: 1);
@@ -34,7 +33,7 @@ void main() {
         lName: 'test',
         phone: 'test',
         nbrClassWanted: 1,
-        availability: Availability(),
+        availability: List<bool>.filled(20, true, growable: false),
         firstChoices: ['SCI'],
         backups: [],
         submissionOrder: 1);
@@ -45,7 +44,7 @@ void main() {
         lName: 'test',
         phone: 'test',
         nbrClassWanted: 1,
-        availability: Availability(),
+        availability: List<bool>.filled(20, true, growable: false),
         firstChoices: [],
         backups: ['SCI'],
         submissionOrder: 1);

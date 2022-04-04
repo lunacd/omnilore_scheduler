@@ -1,11 +1,11 @@
 import 'dart:collection';
 
-import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/compute/validate.dart';
 import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/class_size.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
+import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
@@ -30,11 +30,11 @@ class OverviewData {
   int _nbrUnmetWants = 0;
 
   // Readonly access to CourseControl
-  late final CourseControl _courseControl;
+  late final Scheduling _scheduling;
 
   /// Late initialize CourseControl
-  void initialize(CourseControl courseControl) {
-    _courseControl = courseControl;
+  void initialize(Scheduling scheduling) {
+    _scheduling = scheduling;
   }
 
   /// Compute overview data
@@ -49,7 +49,7 @@ class OverviewData {
       }
     }
 
-    var dropped = _courseControl.getDropped();
+    var dropped = _scheduling.courseControl.getDropped();
 
     // Compute go courses
     if (change.course || change.drop) {
@@ -245,9 +245,9 @@ class OverviewData {
 
   /// Helper function that generates ClassSize object from raw integer
   ClassSize _getClassSizeFromRaw(String course, int size) {
-    if (size > _courseControl.getMaxClassSize(course)) {
+    if (size > _scheduling.courseControl.getMaxClassSize(course)) {
       return ClassSize(size: size, state: ClassState.oversized);
-    } else if (size < _courseControl.getMinClassSize(course)) {
+    } else if (size < _scheduling.courseControl.getMinClassSize(course)) {
       return ClassSize(size: size, state: ClassState.undersized);
     }
     return ClassSize(size: size, state: ClassState.normal);

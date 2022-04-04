@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:omnilore_scheduler/model/availability.dart';
 import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
@@ -7,7 +6,7 @@ import 'package:omnilore_scheduler/scheduling.dart';
 
 import 'test_util.dart';
 
-/// This file tests the coordination between submodules, mostly laoding people
+/// This file tests the coordination between submodules, mostly loading people
 /// and course.
 void main() {
   test('Wrong order', () async {
@@ -76,14 +75,28 @@ void main() {
     expect(person1.fName, 'Carol');
     expect(person1.phone, '372-8535');
     expect(person1.nbrClassWanted, 1);
-    expect(
-        person1.availability
-            .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
-        false);
-    expect(
-        person1.availability.get(
-            WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
-        true);
+    expect(person1.availability, [
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+    ]);
     expect(person1.firstChoices, ['CHK']);
     expect(person1.backups, ['FAC', 'IMP', 'ILA', 'PRF']);
     expect(person1.submissionOrder, 108);
@@ -94,17 +107,61 @@ void main() {
     expect(person2.fName, 'Stan');
     expect(person2.phone, '709-2404');
     expect(person2.nbrClassWanted, 0);
-    expect(
-        person2.availability
-            .get(WeekOfMonth.firstThird, DayOfWeek.friday, TimeOfDay.morning),
-        true);
-    expect(
-        person2.availability.get(
-            WeekOfMonth.secondFourth, DayOfWeek.tuesday, TimeOfDay.afternoon),
-        true);
+    expect(person2.availability, [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+    ]);
     expect(person2.firstChoices, []);
-    expect(person2.backups, []);
     expect(person2.submissionOrder, 259);
+    var person3 = scheduling
+        .getPeople()
+        .firstWhere((element) => element.getName() == 'Fran Brown');
+    expect(person3.lName, 'Brown');
+    expect(person3.fName, 'Fran');
+    expect(person3.phone, '377-5252');
+    expect(person3.nbrClassWanted, 2);
+    expect(person3.availability, [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true
+    ]);
+    expect(person3.firstChoices, ['IMP', 'BAD']);
+    expect(person3.submissionOrder, 9);
   });
 
   test('Inconsistent people and course: course first', () async {

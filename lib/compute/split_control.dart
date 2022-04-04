@@ -1,7 +1,6 @@
 import 'dart:core';
 import 'dart:math';
 
-import 'package:omnilore_scheduler/model/availability.dart';
 import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
@@ -209,36 +208,26 @@ class SplitControl {
     for (int i = 0; i < _peopleToSplit.length; i++) {
       var personData = _people.people[_peopleToSplit[i]]!;
       var unavailableCount = 0;
-      for (var week in WeekOfMonth.values) {
-        for (var day in DayOfWeek.values) {
-          for (var time in TimeOfDay.values) {
-            if (!personData.availability.get(week, day, time)) {
-              var availabilityIndex = _getAvailabilityIndex(week, day, time);
-              assert(availabilityIndex >= 0 && availabilityIndex <= 19);
-              _splitMatrix[i][availabilityIndex] = 1;
-              unavailableCount += 1;
-            }
-          }
+      for (var timeIdx = 0; timeIdx < 20; timeIdx++) {
+        if (!personData.availability[timeIdx]) {
+          _splitMatrix[i][timeIdx] = 1;
+          unavailableCount += 1;
         }
       }
+
       _splitMatrix[i][numPeople] = 1;
       _splitMatrix[i][numUnavail] = unavailableCount;
     }
     for (int i = 0; i < _peopleInBackup.length; i++) {
       var personData = _people.people[_peopleInBackup[i]]!;
       var unavailableCount = 0;
-      for (var week in WeekOfMonth.values) {
-        for (var day in DayOfWeek.values) {
-          for (var time in TimeOfDay.values) {
-            if (!personData.availability.get(week, day, time)) {
-              var availabilityIndex = _getAvailabilityIndex(week, day, time);
-              assert(availabilityIndex >= 0 && availabilityIndex <= 19);
-              _splitMatrix[i + _backupOffset][availabilityIndex] = 1;
-              unavailableCount += 1;
-            }
-          }
+      for (var timeIdx = 0; timeIdx < 20; timeIdx++) {
+        if (!personData.availability[timeIdx]) {
+          _splitMatrix[i + _backupOffset][timeIdx] = 1;
+          unavailableCount += 1;
         }
       }
+
       _splitMatrix[i + _backupOffset][numPeople] = 1;
       _splitMatrix[i + _backupOffset][numUnavail] = unavailableCount;
     }
@@ -540,9 +529,5 @@ class SplitControl {
       }
       maxNum -= 1;
     }
-  }
-
-  int _getAvailabilityIndex(WeekOfMonth week, DayOfWeek day, TimeOfDay time) {
-    return week.index * 10 + day.index * 2 + time.index;
   }
 }
