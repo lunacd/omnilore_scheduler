@@ -17,10 +17,12 @@ class Scheduling {
     overviewData = OverviewData(_courses, _people, _validate);
     courseControl = CourseControl();
     splitControl = SplitControl(_people, _courses);
+    scheduleControl = ScheduleControl(_courses, _people);
 
     courseControl.initialize(this);
     overviewData.initialize(this);
     splitControl.initialize(this);
+    scheduleControl.initialize(this);
   }
 
   // Shared data
@@ -37,6 +39,7 @@ class Scheduling {
   /// Compute all submodules
   void compute(Change change) {
     overviewData.compute(change);
+    scheduleControl.compute(change);
   }
 
   /// Get an iterable list of course codes

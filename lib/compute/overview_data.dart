@@ -32,7 +32,7 @@ class OverviewData {
   // Readonly access to CourseControl
   late final Scheduling _scheduling;
 
-  /// Late initialize CourseControl
+  /// Late initialize Scheduling
   void initialize(Scheduling scheduling) {
     _scheduling = scheduling;
   }

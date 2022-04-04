@@ -154,6 +154,19 @@ class MinLargerThanMaxException implements Exception {
   }
 }
 
+/// Exception for passing invalid argument
+// TODO: Move some of the above exceptions to invalid argument
+class InvalidArgument implements Exception {
+  const InvalidArgument({required this.message});
+
+  final String message;
+
+  @override
+  String toString() {
+    return 'Invalid argument: $message';
+  }
+}
+
 /// Fatal errors that should not have happened
 class UnexpectedFatalException implements Exception {
   // Ignoring this in coverage because this exception should never be thrown

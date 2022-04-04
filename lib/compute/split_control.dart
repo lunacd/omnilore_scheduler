@@ -65,7 +65,7 @@ class SplitControl {
 
   int _rotNum = 0;
 
-  /// Late initialize overview data
+  /// Late initialize Scheduling
   void initialize(Scheduling scheduling) {
     _scheduling = scheduling;
   }

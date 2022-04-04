@@ -19,7 +19,7 @@ class CourseControl {
   // Readonly access to OverviewData
   late final Scheduling _scheduling;
 
-  /// Late initialize pointer to overviewData
+  /// Late initialize Scheduling
   void initialize(Scheduling scheduling) {
     _scheduling = scheduling;
   }
