@@ -109,7 +109,9 @@ class ScheduleControl {
     _scheduling.compute(Change(schedule: true));
   }
 
-  int getNbrUnavail(String course, int timeIndex) {
+  /// Get the number of people who are unavailable for a given course and time
+  /// index
+  int getNbrUnavailable(String course, int timeIndex) {
     return _unavailables[course]![timeIndex];
   }
 }
