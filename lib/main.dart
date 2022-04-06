@@ -435,8 +435,7 @@ class _ScreenState extends State<Screen> {
               children: [
                 const Text('Limit ', style: TextStyle(fontSize: 15)),
                 classDropDownMenu(),
-                Text('courses to(Chosen: $dropDownVal)',
-                    style: const TextStyle(fontSize: 15))
+                const Text('courses to', style: TextStyle(fontSize: 15))
               ],
             ),
           ),
@@ -592,7 +591,9 @@ class _ScreenState extends State<Screen> {
   }
 
   Widget classDropDownMenu() {
+    //String dropDownVal = schedule.getCourseCodes().take(1).toString();
     return DropdownButton(
+        hint: Text(dropDownVal),
         items: schedule.getCourseCodes().map((String value) {
           return DropdownMenuItem(
             child: Text(value),
