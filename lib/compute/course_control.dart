@@ -10,7 +10,7 @@ class CourseControl {
   CourseControl();
 
   // Config
-  int _classMinSize = 10;
+  int _classMinSize = 8;
   int _classMaxSize = 19;
   final _classMaxSizeMap = HashMap<String, int>();
   final _classMinSizeMap = HashMap<String, int>();
@@ -60,25 +60,17 @@ class CourseControl {
 
   /// Set maximum class size for a specific class
   ///
-  /// This will overwrite the global configuration. To cancel the specific
-  /// class size configuration for a class, pass null for both minSize and
-  /// maxSize to this function (I don't think this will be needed).
+  /// This will overwrite the global configuration.
   ///
   /// Throws [MinLargerThanMaxException] if minSize is larger than maxSize
-  void setMinMaxClassSizeForClass(String course, int? minSize, int? maxSize) {
-    if (maxSize != null && minSize != null) {
-      if (minSize > maxSize) {
-        throw MinLargerThanMaxException(min: minSize, max: maxSize);
-      }
+  void setMinMaxClassSizeForClass(String course, int minSize, int maxSize) {
+    if (minSize > maxSize) {
+      throw MinLargerThanMaxException(min: minSize, max: maxSize);
     }
-    if (maxSize == null) {
-      _classMaxSizeMap.remove(course);
-    } else {
+    if (maxSize != _classMaxSize) {
       _classMaxSizeMap[course] = maxSize;
     }
-    if (minSize == null) {
-      _classMinSizeMap.remove(course);
-    } else {
+    if (minSize != _classMinSize) {
       _classMinSizeMap[course] = minSize;
     }
   }

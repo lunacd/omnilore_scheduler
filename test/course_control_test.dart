@@ -153,9 +153,9 @@ void main() {
   test('Class size control', () async {
     var scheduling = Scheduling();
     expect(scheduling.courseControl.getMaxClassSize('SIS'), 19);
-    expect(scheduling.courseControl.getMinClassSize('SIS'), 10);
+    expect(scheduling.courseControl.getMinClassSize('SIS'), 8);
     expect(scheduling.courseControl.getMaxClassSize('GOO'), 19);
-    expect(scheduling.courseControl.getMinClassSize('GOO'), 10);
+    expect(scheduling.courseControl.getMinClassSize('GOO'), 8);
 
     scheduling.courseControl.setGlobalMinMaxClassSize(0, 2000);
     expect(scheduling.courseControl.getMaxClassSize('SIS'), 2000);
@@ -163,15 +163,23 @@ void main() {
     expect(scheduling.courseControl.getMaxClassSize('GOO'), 2000);
     expect(scheduling.courseControl.getMinClassSize('GOO'), 0);
 
-    scheduling.courseControl.setMinMaxClassSizeForClass('SIS', 1000, 3000);
-    expect(scheduling.courseControl.getMaxClassSize('SIS'), 3000);
+    scheduling.courseControl.setMinMaxClassSizeForClass('SIS', 1000, 2000);
+    expect(scheduling.courseControl.getMaxClassSize('SIS'), 2000);
     expect(scheduling.courseControl.getMinClassSize('SIS'), 1000);
     expect(scheduling.courseControl.getMaxClassSize('GOO'), 2000);
     expect(scheduling.courseControl.getMinClassSize('GOO'), 0);
+    expect(scheduling.courseControl.isMaxSizeMixed(), false);
+    expect(scheduling.courseControl.isMinSizeMixed(), true);
 
-    scheduling.courseControl.setMinMaxClassSizeForClass('SIS', null, null);
-    expect(scheduling.courseControl.getMaxClassSize('SIS'), 2000);
-    expect(scheduling.courseControl.getMinClassSize('SIS'), 0);
+    scheduling.courseControl.setMinMaxClassSizeForClass('LES', 0, 3000);
+    expect(scheduling.courseControl.isMaxSizeMixed(), true);
+    expect(scheduling.courseControl.isMinSizeMixed(), true);
+
+    scheduling.courseControl.setGlobalMinMaxClassSize(2, 19);
+    expect(scheduling.courseControl.getMaxClassSize('SIS'), 19);
+    expect(scheduling.courseControl.getMinClassSize('SIS'), 2);
+    expect(scheduling.courseControl.isMaxSizeMixed(), false);
+    expect(scheduling.courseControl.isMinSizeMixed(), false);
 
     expect(
         () => scheduling.courseControl.setGlobalMinMaxClassSize(20, 10),
