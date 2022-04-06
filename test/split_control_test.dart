@@ -68,46 +68,46 @@ void main() {
     expect(
         split1Result,
         containsAll([
-          'Zelda Green',
-          'Susan Fein',
-          'Dennis Goodno',
-          'Mary Jo Little',
-          'Carolyn Pohlner',
-          'Susan Egan',
-          'Joy Jurena',
-          'Jake Kamen',
-          'Rebecca Hansen',
-          'Norman Stockwell',
-          'Kate Nelson',
-          'Lynn Schubert',
-          'Marilou Lieman',
-          'Carmen Svensrud',
-          'Karol McQueary',
-          'Frank Pohlner',
-          'Jerry Green',
-          'Allan Conrad'
-        ]));
-    expect(split2Result.length, 17);
-    expect(
-        split2Result,
-        containsAll([
           'Mel Schrier',
+          'Zelda Green',
           'Kirk Tuey',
-          'Dennis Bosch',
           'John Smith',
           'Carol Wingate',
           'Helen Stockwell',
           'Al Kovalsky',
           'Leslie Criswell',
           'Hank Frankenberg',
+          'Susan Egan',
+          'Norman Stockwell',
+          'Marcia Kovalsky',
+          'Jack Carmody',
+          'Lynn Schubert',
+          'Carmen Svensrud',
+          'Merle Culbert',
+          'Karol McQueary',
+          'Allan Conrad'
+        ]));
+    expect(split2Result.length, 17);
+    expect(
+        split2Result,
+        containsAll([
+          'Susan Fein',
+          'Dennis Goodno',
+          'Dennis Bosch',
+          'Mary Jo Little',
+          'Carolyn Pohlner',
+          'Joy Jurena',
           'Anne Faass',
           'McNair Maxwell',
           'Frank Reiner',
-          'Marcia Kovalsky',
-          'Jack Carmody',
+          'Jake Kamen',
+          'Rebecca Hansen',
+          'Kate Nelson',
           'Stan Pleatman',
+          'Marilou Lieman',
           'Bob Bacinski',
-          'Merle Culbert'
+          'Frank Pohlner',
+          'Jerry Green'
         ]));
     expect(split1Backup.length, 13);
     expect(
@@ -214,54 +214,55 @@ void main() {
         .where((person) => !resultingClass.contains(person))
         .toList(growable: false);
 
-    expect(split1Result.length, 16);
+    expect(split1Result.length, 17);
     expect(
         split1Result,
         containsAll([
           'Mel Schrier',
-          'Zelda Green',
-          'Kirk Tuey',
-          'Susan Fein',
-          'Dennis Bosch',
+          'John Smith',
+          'Mary Jo Little',
+          'Helen Stockwell',
+          'Al Kovalsky',
+          'Hank Frankenberg',
           'Susan Egan',
-          'Joy Jurena',
-          'Jake Kamen',
+          'Frank Reiner',
           'Rebecca Hansen',
+          'Norman Stockwell',
           'Kate Nelson',
-          'Lynn Schubert',
-          'Marilou Lieman',
+          'Marcia Kovalsky',
+          'Jack Carmody',
           'Carmen Svensrud',
+          'Merle Culbert',
           'Karol McQueary',
-          'Jerry Green',
           'Allan Conrad'
         ]));
-    expect(split2Result.length, 19);
+    expect(split2Result.length, 18);
     expect(
         split2Result,
         containsAll([
+          'Zelda Green',
+          'Kirk Tuey',
+          'Susan Fein',
           'Dennis Goodno',
-          'John Smith',
-          'Mary Jo Little',
+          'Dennis Bosch',
           'Carol Wingate',
-          'Helen Stockwell',
-          'Al Kovalsky',
           'Leslie Criswell',
-          'Hank Frankenberg',
           'Carolyn Pohlner',
+          'Joy Jurena',
           'Anne Faass',
           'McNair Maxwell',
-          'Frank Reiner',
-          'Norman Stockwell',
-          'Marcia Kovalsky',
-          'Jack Carmody',
+          'Jake Kamen',
           'Stan Pleatman',
+          'Lynn Schubert',
+          'Marilou Lieman',
           'Bob Bacinski',
-          'Merle Culbert',
-          'Frank Pohlner'
+          'Frank Pohlner',
+          'Jerry Green'
         ]));
-    expect(split1Backup.length, 0);
-    expect(split1Backup, containsAll([]));
-    expect(split2Backup.length, 26);
+    expect(split1Backup.length, 3);
+    expect(split1Backup,
+        containsAll(['Chuck Gray', 'Edith Eddleman', 'Ginny Brown']));
+    expect(split2Backup.length, 23);
     expect(
         split2Backup,
         containsAll([
@@ -277,15 +278,12 @@ void main() {
           'Faye Schwartz',
           'Frances Roberts',
           'Dayla Sims',
-          'Ginny Brown',
-          'Chuck Gray',
           'Maria Ashla',
           'Carlos Lemmi',
           'Andrea Gargaro',
           'Julie Citroen',
           'Carol Johnson',
           'Dennis Eggert',
-          'Edith Eddleman',
           'Cathy Gallipeau',
           'Ellen Tarlow',
           'Bill Paul',
@@ -379,51 +377,51 @@ void main() {
     expect(
         split1Result,
         containsAll([
-          'Kirk Tuey',
-          'Susan Fein',
-          'Dennis Goodno',
-          'Carol Wingate',
+          'John Smith',
+          'Mary Jo Little',
           'Leslie Criswell',
-          'Carolyn Pohlner',
-          'Anne Faass',
+          'Hank Frankenberg',
+          'McNair Maxwell',
+          'Frank Reiner',
+          'Jake Kamen',
           'Kate Nelson',
-          'Stan Pleatman',
-          'Marilou Lieman',
-          'Bob Bacinski',
-          'Frank Pohlner'
+          'Jack Carmody',
+          'Lynn Schubert',
+          'Carmen Svensrud',
+          'Bob Bacinski'
         ]));
-    expect(split2Result.length, 10);
+    expect(split2Result.length, 12);
     expect(
         split2Result,
         containsAll([
           'Mel Schrier',
-          'Dennis Bosch',
-          'John Smith',
-          'Mary Jo Little',
-          'Helen Stockwell',
-          'Hank Frankenberg',
-          'Frank Reiner',
-          'Rebecca Hansen',
-          'Norman Stockwell',
-          'Lynn Schubert'
-        ]));
-    expect(split3Result.length, 13);
-    expect(
-        split3Result,
-        containsAll([
           'Zelda Green',
-          'Al Kovalsky',
-          'Susan Egan',
+          'Kirk Tuey',
+          'Susan Fein',
+          'Carol Wingate',
+          'Helen Stockwell',
           'Joy Jurena',
-          'McNair Maxwell',
-          'Jake Kamen',
-          'Marcia Kovalsky',
-          'Jack Carmody',
-          'Carmen Svensrud',
-          'Merle Culbert',
+          'Norman Stockwell',
+          'Marilou Lieman',
           'Karol McQueary',
           'Jerry Green',
           'Allan Conrad'
+        ]));
+    expect(split3Result.length, 11);
+    expect(
+        split3Result,
+        containsAll([
+          'Dennis Goodno',
+          'Dennis Bosch',
+          'Al Kovalsky',
+          'Carolyn Pohlner',
+          'Susan Egan',
+          'Anne Faass',
+          'Rebecca Hansen',
+          'Marcia Kovalsky',
+          'Stan Pleatman',
+          'Merle Culbert',
+          'Frank Pohlner'
         ]));
     // expect(split1Backup.length, 0);
     // expect(split1Backup, containsAll([]));

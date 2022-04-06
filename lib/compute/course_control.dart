@@ -4,14 +4,17 @@ import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 
+enum SplitMode { split, limit }
+
 class CourseControl {
   CourseControl();
 
   // Config
   int _classMinSize = 10;
   int _classMaxSize = 19;
-  final HashMap<String, int> _classMaxSizeMap = HashMap<String, int>();
-  final HashMap<String, int> _classMinSizeMap = HashMap<String, int>();
+  final _classMaxSizeMap = HashMap<String, int>();
+  final _classMinSizeMap = HashMap<String, int>();
+  final _classSplitModeMap = HashMap<String, SplitMode>();
 
   // Internal states
   final _dropped = HashSet<String>();
@@ -104,5 +107,15 @@ class CourseControl {
   /// the class.
   int getMinClassSize(String course) {
     return _classMinSizeMap[course] ?? _classMinSize;
+  }
+
+  /// Set split mode of a class to the given mode
+  void setSplitMode(String course, SplitMode mode) {
+    _classSplitModeMap[course] = mode;
+  }
+
+  /// Query the current split mode of a class
+  SplitMode getSplitMode(String course) {
+    return _classSplitModeMap[course] ?? SplitMode.split;
   }
 }

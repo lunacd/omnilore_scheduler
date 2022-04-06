@@ -82,6 +82,19 @@ class ScheduleControl {
     return _schedule[timeIndex].contains(course);
   }
 
+  /// Query which time slot has the course been scheduled to
+  ///
+  /// Returns -1 if the course does not exist or if the course has not been
+  /// scheduled.
+  int scheduledTimeFor(String course) {
+    for (var timeIndex = 0; timeIndex < _schedule.length; timeIndex++) {
+      if (_schedule[timeIndex].contains(course)) {
+        return timeIndex;
+      }
+    }
+    return -1;
+  }
+
   /// Schedule a course to a given time slot
   ///
   /// Course is a 3-digit course code, time index is an index to the time slot
