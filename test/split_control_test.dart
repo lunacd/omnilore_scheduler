@@ -70,7 +70,6 @@ void main() {
         containsAll([
           'Mel Schrier',
           'Zelda Green',
-          'Kirk Tuey',
           'John Smith',
           'Carol Wingate',
           'Helen Stockwell',
@@ -85,12 +84,14 @@ void main() {
           'Carmen Svensrud',
           'Merle Culbert',
           'Karol McQueary',
+          'Jerry Green',
           'Allan Conrad'
         ]));
     expect(split2Result.length, 17);
     expect(
         split2Result,
         containsAll([
+          'Kirk Tuey',
           'Susan Fein',
           'Dennis Goodno',
           'Dennis Bosch',
@@ -106,44 +107,43 @@ void main() {
           'Stan Pleatman',
           'Marilou Lieman',
           'Bob Bacinski',
-          'Frank Pohlner',
-          'Jerry Green'
+          'Frank Pohlner'
         ]));
-    expect(split1Backup.length, 13);
+    expect(split1Backup.length, 11);
     expect(
         split1Backup,
         containsAll([
-          'Chuck Gray',
+          'John Vehrencamp',
+          'Ronnie Lemmi',
           'Maria Ashla',
           'Carlos Lemmi',
           'Andrea Gargaro',
-          'Julie Citroen',
+          'Yvette Reiner',
           'Carol Johnson',
-          'Dennis Eggert',
-          'Edith Eddleman',
-          'Cathy Gallipeau',
-          'Ellen Tarlow',
-          'Bill Paul',
-          'Muriel Blatt',
-          'Jerry Bichlmeier'
+          'Kirsten Loumeau',
+          'Leslie Schettler',
+          'Dayla Sims',
+          'Muriel Blatt'
         ]));
-    expect(split2Backup.length, 13);
+    expect(split2Backup.length, 15);
     expect(
         split2Backup,
         containsAll([
-          'John Vehrencamp',
-          'Ronnie Lemmi',
+          'Chuck Gray',
           'Fran Wielin',
           'Gail Ruder',
-          'Yvette Reiner',
+          'Julie Citroen',
           'Ruth Belonsky',
           'Carol Kern',
-          'Kirsten Loumeau',
-          'Leslie Schettler',
+          'Dennis Eggert',
+          'Edith Eddleman',
+          'Cathy Gallipeau',
           'Faye Schwartz',
+          'Ellen Tarlow',
           'Frances Roberts',
-          'Dayla Sims',
-          'Ginny Brown'
+          'Bill Paul',
+          'Ginny Brown',
+          'Jerry Bichlmeier'
         ]));
   });
 
@@ -259,35 +259,40 @@ void main() {
           'Frank Pohlner',
           'Jerry Green'
         ]));
-    expect(split1Backup.length, 3);
-    expect(split1Backup,
-        containsAll(['Chuck Gray', 'Edith Eddleman', 'Ginny Brown']));
-    expect(split2Backup.length, 23);
+    expect(split1Backup.length, 20);
     expect(
-        split2Backup,
+        split1Backup,
         containsAll([
           'John Vehrencamp',
+          'Chuck Gray',
           'Ronnie Lemmi',
           'Fran Wielin',
-          'Gail Ruder',
-          'Yvette Reiner',
-          'Ruth Belonsky',
-          'Carol Kern',
-          'Kirsten Loumeau',
-          'Leslie Schettler',
-          'Faye Schwartz',
-          'Frances Roberts',
-          'Dayla Sims',
-          'Maria Ashla',
           'Carlos Lemmi',
           'Andrea Gargaro',
+          'Yvette Reiner',
           'Julie Citroen',
           'Carol Johnson',
           'Dennis Eggert',
+          'Kirsten Loumeau',
+          'Edith Eddleman',
+          'Leslie Schettler',
           'Cathy Gallipeau',
-          'Ellen Tarlow',
+          'Faye Schwartz',
+          'Frances Roberts',
           'Bill Paul',
+          'Dayla Sims',
           'Muriel Blatt',
+          'Ginny Brown'
+        ]));
+    expect(split2Backup.length, 6);
+    expect(
+        split2Backup,
+        containsAll([
+          'Maria Ashla',
+          'Gail Ruder',
+          'Ruth Belonsky',
+          'Carol Kern',
+          'Ellen Tarlow',
           'Jerry Bichlmeier'
         ]));
   });
@@ -360,49 +365,49 @@ void main() {
         .map((person) => person.getName())
         .where((person) => resultingClass.contains(person))
         .toList(growable: false);
-    // var split1Backup = split1
-    //     .map((person) => person.getName())
-    //     .where((person) => !resultingClass.contains(person))
-    //     .toList(growable: false);
-    // var split2Backup = split2
-    //     .map((person) => person.getName())
-    //     .where((person) => !resultingClass.contains(person))
-    //     .toList(growable: false);
-    // var split3Backup = split3
-    //     .map((person) => person.getName())
-    //     .where((person) => !resultingClass.contains(person))
-    //     .toList(growable: false);
+    var split1Backup = split1
+        .map((person) => person.getName())
+        .where((person) => !resultingClass.contains(person))
+        .toList(growable: false);
+    var split2Backup = split2
+        .map((person) => person.getName())
+        .where((person) => !resultingClass.contains(person))
+        .toList(growable: false);
+    var split3Backup = split3
+        .map((person) => person.getName())
+        .where((person) => !resultingClass.contains(person))
+        .toList(growable: false);
 
-    expect(split1Result.length, 12);
+    expect(split1Result.length, 13);
     expect(
         split1Result,
         containsAll([
+          'Mel Schrier',
           'John Smith',
           'Mary Jo Little',
-          'Leslie Criswell',
+          'Helen Stockwell',
           'Hank Frankenberg',
           'McNair Maxwell',
           'Frank Reiner',
           'Jake Kamen',
+          'Norman Stockwell',
           'Kate Nelson',
           'Jack Carmody',
           'Lynn Schubert',
-          'Carmen Svensrud',
-          'Bob Bacinski'
+          'Carmen Svensrud'
         ]));
-    expect(split2Result.length, 12);
+    expect(split2Result.length, 11);
     expect(
         split2Result,
         containsAll([
-          'Mel Schrier',
           'Zelda Green',
-          'Kirk Tuey',
           'Susan Fein',
           'Carol Wingate',
-          'Helen Stockwell',
+          'Leslie Criswell',
           'Joy Jurena',
-          'Norman Stockwell',
+          'Rebecca Hansen',
           'Marilou Lieman',
+          'Bob Bacinski',
           'Karol McQueary',
           'Jerry Green',
           'Allan Conrad'
@@ -411,50 +416,48 @@ void main() {
     expect(
         split3Result,
         containsAll([
+          'Kirk Tuey',
           'Dennis Goodno',
           'Dennis Bosch',
           'Al Kovalsky',
           'Carolyn Pohlner',
           'Susan Egan',
           'Anne Faass',
-          'Rebecca Hansen',
           'Marcia Kovalsky',
           'Stan Pleatman',
           'Merle Culbert',
           'Frank Pohlner'
         ]));
-    // expect(split1Backup.length, 0);
-    // expect(split1Backup, containsAll([]));
-    // expect(split2Backup.length, 26);
-    // expect(
-    //     split2Backup,
-    //     containsAll([
-    //       'John Vehrencamp',
-    //       'Ronnie Lemmi',
-    //       'Fran Wielin',
-    //       'Gail Ruder',
-    //       'Yvette Reiner',
-    //       'Ruth Belonsky',
-    //       'Carol Kern',
-    //       'Kirsten Loumeau',
-    //       'Leslie Schettler',
-    //       'Faye Schwartz',
-    //       'Frances Roberts',
-    //       'Dayla Sims',
-    //       'Ginny Brown',
-    //       'Chuck Gray',
-    //       'Maria Ashla',
-    //       'Carlos Lemmi',
-    //       'Andrea Gargaro',
-    //       'Julie Citroen',
-    //       'Carol Johnson',
-    //       'Dennis Eggert',
-    //       'Edith Eddleman',
-    //       'Cathy Gallipeau',
-    //       'Ellen Tarlow',
-    //       'Bill Paul',
-    //       'Muriel Blatt',
-    //       'Jerry Bichlmeier'
-    //     ]));
+    expect(split1Backup.length, 20);
+    expect(
+        split1Backup,
+        containsAll([
+          'John Vehrencamp',
+          'Chuck Gray',
+          'Ronnie Lemmi',
+          'Maria Ashla',
+          'Carlos Lemmi',
+          'Gail Ruder',
+          'Andrea Gargaro',
+          'Yvette Reiner',
+          'Julie Citroen',
+          'Ruth Belonsky',
+          'Carol Johnson',
+          'Carol Kern',
+          'Dennis Eggert',
+          'Kirsten Loumeau',
+          'Edith Eddleman',
+          'Leslie Schettler',
+          'Cathy Gallipeau',
+          'Ellen Tarlow',
+          'Dayla Sims',
+          'Ginny Brown'
+        ]));
+    expect(split2Backup.length, 3);
+    expect(split2Backup,
+        containsAll(['Faye Schwartz', 'Muriel Blatt', 'Jerry Bichlmeier']));
+    expect(split3Backup.length, 3);
+    expect(split3Backup,
+        containsAll(['Fran Wielin', 'Frances Roberts', 'Bill Paul']));
   });
 }

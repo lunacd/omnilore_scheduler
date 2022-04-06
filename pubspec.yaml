@@ -45,6 +45,7 @@ dependencies:
   multilevel_drawer: ^2.0.0
   flutter_menu: ^0.4.1
   file_picker: ^4.4.0
+  tuple: ^2.0.0
 
 dev_dependencies:
   flutter_test:
