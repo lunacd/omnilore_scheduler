@@ -118,6 +118,9 @@ class _ScreenState extends State<Screen> {
 
   void _setMinMaxClass() {
     setState(() {
+      if (kDebugMode) {
+        print('Current class selected $dropDownVal');
+      }
       if (minVal != '' || maxVal != '') {
         try {
           int minV = int.parse(minVal);
@@ -586,7 +589,12 @@ class _ScreenState extends State<Screen> {
     //String dropDownVal = schedule.getCourseCodes().take(1).toString();
     return DropdownButton(
         hint: Text(dropDownVal),
-        items: schedule.getCourseCodes().map((String value) {
+        items: (schedule.getCourseCodes().isEmpty
+                ? schedule.getCourseCodes()
+                : <String>['ALL'].followedBy(schedule.getCourseCodes()))
+            .map((String value)
+                // schedule.getCourseCodes().map((String value)
+                {
           return DropdownMenuItem(
             child: Text(value),
             value: value,
