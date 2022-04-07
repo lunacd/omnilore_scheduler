@@ -299,6 +299,9 @@ class SplitControl {
         break;
       }
     }
+    for (var i = 0; i < _numSplits; i++) {
+      _bestTestArray.add(_sortArray[i] % 256);
+    }
   }
 
   /// Generate a correlation matrix for each pair of people

@@ -297,6 +297,190 @@ void main() {
         ]));
   });
 
+  test('Split: 2015, 2 split, manual', () async {
+    Scheduling scheduling = Scheduling();
+    expect(await scheduling.loadCourses('test/resources/2015-split/course.txt'),
+        27);
+    expect(await scheduling.loadPeople('test/resources/2015-split/people.txt'),
+        296);
+    scheduling.courseControl.drop('AIN');
+    scheduling.courseControl.drop('AUG');
+    scheduling.courseControl.drop('DOG');
+    scheduling.courseControl.drop('FAK');
+    scheduling.courseControl.drop('F2K');
+    scheduling.courseControl.drop('GOV');
+    scheduling.courseControl.drop('RAP');
+    scheduling.courseControl.drop('UKR');
+    expect(scheduling.overviewData.getNbrGoCourses(), 19);
+    expect(scheduling.overviewData.getResultingClassSize('CRM').size, 16);
+    expect(scheduling.overviewData.getResultingClassSize('DIP').size, 11);
+    expect(scheduling.overviewData.getResultingClassSize('GFT').size, 13);
+    expect(scheduling.overviewData.getResultingClassSize('GHG').size, 14);
+    expect(scheduling.overviewData.getResultingClassSize('TED').size, 35);
+    var resultingClass =
+        scheduling.overviewData.getPeopleForResultingClass('TED');
+
+    scheduling.splitControl.addCluster({
+      'Mel Schrier',
+      'John Smith',
+      'Mary Jo Little',
+      'Helen Stockwell',
+      'Al Kovalsky',
+      'Hank Frankenberg',
+      'Susan Egan',
+      'Frank Reiner',
+      'Rebecca Hansen',
+      'Norman Stockwell',
+      'Kate Nelson',
+      'Marcia Kovalsky',
+      'Jack Carmody',
+      'Carmen Svensrud',
+      'Merle Culbert',
+      'Bob Bacinski',
+      'Allan Conrad'
+    });
+    scheduling.splitControl.addCluster({
+      'Zelda Green',
+      'Kirk Tuey',
+      'Susan Fein',
+      'Dennis Goodno',
+      'Dennis Bosch',
+      'Carol Wingate',
+      'Leslie Criswell',
+      'Carolyn Pohlner',
+      'Joy Jurena',
+      'Anne Faass',
+      'McNair Maxwell',
+      'Jake Kamen',
+      'Stan Pleatman',
+      'Lynn Schubert',
+      'Karol McQueary',
+      'Marilou Lieman',
+      'Frank Pohlner',
+      'Jerry Green'
+    });
+
+    scheduling.splitControl.split('TED');
+
+    var people = scheduling
+        .getPeople()
+        .where((person) =>
+            person.backups.indexWhere((course) => course.contains('TED', 0)) !=
+                -1 ||
+            person.firstChoices
+                    .indexWhere((course) => course.contains('TED', 0)) !=
+                -1)
+        .toList(growable: false);
+    var split1 = people
+        .where((person) =>
+            person.firstChoices.contains('TED1') ||
+            person.backups.contains('TED1'))
+        .toList(growable: false);
+    var split2 = people
+        .where((person) =>
+            person.firstChoices.contains('TED2') ||
+            person.backups.contains('TED2'))
+        .toList(growable: false);
+    var split1Result = split1
+        .map((person) => person.getName())
+        .where((person) => resultingClass.contains(person))
+        .toList(growable: false);
+    var split2Result = split2
+        .map((person) => person.getName())
+        .where((person) => resultingClass.contains(person))
+        .toList(growable: false);
+    var split1Backup = split1
+        .map((person) => person.getName())
+        .where((person) => !resultingClass.contains(person))
+        .toList(growable: false);
+    var split2Backup = split2
+        .map((person) => person.getName())
+        .where((person) => !resultingClass.contains(person))
+        .toList(growable: false);
+
+    expect(split1Result.length, 18);
+    expect(
+        split1Result,
+        containsAll([
+          'Zelda Green',
+          'Kirk Tuey',
+          'Susan Fein',
+          'Dennis Goodno',
+          'Dennis Bosch',
+          'Carol Wingate',
+          'Leslie Criswell',
+          'Carolyn Pohlner',
+          'Joy Jurena',
+          'Anne Faass',
+          'McNair Maxwell',
+          'Jake Kamen',
+          'Stan Pleatman',
+          'Lynn Schubert',
+          'Marilou Lieman',
+          'Frank Pohlner',
+          'Karol McQueary',
+          'Jerry Green'
+        ]));
+    expect(split2Result.length, 17);
+    expect(
+        split2Result,
+        containsAll([
+          'Mel Schrier',
+          'John Smith',
+          'Mary Jo Little',
+          'Helen Stockwell',
+          'Al Kovalsky',
+          'Hank Frankenberg',
+          'Susan Egan',
+          'Frank Reiner',
+          'Rebecca Hansen',
+          'Norman Stockwell',
+          'Kate Nelson',
+          'Marcia Kovalsky',
+          'Jack Carmody',
+          'Carmen Svensrud',
+          'Merle Culbert',
+          'Bob Bacinski',
+          'Allan Conrad'
+        ]));
+    expect(split1Backup.length, 6);
+    expect(
+        split1Backup,
+        containsAll([
+          'Maria Ashla',
+          'Gail Ruder',
+          'Ruth Belonsky',
+          'Carol Kern',
+          'Ellen Tarlow',
+          'Jerry Bichlmeier'
+        ]));
+    expect(split2Backup.length, 20);
+    expect(
+        split2Backup,
+        containsAll([
+          'John Vehrencamp',
+          'Chuck Gray',
+          'Ronnie Lemmi',
+          'Fran Wielin',
+          'Carlos Lemmi',
+          'Andrea Gargaro',
+          'Yvette Reiner',
+          'Julie Citroen',
+          'Carol Johnson',
+          'Dennis Eggert',
+          'Kirsten Loumeau',
+          'Edith Eddleman',
+          'Leslie Schettler',
+          'Cathy Gallipeau',
+          'Faye Schwartz',
+          'Frances Roberts',
+          'Bill Paul',
+          'Dayla Sims',
+          'Muriel Blatt',
+          'Ginny Brown'
+        ]));
+  });
+
   test('Split: 2015, 3 split, with clusters', () async {
     Scheduling scheduling = Scheduling();
     expect(await scheduling.loadCourses('test/resources/2015-split/course.txt'),
