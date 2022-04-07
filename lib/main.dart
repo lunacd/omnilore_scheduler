@@ -8,6 +8,23 @@ import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 
+const MaterialColor primaryBlack = MaterialColor(
+  _blackPrimaryValue,
+  <int, Color>{
+    50: Color(0xFF000000),
+    100: Color(0xFF000000),
+    200: Color(0xFF000000),
+    300: Color(0xFF000000),
+    400: Color(0xFF000000),
+    500: Color(_blackPrimaryValue),
+    600: Color(0xFF000000),
+    700: Color(0xFF000000),
+    800: Color(0xFF000000),
+    900: Color(0xFF000000),
+  },
+);
+const int _blackPrimaryValue = 0xFF000000;
+
 const Map kColorMap = {
   'DarkBlue': Color.fromARGB(255, 69, 91, 138),
   'MediumBlue': Color.fromARGB(255, 124, 172, 223),
@@ -33,8 +50,8 @@ const List<String> StateProcessing = [
   'Need Courses',
   'Need People',
   'Inconsistent',
-  'Drop',
-  'Split',
+  'Drop and Split',
+  'Drop and Split',
   'Schedule'
 ];
 
@@ -57,7 +74,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Omnilore Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: primaryBlack,
         textButtonTheme: TextButtonThemeData(
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.all(
@@ -222,6 +239,16 @@ class _ScreenState extends State<Screen> {
                       _showMyDialog(e.toString(), 'people');
                     }
                   }
+                  dropDownVal = 'ALL';
+                  hintMax =
+                      schedule.courseControl.getMaxClassSize('ALL').toString();
+                  hintMin =
+                      schedule.courseControl.getMinClassSize('ALL').toString();
+                  minVal = '';
+                  maxVal = '';
+                  minTextField.clear();
+                  maxTextField.clear();
+                  peopleImported = true;
                 } else {
                   // User canceled the picker
                 }
@@ -733,7 +760,7 @@ class _ScreenState extends State<Screen> {
 
     return Table(
       border: TableBorder.symmetric(
-          inside: const BorderSide(width: 1, color: Colors.blue),
+          inside: const BorderSide(width: 1, color: Colors.black),
           outside: const BorderSide(width: 1)),
       columnWidths: const {0: IntrinsicColumnWidth()},
       children: buildInfo(growableList, dataList),
