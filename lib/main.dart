@@ -430,7 +430,6 @@ class _ScreenState extends State<Screen> {
           ),
           Container(
             alignment: Alignment.center,
-<<<<<<< HEAD
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -439,15 +438,6 @@ class _ScreenState extends State<Screen> {
                 const Text('courses to', style: TextStyle(fontSize: 15))
               ],
             ),
-=======
-            child: const Text('Limit All courses to',
-                style: TextStyle(fontSize: 15)),
-          ),
-          Row(
-            children: const [
-              SizedBox(height: 10),
-            ],
->>>>>>> main
           ),
           // Container(alignment: Alignment.center, child: classDropDownMenu()),
           // Row(
@@ -481,8 +471,6 @@ class _ScreenState extends State<Screen> {
                       ),
                       style: const TextStyle(
                           fontSize: 15.0, height: 1.25, color: Colors.grey))),
-<<<<<<< HEAD
-=======
               /*const SizedBox(
                 width: 50,
                 child: Text('max. '),
@@ -492,7 +480,6 @@ class _ScreenState extends State<Screen> {
           Row(
             children: const [
               SizedBox(height: 10),
->>>>>>> main
             ],
           ),
 
@@ -508,14 +495,6 @@ class _ScreenState extends State<Screen> {
                   onPressed: _setMinMaxClass, child: const Text('   set   ')),
             ],
           ),
-<<<<<<< HEAD
-=======
-          Row(
-            children: const [
-              SizedBox(height: 10),
-            ],
-          )
->>>>>>> main
         ],
       ),
     );
