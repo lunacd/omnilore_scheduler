@@ -461,10 +461,6 @@ class _ScreenState extends State<Screen> {
                         height: 1.25,
                         color: Colors.grey,
                       ))),
-              /*const SizedBox(
-                width: 50,
-                child: Text('min. & '),
-              ),*/
               SizedBox(
                   width: 100,
                   child: TextField(
@@ -475,17 +471,9 @@ class _ScreenState extends State<Screen> {
                       ),
                       style: const TextStyle(
                           fontSize: 15.0, height: 1.25, color: Colors.grey))),
-              /*const SizedBox(
-                width: 50,
-                child: Text('max. '),
-              ),*/
             ],
           ),
-          // Row(
-          //   children: [
-          //     SizedBox(height: 10),
-          //   ],
-          // ),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -498,11 +486,6 @@ class _ScreenState extends State<Screen> {
                   onPressed: _setMinMaxClass, child: const Text('   set   ')),
             ],
           ),
-          // Row(
-          //   children: [
-          //     SizedBox(height: 10),
-          //   ],
-          // )
         ],
       ),
     );
