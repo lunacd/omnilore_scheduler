@@ -96,6 +96,9 @@ class _ScreenState extends State<Screen> {
   int? numCourses;
   int? numPeople;
 
+  final minTextField = TextEditingController();
+  final maxTextField = TextEditingController();
+  String hintMax = 'Max', hintMin = 'Min';
   String minVal = '', maxVal = '';
   String curClass = '';
   String curCell = '';
@@ -119,13 +122,26 @@ class _ScreenState extends State<Screen> {
   void _setMinMaxClass() {
     setState(() {
       if (kDebugMode) {
-        print('Current class selected $dropDownVal');
+        print('Current class selected $dropDownVal $minVal $maxVal');
       }
-      if (minVal != '' || maxVal != '') {
+      if (minVal != '' && maxVal != '' && coursesImported) {
         try {
           int minV = int.parse(minVal);
           int maxV = int.parse(maxVal);
-          schedule.courseControl.setGlobalMinMaxClassSize(minV, maxV);
+          if (dropDownVal == 'ALL') {
+            schedule.courseControl.setGlobalMinMaxClassSize(minV, maxV);
+          } else {
+            schedule.courseControl
+                .setMinMaxClassSizeForClass(dropDownVal, minV, maxV);
+          }
+          hintMax =
+              schedule.courseControl.getMaxClassSize(dropDownVal).toString();
+          hintMin =
+              schedule.courseControl.getMinClassSize(dropDownVal).toString();
+          minVal = maxVal = '';
+          minTextField.clear();
+          maxTextField.clear();
+
           if (kDebugMode) {
             print('Min and max set with vals $minV $maxV');
           }
@@ -164,14 +180,27 @@ class _ScreenState extends State<Screen> {
                       numCourses = await schedule.loadCourses(path);
                       droppedList =
                           List<bool>.filled(numCourses!, false, growable: true);
+                      dropDownVal = 'ALL';
+                      hintMax = schedule.courseControl
+                          .getMaxClassSize('ALL')
+                          .toString();
+                      hintMin = schedule.courseControl
+                          .getMinClassSize('ALL')
+                          .toString();
+                      minVal = '';
+                      maxVal = '';
+                      minTextField.clear();
+                      maxTextField.clear();
+                      coursesImported = true;
                     } catch (e) {
                       _showMyDialog(e.toString(), 'courses');
                     }
                   } else {
+                    // ignore: todo
+                    //TODO: Add pop up box to show that the user canceled
                     //user canceled
                   }
                 }
-                // _fileExplorer();
                 setState(() {});
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
@@ -455,25 +484,31 @@ class _ScreenState extends State<Screen> {
                   width: 100,
                   child: TextField(
                       onChanged: (value) => minVal = value,
-                      decoration: const InputDecoration(
-                        enabledBorder: OutlineInputBorder(),
-                        hintText: 'Min',
+                      decoration: InputDecoration(
+                        enabledBorder: const OutlineInputBorder(),
+                        hintText: hintMin,
                       ),
+                      controller: minTextField,
                       style: const TextStyle(
-                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
                         height: 1.25,
-                        color: Colors.grey,
+                        color: Colors.black,
                       ))),
               SizedBox(
                   width: 100,
                   child: TextField(
                       onChanged: (value) => maxVal = value,
-                      decoration: const InputDecoration(
-                        enabledBorder: OutlineInputBorder(),
-                        hintText: 'Max',
+                      decoration: InputDecoration(
+                        enabledBorder: const OutlineInputBorder(),
+                        hintText: hintMax,
                       ),
+                      controller: maxTextField,
                       style: const TextStyle(
-                          fontSize: 15.0, height: 1.25, color: Colors.grey))),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.0,
+                          height: 1.25,
+                          color: Colors.black))),
               /*const SizedBox(
                 width: 50,
                 child: Text('max. '),
@@ -603,6 +638,10 @@ class _ScreenState extends State<Screen> {
         onChanged: (String? newValue) {
           setState(() {
             dropDownVal = newValue!;
+            hintMax =
+                schedule.courseControl.getMaxClassSize(dropDownVal).toString();
+            hintMin =
+                schedule.courseControl.getMinClassSize(dropDownVal).toString();
           });
         });
   }
