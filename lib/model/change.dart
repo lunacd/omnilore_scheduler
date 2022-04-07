@@ -8,7 +8,7 @@ class Change {
   /// Denote changes in course data (load course, edit course, split)
   bool course;
 
-  /// Denote changes in people data (load people, edit people, split)
+  /// Denote changes in people data (load people, edit people)
   bool people;
 
   /// Denote changes in dropped classes

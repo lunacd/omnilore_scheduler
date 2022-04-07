@@ -4,14 +4,17 @@ import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 
+enum SplitMode { split, limit }
+
 class CourseControl {
   CourseControl();
 
   // Config
-  int _classMinSize = 10;
+  int _classMinSize = 8;
   int _classMaxSize = 19;
-  final HashMap<String, int> _classMaxSizeMap = HashMap<String, int>();
-  final HashMap<String, int> _classMinSizeMap = HashMap<String, int>();
+  final _classMaxSizeMap = HashMap<String, int>();
+  final _classMinSizeMap = HashMap<String, int>();
+  final _classSplitModeMap = HashMap<String, SplitMode>();
 
   // Internal states
   final _dropped = HashSet<String>();
@@ -19,7 +22,7 @@ class CourseControl {
   // Readonly access to OverviewData
   late final Scheduling _scheduling;
 
-  /// Late initialize pointer to overviewData
+  /// Late initialize Scheduling
   void initialize(Scheduling scheduling) {
     _scheduling = scheduling;
   }
@@ -41,39 +44,45 @@ class CourseControl {
   }
 
   /// Set global minimum and maximum class size
+  /// Calling this function will overwrite all previously added class-specific
+  /// min/max sizes
   ///
   /// Throws [MinLargerThanMaxException] if minSize is larger than maxSize
-  void setMinMaxClassSize(int minSize, int maxSize) {
+  void setGlobalMinMaxClassSize(int minSize, int maxSize) {
     if (minSize > maxSize) {
       throw MinLargerThanMaxException(min: minSize, max: maxSize);
     }
+    _classMaxSizeMap.clear();
+    _classMinSizeMap.clear();
     _classMaxSize = maxSize;
     _classMinSize = minSize;
   }
 
   /// Set maximum class size for a specific class
   ///
-  /// This will overwrite the global configuration. To cancel the specific
-  /// class size configuration for a class, pass null for both minSize and
-  /// maxSize to this function (I don't think this will be needed).
+  /// This will overwrite the global configuration.
   ///
   /// Throws [MinLargerThanMaxException] if minSize is larger than maxSize
-  void setMinMaxClassSizeForClass(String course, int? minSize, int? maxSize) {
-    if (maxSize != null && minSize != null) {
-      if (minSize > maxSize) {
-        throw MinLargerThanMaxException(min: minSize, max: maxSize);
-      }
+  void setMinMaxClassSizeForClass(String course, int minSize, int maxSize) {
+    if (minSize > maxSize) {
+      throw MinLargerThanMaxException(min: minSize, max: maxSize);
     }
-    if (maxSize == null) {
-      _classMaxSizeMap.remove(course);
-    } else {
+    if (maxSize != _classMaxSize) {
       _classMaxSizeMap[course] = maxSize;
     }
-    if (minSize == null) {
-      _classMinSizeMap.remove(course);
-    } else {
+    if (minSize != _classMinSize) {
       _classMinSizeMap[course] = minSize;
     }
+  }
+
+  /// Determine whether the min class size is mixed for current classes
+  bool isMinSizeMixed() {
+    return _classMinSizeMap.isNotEmpty;
+  }
+
+  /// Determine whether the max class size is mixed for current classes
+  bool isMaxSizeMixed() {
+    return _classMaxSizeMap.isNotEmpty;
   }
 
   /// Get the maximum class size for a class
@@ -90,5 +99,15 @@ class CourseControl {
   /// the class.
   int getMinClassSize(String course) {
     return _classMinSizeMap[course] ?? _classMinSize;
+  }
+
+  /// Set split mode of a class to the given mode
+  void setSplitMode(String course, SplitMode mode) {
+    _classSplitModeMap[course] = mode;
+  }
+
+  /// Query the current split mode of a class
+  SplitMode getSplitMode(String course) {
+    return _classSplitModeMap[course] ?? SplitMode.split;
   }
 }

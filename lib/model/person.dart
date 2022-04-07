@@ -1,5 +1,3 @@
-import 'package:omnilore_scheduler/model/availability.dart';
-
 /// Person holds information of an Omnilore member
 class Person {
   const Person(
@@ -25,7 +23,7 @@ class Person {
   final int nbrClassWanted;
 
   /// Availability for class slots
-  final Availability availability;
+  final List<bool> availability;
 
   /// List of classes wanted as first choices
   final List<String> firstChoices;

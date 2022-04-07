@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/compute/overview_data.dart';
+import 'package:omnilore_scheduler/compute/schedule_control.dart';
 import 'package:omnilore_scheduler/compute/split_control.dart';
 import 'package:omnilore_scheduler/compute/validate.dart';
 import 'package:omnilore_scheduler/model/change.dart';
@@ -16,10 +17,12 @@ class Scheduling {
     overviewData = OverviewData(_courses, _people, _validate);
     courseControl = CourseControl();
     splitControl = SplitControl(_people, _courses);
+    scheduleControl = ScheduleControl(_courses, _people);
 
     courseControl.initialize(this);
-    overviewData.initialize(courseControl);
+    overviewData.initialize(this);
     splitControl.initialize(this);
+    scheduleControl.initialize(this);
   }
 
   // Shared data
@@ -31,10 +34,12 @@ class Scheduling {
   late OverviewData overviewData;
   late CourseControl courseControl;
   late SplitControl splitControl;
+  late ScheduleControl scheduleControl;
 
   /// Compute all submodules
   void compute(Change change) {
     overviewData.compute(change);
+    scheduleControl.compute(change);
   }
 
   /// Get an iterable list of course codes

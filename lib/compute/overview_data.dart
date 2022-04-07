@@ -5,9 +5,13 @@ import 'package:omnilore_scheduler/compute/validate.dart';
 import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/class_size.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
+import 'package:omnilore_scheduler/model/person.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
+import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
+
+enum PlacementResult { success, drop, time, full, dup }
 
 class OverviewData {
   OverviewData(Courses courses, People people, Validate validate)
@@ -30,11 +34,11 @@ class OverviewData {
   int _nbrUnmetWants = 0;
 
   // Readonly access to CourseControl
-  late final CourseControl _courseControl;
+  late final Scheduling _scheduling;
 
-  /// Late initialize CourseControl
-  void initialize(CourseControl courseControl) {
-    _courseControl = courseControl;
+  /// Late initialize Scheduling
+  void initialize(Scheduling scheduling) {
+    _scheduling = scheduling;
   }
 
   /// Compute overview data
@@ -49,7 +53,7 @@ class OverviewData {
       }
     }
 
-    var dropped = _courseControl.getDropped();
+    var dropped = _scheduling.courseControl.getDropped();
 
     // Compute go courses
     if (change.course || change.drop) {
@@ -73,7 +77,11 @@ class OverviewData {
       _nbrRequested = 0;
 
       // Compute people stats
-      for (var person in _people.people.values) {
+      var peopleData = _people.people.values.toList(growable: false);
+      peopleData.sort((Person a, Person b) =>
+          a.submissionOrder.compareTo(b.submissionOrder));
+      for (var person in peopleData) {
+        var hasClass = List<bool>.filled(20, false, growable: false);
         var wanted = person.nbrClassWanted;
         _nbrRequested += wanted;
         if (wanted == 0) {
@@ -81,26 +89,63 @@ class OverviewData {
         } else {
           _nbrCourseTakers += 1;
         }
+        // Count backups
         for (var i = 0; i < person.backups.length; i++) {
           _data[person.backups[i]]!.backups[i].add(person.getName());
         }
+        // Count first choices
         for (var course in person.firstChoices) {
-          if (!dropped.contains(course)) {
+          if (_placePersonInCourse(person, course, dropped, true, hasClass) ==
+              PlacementResult.success) {
             wanted -= 1;
-            _data[course]!.firstChoices.add(person.getName());
           }
         }
-        for (var i = 0; i < person.backups.length; i++) {
-          if (wanted > 0 && !dropped.contains(person.backups[i])) {
+        // Count add from backup
+        for (var i = 0; i < person.backups.length && wanted > 0; i++) {
+          if (_placePersonInCourse(
+                  person, person.backups[i], dropped, false, hasClass) ==
+              PlacementResult.success) {
             wanted -= 1;
-            _data[person.backups[i]]!.addFromBackup.add(person.getName());
           }
         }
+        // Count unmet wants
         if (wanted > 0) {
           _nbrUnmetWants += wanted;
         }
       }
     }
+  }
+
+  /// Attempt to place person into the given course and return the result
+  PlacementResult _placePersonInCourse(Person person, String course,
+      Set<String> dropped, bool firstChoice, List<bool> hasClass) {
+    if (dropped.contains(course)) {
+      return PlacementResult.drop;
+    }
+    var time = _scheduling.scheduleControl.scheduledTimeFor(course);
+    if (time != -1 && !person.availability[time]) {
+      _data[course]!.dropTime.add(person.getName());
+      return PlacementResult.time;
+    }
+    if (time != -1 && hasClass[time]) {
+      _data[course]!.dropDup.add(person.getName());
+      return PlacementResult.dup;
+    }
+    if (_scheduling.courseControl.getSplitMode(course) == SplitMode.limit &&
+        _data[course]!.getResultingSize() >=
+            _scheduling.courseControl.getMaxClassSize(course)) {
+      _data[course]!.dropFull.add(person.getName());
+      return PlacementResult.full;
+    }
+    if (firstChoice) {
+      _data[course]!.firstChoices.add(person.getName());
+    } else {
+      _data[course]!.addFromBackup.add(person.getName());
+    }
+    if (time != -1) {
+      hasClass[time] = true;
+    }
+    return PlacementResult.success;
   }
 
   /// Get the number people who has listed a given course as their nth choice
@@ -156,21 +201,57 @@ class OverviewData {
   /// Get the number of people added from backup for a course
   ///
   /// Will crash if course code does not exist.
-  ///
-  /// This is an alias to the function of the same name under CourseControl.
-  /// Alias provided for consistency.
   int getNbrAddFromBackup(String course) {
     return _data[course]!.addFromBackup.length;
   }
 
-  /// Get a list of people added from backup for a course
+  /// Get a set of people added from backup for a course
   ///
   /// Will crash if course code does not exist.
-  ///
-  /// This is an alias to the function of the same name under CourseControl.
-  /// Alias provided for consistency.
   Set<String> getPeopleAddFromBackup(String course) {
     return _data[course]!.addFromBackup;
+  }
+
+  /// Get the number of people dropped because of availability
+  ///
+  /// Will crash if course code does not exist.
+  int getNbrDropTime(String course) {
+    return _data[course]!.dropTime.length;
+  }
+
+  /// Get a set of people dropped because of availability
+  ///
+  /// Will crash if course code does not exist.
+  Set<String> getPeopleDropTime(String course) {
+    return _data[course]!.dropTime;
+  }
+
+  /// Get the number of people dropped because of class full
+  ///
+  /// Will crash if course code does not exist.
+  int getNbrDropFull(String course) {
+    return _data[course]!.dropFull.length;
+  }
+
+  /// Get a set of people dropped because of class full
+  ///
+  /// Will crash if course code does not exist.
+  Set<String> getPeopleDropFull(String course) {
+    return _data[course]!.dropFull;
+  }
+
+  /// Get the number of people dropped because of duplicate class schedules
+  ///
+  /// Will crash if course code does not exist.
+  int getNbrDropDup(String course) {
+    return _data[course]!.dropDup.length;
+  }
+
+  /// Get a set of people dropped because of duplicate class schedules
+  ///
+  /// Will crash if course code does not exist.
+  Set<String> getPeopleDropDup(String course) {
+    return _data[course]!.dropDup;
   }
 
   /// Get the resulting class size
@@ -245,9 +326,9 @@ class OverviewData {
 
   /// Helper function that generates ClassSize object from raw integer
   ClassSize _getClassSizeFromRaw(String course, int size) {
-    if (size > _courseControl.getMaxClassSize(course)) {
+    if (size > _scheduling.courseControl.getMaxClassSize(course)) {
       return ClassSize(size: size, state: ClassState.oversized);
-    } else if (size < _courseControl.getMinClassSize(course)) {
+    } else if (size < _scheduling.courseControl.getMinClassSize(course)) {
       return ClassSize(size: size, state: ClassState.undersized);
     }
     return ClassSize(size: size, state: ClassState.normal);
@@ -278,12 +359,20 @@ class CourseData {
   Set<String> firstChoices = {};
   List<Set<String>> backups = [{}, {}, {}, {}, {}];
   Set<String> addFromBackup = {};
+  Set<String> dropTime = {};
+  Set<String> dropFull = {};
+  Set<String> dropDup = {};
 
   /// Reset course data to zeros
   void reset() {
-    backups = [{}, {}, {}, {}, {}];
-    addFromBackup = {};
-    firstChoices = {};
+    addFromBackup.clear();
+    firstChoices.clear();
+    dropTime.clear();
+    dropFull.clear();
+    dropDup.clear();
+    for (var i = 0; i < backups.length; i++) {
+      backups[i].clear();
+    }
   }
 
   /// Get the number of people in the resulting class

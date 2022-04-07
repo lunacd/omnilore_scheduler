@@ -122,7 +122,7 @@ class _ScreenState extends State<Screen> {
         try {
           int minV = int.parse(minVal);
           int maxV = int.parse(maxVal);
-          schedule.courseControl.setMinMaxClassSize(minV, maxV);
+          schedule.courseControl.setGlobalMinMaxClassSize(minV, maxV);
           if (kDebugMode) {
             print('Min and max set with vals $minV $maxV');
           }
@@ -430,6 +430,7 @@ class _ScreenState extends State<Screen> {
           ),
           Container(
             alignment: Alignment.center,
+<<<<<<< HEAD
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -438,6 +439,15 @@ class _ScreenState extends State<Screen> {
                 const Text('courses to', style: TextStyle(fontSize: 15))
               ],
             ),
+=======
+            child: const Text('Limit All courses to',
+                style: TextStyle(fontSize: 15)),
+          ),
+          Row(
+            children: const [
+              SizedBox(height: 10),
+            ],
+>>>>>>> main
           ),
           // Container(alignment: Alignment.center, child: classDropDownMenu()),
           // Row(
@@ -471,6 +481,18 @@ class _ScreenState extends State<Screen> {
                       ),
                       style: const TextStyle(
                           fontSize: 15.0, height: 1.25, color: Colors.grey))),
+<<<<<<< HEAD
+=======
+              /*const SizedBox(
+                width: 50,
+                child: Text('max. '),
+              ),*/
+            ],
+          ),
+          Row(
+            children: const [
+              SizedBox(height: 10),
+>>>>>>> main
             ],
           ),
 
@@ -486,6 +508,14 @@ class _ScreenState extends State<Screen> {
                   onPressed: _setMinMaxClass, child: const Text('   set   ')),
             ],
           ),
+<<<<<<< HEAD
+=======
+          Row(
+            children: const [
+              SizedBox(height: 10),
+            ],
+          )
+>>>>>>> main
         ],
       ),
     );
@@ -554,7 +584,7 @@ class _ScreenState extends State<Screen> {
   Widget overviewData(Scheduling scheduling) {
     return Container(
       color: kColorMap['LightBlue'],
-      constraints: BoxConstraints.expand(),
+      constraints: const BoxConstraints.expand(),
       child: DefaultTextStyle(
         child: Column(
           children: [

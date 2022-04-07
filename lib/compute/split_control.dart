@@ -1,12 +1,12 @@
 import 'dart:core';
 import 'dart:math';
 
-import 'package:omnilore_scheduler/model/availability.dart';
 import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
+import 'package:tuple/tuple.dart';
 
 /// This class implements an algorithm to find good and equal split among
 /// a group of people
@@ -64,9 +64,10 @@ class SplitControl {
   /// Currently discovered best _testArray
   List<int> _bestTestArray = [];
 
-  int _rotNum = 0;
+  /// Rotating priority
+  late List<int> _rot;
 
-  /// Late initialize overview data
+  /// Late initialize Scheduling
   void initialize(Scheduling scheduling) {
     _scheduling = scheduling;
   }
@@ -129,6 +130,7 @@ class SplitControl {
     _testArray = List<int>.filled(_numSplits, 0, growable: false);
     _baseOffset = _peopleToSplit.length + _peopleInBackup.length;
     _backupOffset = _peopleToSplit.length;
+    _rot = List<int>.generate(_numSplits, (index) => index);
 
     _loadSplitMatrix();
     _loadClusterArray();
@@ -169,7 +171,7 @@ class SplitControl {
 
     // Update backups with correlation
     for (var i = 0; i < _peopleInBackup.length; i++) {
-      var cluster = _findBestCluster(i + _backupOffset, false);
+      var cluster = _findBestCluster(i + _backupOffset, false, true);
       var classIndex = _people.people[_peopleInBackup[i]]!.backups
           .indexWhere((element) => element == course);
       _people.people[_peopleInBackup[i]]!.backups.replaceRange(
@@ -209,36 +211,26 @@ class SplitControl {
     for (int i = 0; i < _peopleToSplit.length; i++) {
       var personData = _people.people[_peopleToSplit[i]]!;
       var unavailableCount = 0;
-      for (var week in WeekOfMonth.values) {
-        for (var day in DayOfWeek.values) {
-          for (var time in TimeOfDay.values) {
-            if (!personData.availability.get(week, day, time)) {
-              var availabilityIndex = _getAvailabilityIndex(week, day, time);
-              assert(availabilityIndex >= 0 && availabilityIndex <= 19);
-              _splitMatrix[i][availabilityIndex] = 1;
-              unavailableCount += 1;
-            }
-          }
+      for (var timeIdx = 0; timeIdx < 20; timeIdx++) {
+        if (!personData.availability[timeIdx]) {
+          _splitMatrix[i][timeIdx] = 1;
+          unavailableCount += 1;
         }
       }
+
       _splitMatrix[i][numPeople] = 1;
       _splitMatrix[i][numUnavail] = unavailableCount;
     }
     for (int i = 0; i < _peopleInBackup.length; i++) {
       var personData = _people.people[_peopleInBackup[i]]!;
       var unavailableCount = 0;
-      for (var week in WeekOfMonth.values) {
-        for (var day in DayOfWeek.values) {
-          for (var time in TimeOfDay.values) {
-            if (!personData.availability.get(week, day, time)) {
-              var availabilityIndex = _getAvailabilityIndex(week, day, time);
-              assert(availabilityIndex >= 0 && availabilityIndex <= 19);
-              _splitMatrix[i + _backupOffset][availabilityIndex] = 1;
-              unavailableCount += 1;
-            }
-          }
+      for (var timeIdx = 0; timeIdx < 20; timeIdx++) {
+        if (!personData.availability[timeIdx]) {
+          _splitMatrix[i + _backupOffset][timeIdx] = 1;
+          unavailableCount += 1;
         }
       }
+
       _splitMatrix[i + _backupOffset][numPeople] = 1;
       _splitMatrix[i + _backupOffset][numUnavail] = unavailableCount;
     }
@@ -306,6 +298,9 @@ class SplitControl {
         _nonZeroCount = i + 1;
         break;
       }
+    }
+    for (var i = 0; i < _numSplits; i++) {
+      _bestTestArray.add(_sortArray[i] % 256);
     }
   }
 
@@ -390,7 +385,6 @@ class SplitControl {
   /// Assign people with non-zero can't attends to the splits
   void _formGroups() {
     var finished = false;
-    _rotNum = 0;
     var firstRound = true;
 
     while (!finished) {
@@ -400,7 +394,7 @@ class SplitControl {
         if (_splitMatrix[person][numPeople] != 0) {
           // Person has not been assigned yet
           finished = false;
-          var clusterPos = _findBestCluster(person, firstRound);
+          var clusterPos = _findBestCluster(person, firstRound, false);
           if (clusterPos > 0) {
             // If found conclusive cluster
             _putPersonInCluster(person, clusterPos);
@@ -415,91 +409,95 @@ class SplitControl {
   ///
   /// Returns -1 when it wants to postpone the decision. Only possible when
   /// firstRound = true
-  int _findBestCluster(int person, bool firstRound) {
-    // 21 is used as "infinity" as the count below is 20 max
-    // Store the two least increase in the number of availabilities
-    var splitAffected = List<int>.filled(2, 21, growable: false);
-
-    // Store the two least total number of availabilities
-    var totSplit = List<int>.filled(2, 21, growable: false);
-
-    // lastSplit[0] stores the split with least increase in unavailability
-    // lastSplit[1] stores the split with least total unavailability
-    List<int> lastSplit = [0, _rotNum % _numSplits + _baseOffset];
+  int _findBestCluster(int person, bool firstRound, bool bypass) {
+    // First is split index, second is affected count, third is total count
+    List<Tuple3<int, int, int>> rankings = [];
 
     for (var splitIndex = 0; splitIndex < _numSplits; splitIndex++) {
-      if (_splitMatrix[splitIndex + _baseOffset][numPeople] >= _maxSplitSize) {
-        continue;
-      }
-      var currentSplit = (splitIndex + _rotNum) % _numSplits + _baseOffset;
-      var tempCount = _splitMatrix[currentSplit][numPeople] +
-          _splitMatrix[person][numPeople];
-      if (tempCount < _maxSplitSize) {
+      var clusterPos = _baseOffset + splitIndex;
+      var tempCount =
+          _splitMatrix[clusterPos][numPeople] + _splitMatrix[person][numPeople];
+      if (tempCount <= _maxSplitSize || bypass) {
         // Compute affected availability
         var affectedCount = 0;
         for (var timeIndex = 0; timeIndex < 20; timeIndex++) {
-          if (_splitMatrix[currentSplit][timeIndex] == 0 &&
+          if (_splitMatrix[clusterPos][timeIndex] == 0 &&
               _splitMatrix[person][timeIndex] != 0) {
             affectedCount += 1;
           }
         }
-
-        // Update splitSum and totSplit
-        if (affectedCount < splitAffected[0]) {
-          splitAffected[1] = splitAffected[0];
-          splitAffected[0] = affectedCount;
-          lastSplit[0] = currentSplit;
-        } else if (affectedCount < splitAffected[1]) {
-          splitAffected[1] = affectedCount;
-        }
-        var totalCount = affectedCount + _splitMatrix[currentSplit][numUnavail];
-        if (totalCount < totSplit[0]) {
-          totSplit[1] = totSplit[0];
-          totSplit[0] = totalCount;
-          lastSplit[1] = currentSplit;
-        } else if (totalCount < totSplit[1]) {
-          totSplit[1] = totalCount;
-        }
+        var totalCount = affectedCount + _splitMatrix[clusterPos][numUnavail];
+        rankings.add(Tuple3(clusterPos, affectedCount, totalCount));
       }
     }
 
-    // Determine split
-    if (splitAffected[0] == 0 && splitAffected[1] != 0) {
-      // If addition of this person does not affect a split's availability and
-      // such a split is unambiguous
-      return lastSplit[0];
-    } else if (splitAffected[0] == 0 && splitAffected[1] == 0) {
-      // If addition of this person does not affect a split's availability but
-      // such a split is ambiguous
-      if (totSplit[0] < totSplit[1]) {
-        // If total amount of availabilities are unambiguous
-        return lastSplit[1];
-      } else {
-        // Pick lastSplit[0] and rotate
-        // Incrementing rotNum will result in the next call inspecting splits
-        // in different order, and thus breaking ties differently.
-        _rotNum += 1;
-        return lastSplit[0];
-      }
-    } else {
-      // If no zero affect choice is available
-      if (totSplit[0] < totSplit[1]) {
-        // Favor least number of total unavailability
-        return lastSplit[1];
-      } else {
-        // If least number of total unavailability is ambiguous
-        if (splitAffected[0] < splitAffected[1]) {
-          return lastSplit[0];
+    if (rankings.length < 2) {
+      return rankings[0].item1;
+    }
+
+    // Sort rankings
+    rankings.sort((Tuple3<int, int, int> a, Tuple3<int, int, int> b) {
+      if (a.item2 < b.item2) {
+        return -1;
+      } else if (a.item2 == b.item2) {
+        if (a.item3 < b.item3) {
+          return -1;
+        } else if (a.item3 == b.item3) {
+          return _rot[a.item1 - _baseOffset]
+              .compareTo(_rot[b.item1 - _baseOffset]);
         } else {
-          if (firstRound) {
-            // In first round, delay decision
+          return 1;
+        }
+      } else {
+        return 1;
+      }
+    });
+
+    // Determine split
+    if (rankings[0].item2 == 0) {
+      // If addition of this person does not affect a split's availability,
+      // return the first in ranking
+      // If the first is ambiguous on both affected and total count, rotate the
+      // priority resolver
+      if (rankings[0].item2 == rankings[1].item2 &&
+          rankings[0].item3 == rankings[1].item3) {
+        var first = _rot[0];
+        _rot.removeAt(0);
+        _rot.add(first);
+      }
+      return rankings[0].item1;
+    } else {
+      // If no zero affect choice is available, favor least number of total
+      // unavailability
+      rankings.sort((Tuple3<int, int, int> a, Tuple3<int, int, int> b) {
+        if (a.item3 < b.item3) {
+          return -1;
+        } else if (a.item3 == b.item3) {
+          if (a.item2 < b.item2) {
             return -1;
+          } else if (a.item2 == b.item2) {
+            return _rot[a.item1 - _baseOffset]
+                .compareTo(_rot[b.item1 - _baseOffset]);
           } else {
-            _rotNum += 1;
-            return lastSplit[1];
+            return 1;
           }
+        } else {
+          return 1;
+        }
+      });
+      // If ambiguous, rotate priority resolver
+      if (rankings[0].item2 == rankings[1].item2 &&
+          rankings[0].item3 == rankings[1].item3) {
+        if (firstRound) {
+          // Delay decision in the first round
+          return -1;
+        } else {
+          var first = _rot[0];
+          _rot.removeAt(0);
+          _rot.add(first);
         }
       }
+      return rankings[0].item1;
     }
   }
 
@@ -521,9 +519,7 @@ class SplitControl {
     }
     // Process clusters from the largest to the smallest
     while (maxNum > 0) {
-      for (var personIndex = 0;
-          personIndex < _splitMatrix.length;
-          personIndex++) {
+      for (var personIndex = 0; personIndex < _backupOffset; personIndex++) {
         if (_splitMatrix[personIndex][numPeople] == maxNum &&
             _splitMatrix[personIndex][numUnavail] == 0) {
           var minSize = _peopleToSplit.length;
@@ -540,9 +536,5 @@ class SplitControl {
       }
       maxNum -= 1;
     }
-  }
-
-  int _getAvailabilityIndex(WeekOfMonth week, DayOfWeek day, TimeOfDay time) {
-    return week.index * 10 + day.index * 2 + time.index;
   }
 }
