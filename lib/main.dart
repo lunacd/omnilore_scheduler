@@ -182,7 +182,7 @@ class _ScreenState extends State<Screen> {
           minTextField.clear();
           maxTextField.clear();
         }
-      }
+      } //else error popup and textfieldclear ^^^ 182
     });
   }
 
