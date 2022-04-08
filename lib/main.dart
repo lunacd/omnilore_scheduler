@@ -147,14 +147,25 @@ class _ScreenState extends State<Screen> {
           int maxV = int.parse(maxVal);
           if (dropDownVal == 'ALL') {
             schedule.courseControl.setGlobalMinMaxClassSize(minV, maxV);
+
+            schedule.courseControl.isMaxSizeMixed()
+                ? hintMax = 'Mix'
+                : hintMax = schedule.courseControl
+                    .getMaxClassSize(dropDownVal)
+                    .toString();
+            schedule.courseControl.isMinSizeMixed()
+                ? hintMin = 'Mix'
+                : hintMin = schedule.courseControl
+                    .getMinClassSize(dropDownVal)
+                    .toString();
           } else {
             schedule.courseControl
                 .setMinMaxClassSizeForClass(dropDownVal, minV, maxV);
+            hintMax =
+                schedule.courseControl.getMaxClassSize(dropDownVal).toString();
+            hintMin =
+                schedule.courseControl.getMinClassSize(dropDownVal).toString();
           }
-          hintMax =
-              schedule.courseControl.getMaxClassSize(dropDownVal).toString();
-          hintMin =
-              schedule.courseControl.getMinClassSize(dropDownVal).toString();
           minVal = maxVal = '';
           minTextField.clear();
           maxTextField.clear();
@@ -168,6 +179,8 @@ class _ScreenState extends State<Screen> {
           if (kDebugMode) {
             print('Error parsing the int');
           }
+          minTextField.clear();
+          maxTextField.clear();
         }
       }
     });
@@ -665,10 +678,26 @@ class _ScreenState extends State<Screen> {
         onChanged: (String? newValue) {
           setState(() {
             dropDownVal = newValue!;
-            hintMax =
-                schedule.courseControl.getMaxClassSize(dropDownVal).toString();
-            hintMin =
-                schedule.courseControl.getMinClassSize(dropDownVal).toString();
+            if (dropDownVal == 'ALL') {
+              // minVal = maxVal = '';
+              schedule.courseControl.isMaxSizeMixed()
+                  ? hintMax = 'Mix'
+                  : hintMax = schedule.courseControl
+                      .getMaxClassSize(dropDownVal)
+                      .toString();
+              schedule.courseControl.isMinSizeMixed()
+                  ? hintMin = 'Mix'
+                  : hintMin = schedule.courseControl
+                      .getMinClassSize(dropDownVal)
+                      .toString();
+            } else {
+              hintMax = schedule.courseControl
+                  .getMaxClassSize(dropDownVal)
+                  .toString();
+              hintMin = schedule.courseControl
+                  .getMinClassSize(dropDownVal)
+                  .toString();
+            }
           });
         });
   }
