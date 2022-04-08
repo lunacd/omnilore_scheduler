@@ -41,7 +41,7 @@ class ScheduleControl {
         for (var person in resultingPeople) {
           var personData = _people.people[person]!;
           for (var timeIndex = 0; timeIndex < 20; timeIndex++) {
-            if (personData.availability[timeIndex]) {
+            if (!personData.availability[timeIndex]) {
               _unavailables[course]![timeIndex] += 1;
             }
           }

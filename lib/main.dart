@@ -309,10 +309,7 @@ class _ScreenState extends State<Screen> {
           width: double.infinity,
           color: masterBackgroundColor,
           child: Column(
-            children: [
-              screen1(),
-              tableData(),
-            ],
+            children: [screen1(), tableData(), tableTimeData()],
           ),
         );
       },
@@ -838,7 +835,8 @@ class _ScreenState extends State<Screen> {
                       .getPeopleAddFromBackup(dataList[0][j].toString());
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Drop, bad time') {
-                  curClassRoster = [];
+                  curClassRoster = schedule.overviewData
+                      .getPeopleDropTime(dataList[0][j].toString());
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Drop, dup class') {
                   curClassRoster = [];
@@ -951,6 +949,201 @@ class _ScreenState extends State<Screen> {
       ));
     }
     return list;
+  }
+
+  Widget tableTimeData() {
+    final growableList = <String>[
+      '',
+      '1st/3rd Mon AM',
+      '1st/3rd Mon PM',
+      '1st/3rd Tue AM',
+      '1st/3rd Tue PM',
+      '1st/3rd Wed AM',
+      '1st/3rd Wed PM',
+      '1st/3rd Thu AM',
+      '1st/3rd Thu PM',
+      '1st/3rd Fri AM',
+      '1st/3rd Fri PM',
+      '2nd/4th Mon AM',
+      '2nd/4th Mon PM',
+      '2nd/4th Tue AM',
+      '2nd/4th Tue PM',
+      '2nd/4th Wed AM',
+      '2nd/4th Wed PM',
+      '2nd/4th Thu AM',
+      '2nd/4th Thu PM',
+      '2nd/4th Fri AM',
+      '2nd/4th Fri PM'
+    ];
+    if (kDebugMode) {
+      print('num of course $numCourses');
+    }
+    int arrSize = numCourses ?? 14;
+
+    var firstMonAM = List<int>.generate(arrSize, (index) => -1);
+    var firstMonPM = List<int>.generate(arrSize, (index) => -1);
+    var firstTueAM = List<int>.generate(arrSize, (index) => -1);
+    var firstTuePM = List<int>.generate(arrSize, (index) => -1);
+    var firstWedAM = List<int>.generate(arrSize, (index) => -1);
+    var firstWedPM = List<int>.generate(arrSize, (index) => -1);
+    var firstThuAM = List<int>.generate(arrSize, (index) => -1);
+    var firstThuPM = List<int>.generate(arrSize, (index) => -1);
+    var firstFriAM = List<int>.generate(arrSize, (index) => -1);
+    var firstFriPM = List<int>.generate(arrSize, (index) => -1);
+    var secondMonAM = List<int>.generate(arrSize, (index) => -1);
+    var secondMonPM = List<int>.generate(arrSize, (index) => -1);
+    var secondTueAM = List<int>.generate(arrSize, (index) => -1);
+    var secondTuePM = List<int>.generate(arrSize, (index) => -1);
+    var secondWedAM = List<int>.generate(arrSize, (index) => -1);
+    var secondWedPM = List<int>.generate(arrSize, (index) => -1);
+    var secondThuAM = List<int>.generate(arrSize, (index) => -1);
+    var secondThuPM = List<int>.generate(arrSize, (index) => -1);
+    var secondFriAM = List<int>.generate(arrSize, (index) => -1);
+    var secondFriPM = List<int>.generate(arrSize, (index) => -1);
+
+    var firstChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var secondChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var fromBU = List<int>.generate(arrSize, (index) => -1);
+    var resultingSize = List<int>.generate(arrSize, (index) => -1);
+    int idx = 0;
+    //creating the 2d array
+    var dataList = List<List<String>>.generate(
+        21, (i) => List<String>.generate(arrSize, (j) => ''));
+
+    //checking the values of the dropped list and updating the list accordingly
+    for (String code in schedule.getCourseCodes()) {
+      dataList[0][idx] = code;
+      idx++;
+    }
+    for (int i = 0; i < droppedList.length; i++) {
+      if (droppedList[i] == true) {
+        schedule.courseControl.drop(dataList[0][i]);
+      } else {
+        schedule.courseControl.undrop(dataList[0][i]);
+      }
+    }
+    idx = 0;
+    for (String code in schedule.getCourseCodes()) {
+      firstMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 0);
+      firstMonPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 1);
+      firstTueAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 2);
+      firstTuePM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 3);
+      firstWedAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 4);
+      firstWedPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 5);
+      firstThuAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 6);
+      firstThuPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 7);
+      firstFriAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 8);
+      firstFriPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 9);
+      secondMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 10);
+      secondMonPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 11);
+      secondTueAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 12);
+      secondTuePM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 13);
+      secondWedAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 14);
+      secondWedPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 15);
+      secondThuAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 16);
+      secondThuPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 17);
+      secondFriAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 18);
+      secondFriPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 19);
+
+      dataList[0][idx] = code;
+      droppedList[idx]
+          ? dataList[1][idx] = '0'
+          : dataList[1][idx] = firstMonAM[idx].toString();
+      droppedList[idx]
+          ? dataList[2][idx] = '0'
+          : dataList[2][idx] = firstMonPM[idx].toString();
+      droppedList[idx]
+          ? dataList[3][idx] = '0'
+          : dataList[3][idx] = firstTueAM[idx].toString();
+      droppedList[idx]
+          ? dataList[4][idx] = '0'
+          : dataList[4][idx] = firstTuePM[idx].toString();
+      droppedList[idx]
+          ? dataList[5][idx] = '0'
+          : dataList[5][idx] = firstWedAM[idx].toString();
+      droppedList[idx]
+          ? dataList[6][idx] = '0'
+          : dataList[6][idx] = firstWedPM[idx].toString();
+      droppedList[idx]
+          ? dataList[7][idx] = '0'
+          : dataList[7][idx] = firstThuAM[idx].toString();
+      droppedList[idx]
+          ? dataList[8][idx] = '0'
+          : dataList[8][idx] = firstThuPM[idx].toString();
+      droppedList[idx]
+          ? dataList[9][idx] = '0'
+          : dataList[9][idx] = firstFriAM[idx].toString();
+      droppedList[idx]
+          ? dataList[10][idx] = '0'
+          : dataList[10][idx] = firstFriPM[idx].toString();
+      droppedList[idx]
+          ? dataList[11][idx] = '0'
+          : dataList[11][idx] = secondMonAM[idx].toString();
+      droppedList[idx]
+          ? dataList[12][idx] = '0'
+          : dataList[12][idx] = secondMonPM[idx].toString();
+      droppedList[idx]
+          ? dataList[13][idx] = '0'
+          : dataList[13][idx] = secondTueAM[idx].toString();
+      droppedList[idx]
+          ? dataList[14][idx] = '0'
+          : dataList[14][idx] = secondTuePM[idx].toString();
+      droppedList[idx]
+          ? dataList[15][idx] = '0'
+          : dataList[15][idx] = secondWedAM[idx].toString();
+      droppedList[idx]
+          ? dataList[16][idx] = '0'
+          : dataList[16][idx] = secondWedPM[idx].toString();
+      droppedList[idx]
+          ? dataList[17][idx] = '0'
+          : dataList[17][idx] = secondThuAM[idx].toString();
+      droppedList[idx]
+          ? dataList[18][idx] = '0'
+          : dataList[18][idx] = secondThuPM[idx].toString();
+      droppedList[idx]
+          ? dataList[19][idx] = '0'
+          : dataList[19][idx] = secondFriAM[idx].toString();
+      droppedList[idx]
+          ? dataList[20][idx] = '0'
+          : dataList[20][idx] = secondFriPM[idx].toString();
+      idx++;
+    }
+    if (kDebugMode) {
+      print(growableList.length);
+      print(dataList.length);
+    }
+
+    return Table(
+      border: TableBorder.symmetric(
+          inside: const BorderSide(width: 1, color: Colors.blue),
+          outside: const BorderSide(width: 1)),
+      columnWidths: const {0: IntrinsicColumnWidth()},
+      children: buildTimeInfo(growableList, dataList),
+    );
+  }
+
+  List<TableRow> buildTimeInfo(
+      // builds the list of table rows. I had to do it in a function because for
+      // some reason state doesn't update if its done the other way
+      List<String> growableList,
+      List<List<String>> dataList) {
+    List<TableRow> result = [];
+    for (int i = 1; i < growableList.length; i++) {
+      result.add(TableRow(children: [
+        TableCell(
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[Text(growableList[i].toString())])),
+        for (int j = 0; j < dataList[i].length; j++)
+          TextButton(
+            child: Text(dataList[i][j].toString()),
+            onPressed: null,
+          )
+      ]));
+    }
+    return result;
   }
 
   Future<void> _showMyDialog(String error, String loadType) async {
