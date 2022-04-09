@@ -881,12 +881,12 @@ class _ScreenState extends State<Screen> {
     var secondFriAM = List<int>.generate(arrSize, (index) => -1);
     var secondFriPM = List<int>.generate(arrSize, (index) => -1);
 
-    var firstChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var secondChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var fromBU = List<int>.generate(arrSize, (index) => -1);
-    var resultingSize = List<int>.generate(arrSize, (index) => -1);
+    // var firstChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    // var secondChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    // var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    // var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    // var fromBU = List<int>.generate(arrSize, (index) => -1);
+    // var resultingSize = List<int>.generate(arrSize, (index) => -1);
     int idx = 0;
     //creating the 2d array
     var dataList = List<List<String>>.generate(
