@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
+import 'package:omnilore_scheduler/model/coordinators.dart';
 
 enum SplitMode { split, limit }
 
@@ -15,6 +16,7 @@ class CourseControl {
   final _classMaxSizeMap = HashMap<String, int>();
   final _classMinSizeMap = HashMap<String, int>();
   final _classSplitModeMap = HashMap<String, SplitMode>();
+  final _coordinatorsMap = HashMap<String, Coordinators>();
 
   // Internal states
   final _dropped = HashSet<String>();
@@ -109,5 +111,31 @@ class CourseControl {
   /// Query the current split mode of a class
   SplitMode getSplitMode(String course) {
     return _classSplitModeMap[course] ?? SplitMode.split;
+  }
+
+  /// Set main / co-coordinator
+  void setMainCoCoordinator(String course, String name) {
+    if (_coordinatorsMap.containsKey(course)) {
+      if (_coordinatorsMap[course]!.equal) {
+        throw const InvalidArgument(
+            message: 'Cannot set co-coordinator with equal coordinators set');
+      }
+      _coordinatorsMap[course]!.coordinators[1] = name;
+    }
+    _coordinatorsMap[course] = Coordinators(equal: false);
+    _coordinatorsMap[course]!.coordinators[0] = name;
+  }
+
+  /// Set equal coordinators
+  void setEqualCoCoordinator(String course, String name) {
+    if (_coordinatorsMap.containsKey(course)) {
+      if (!_coordinatorsMap[course]!.equal) {
+        throw const InvalidArgument(
+            message: 'Cannot set equal co-coordinator with a coordinator set');
+      }
+      _coordinatorsMap[course]!.coordinators[1] = name;
+    }
+    _coordinatorsMap[course] = Coordinators(equal: true);
+    _coordinatorsMap[course]!.coordinators[0] = name;
   }
 }
