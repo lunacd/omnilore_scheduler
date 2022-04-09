@@ -47,16 +47,31 @@ class People {
       var lName = tokens[0];
       var fName = tokens[1];
       var phone = tokens[2];
-      var numClassWanted = int.parse(tokens[3]);
+      var numClassWanted = 0;
+      var submissionOrder = 0;
+      List<String> firstChoices = [];
+      List<String> backups = [];
+      List<bool> availability = List<bool>.filled(20, true, growable: false);
+      try {
+        numClassWanted = int.parse(tokens[3]);
+      } catch (e) {
+        // Missing people who made no submissions
+        people['$fName $lName'] = (Person(
+            fName: fName,
+            lName: lName,
+            phone: phone,
+            nbrClassWanted: numClassWanted,
+            availability: availability,
+            firstChoices: firstChoices,
+            backups: backups,
+            submissionOrder: submissionOrder));
+      }
       if (numClassWanted < 0 || numClassWanted > 6) {
         throw InvalidNumClassWantedException(
             malformedLine: numLines + 1, numClassWanted: numClassWanted);
       }
-      List<String> firstChoices = [];
-      List<String> backups = [];
-      var submissionOrder = int.parse(tokens[20]);
+      submissionOrder = int.parse(tokens[20]);
 
-      List<bool> availability = List<bool>.filled(20, true, growable: false);
       // Parse availability
       for (int i = 0; i < 10; i++) {
         var avail = tokens[i + 4];
