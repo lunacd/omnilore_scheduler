@@ -308,9 +308,10 @@ class _ScreenState extends State<Screen> {
         return Container(
           width: double.infinity,
           color: masterBackgroundColor,
-          child: Column(
+          child: SingleChildScrollView(
+              child: Column(
             children: [screen1(), tableData(), tableTimeData()],
-          ),
+          )),
         );
       },
     );
@@ -1149,78 +1150,17 @@ class _ScreenState extends State<Screen> {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[Text(growableList[i].toString())])),
-        for (int j = 1; j < dataList[i].length; j++)
+        for (int j = 0; j < dataList[i].length; j++)
           TextButton(
             child: Text(dataList[i][j].toString()),
             onPressed: () {
               setState(() {
-                int timeIndex = -1;
-                if (growableList[i].toString() == '1st/3rd Mon AM') {
-                  timeIndex = 0;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Mon PM') {
-                  timeIndex = 1;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Tue AM') {
-                  timeIndex = 2;
-                  print(curClassRoster);
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Tue PM') {
-                  timeIndex = 3;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Wed AM') {
-                  timeIndex = 4;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Wed PM') {
-                  timeIndex = 5;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Thu AM') {
-                  timeIndex = 6;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Thu PM') {
-                  timeIndex = 7;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Fri AM') {
-                  timeIndex = 8;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Fri PM') {
-                  timeIndex = 9;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Mon AM') {
-                  timeIndex = 10;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Mon PM') {
-                  timeIndex = 11;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Tue AM') {
-                  timeIndex = 12;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Tue PM') {
-                  timeIndex = 13;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Wed AM') {
-                  timeIndex = 14;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Wed PM') {
-                  timeIndex = 15;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Thu AM') {
-                  timeIndex = 16;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Thu PM') {
-                  timeIndex = 17;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '2nd/4th Fri AM') {
-                  timeIndex = 18;
-                  resultingClass = false;
-                } else if (growableList[i].toString() == '1st/3rd Fri PM') {
-                  timeIndex = 19;
-                  resultingClass = false;
-                }
+                int timeIndex = getTimeIndex(growableList[i].toString());
 
                 curClass = dataList[0][j].toString();
-                if (schedule.scheduleControl
-                    .isScheduledAt(curClass, timeIndex)) {}
+
+                schedule.scheduleControl.schedule(curClass, timeIndex);
+
                 curSelected.clear();
                 clustColors.clear();
                 curCell = growableList[i];
@@ -1236,10 +1176,87 @@ class _ScreenState extends State<Screen> {
                 }
               });
             },
+            style: (() {
+              if (schedule.scheduleControl.isScheduledAt(
+                  dataList[0][j].toString(),
+                  getTimeIndex(growableList[i].toString()))) {
+                print("got here");
+                return ElevatedButton.styleFrom(primary: Colors.red);
+              } else {
+                return ElevatedButton.styleFrom(primary: Colors.transparent);
+              }
+            }()),
           )
       ]));
     }
     return result;
+  }
+
+  int getTimeIndex(String c) {
+    int timeIndex = -1;
+    if (c == '1st/3rd Mon AM') {
+      timeIndex = 0;
+      resultingClass = false;
+    } else if (c == '1st/3rd Mon PM') {
+      timeIndex = 1;
+      resultingClass = false;
+    } else if (c == '1st/3rd Tue AM') {
+      timeIndex = 2;
+      print(curClassRoster);
+      resultingClass = false;
+    } else if (c == '1st/3rd Tue PM') {
+      timeIndex = 3;
+      resultingClass = false;
+    } else if (c == '1st/3rd Wed AM') {
+      timeIndex = 4;
+      resultingClass = false;
+    } else if (c == '1st/3rd Wed PM') {
+      timeIndex = 5;
+      resultingClass = false;
+    } else if (c == '1st/3rd Thu AM') {
+      timeIndex = 6;
+      resultingClass = false;
+    } else if (c == '1st/3rd Thu PM') {
+      timeIndex = 7;
+      resultingClass = false;
+    } else if (c == '1st/3rd Fri AM') {
+      timeIndex = 8;
+      resultingClass = false;
+    } else if (c == '1st/3rd Fri PM') {
+      timeIndex = 9;
+      resultingClass = false;
+    } else if (c == '2nd/4th Mon AM') {
+      timeIndex = 10;
+      resultingClass = false;
+    } else if (c == '2nd/4th Mon PM') {
+      timeIndex = 11;
+      resultingClass = false;
+    } else if (c == '2nd/4th Tue AM') {
+      timeIndex = 12;
+      resultingClass = false;
+    } else if (c == '2nd/4th Tue PM') {
+      timeIndex = 13;
+      resultingClass = false;
+    } else if (c == '2nd/4th Wed AM') {
+      timeIndex = 14;
+      resultingClass = false;
+    } else if (c == '2nd/4th Wed PM') {
+      timeIndex = 15;
+      resultingClass = false;
+    } else if (c == '2nd/4th Thu AM') {
+      timeIndex = 16;
+      resultingClass = false;
+    } else if (c == '2nd/4th Thu PM') {
+      timeIndex = 17;
+      resultingClass = false;
+    } else if (c == '2nd/4th Fri AM') {
+      timeIndex = 18;
+      resultingClass = false;
+    } else if (c == '2nd/4th Fri PM') {
+      timeIndex = 19;
+      resultingClass = false;
+    }
+    return timeIndex;
   }
 
   Future<void> _showMyDialog(String error, String loadType) async {
@@ -1270,6 +1287,11 @@ class _ScreenState extends State<Screen> {
       },
     );
   }
+}
+
+bool validSchedule(Scheduling sched) {
+  return StateProcessing[sched.overviewData.getStateOfProcessing().index] ==
+      'Drop and Split';
 }
 
 Widget auxData(Scheduling scheduling) {
