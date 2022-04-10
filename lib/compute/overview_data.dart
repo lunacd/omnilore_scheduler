@@ -32,6 +32,7 @@ class OverviewData {
   int _nbrCourseTakers = 0;
   int _nbrGoCourse = 0;
   int _nbrUnmetWants = 0;
+  final Set<String> _unmetPeople = {};
 
   // Readonly access to CourseControl
   late final Scheduling _scheduling;
@@ -75,6 +76,7 @@ class OverviewData {
       _nbrOnLeave = 0;
       _nbrCourseTakers = 0;
       _nbrRequested = 0;
+      _unmetPeople.clear();
 
       // Compute people stats
       var peopleData = _people.people.values.toList(growable: false);
@@ -111,6 +113,7 @@ class OverviewData {
         // Count unmet wants
         if (wanted > 0) {
           _nbrUnmetWants += wanted;
+          _unmetPeople.add(person.getName());
         }
       }
     }
@@ -302,6 +305,11 @@ class OverviewData {
   /// Get the total number of unmet wants
   int getNbrUnmetWants() {
     return _nbrUnmetWants;
+  }
+
+  /// Get a set of people with unmet wants
+  Set<String> getPeopleUnmetWants() {
+    return _unmetPeople;
   }
 
   /// Get the current status of processing
