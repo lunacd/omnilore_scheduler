@@ -585,12 +585,12 @@ class _ScreenState extends State<Screen> {
                         enabledBorder: const OutlineInputBorder(),
                         hintText: hintMin,
                       ),
-                      controller: minTextField..text = hintMin,
+                      controller: minTextField,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20.0,
                         height: 1.25,
-                        color: Color.fromARGB(255, 48, 48, 48),
+                        color: Colors.black,
                       ))),
               SizedBox(
                   width: 100,
@@ -600,13 +600,12 @@ class _ScreenState extends State<Screen> {
                         enabledBorder: const OutlineInputBorder(),
                         hintText: hintMax,
                       ),
-                      controller: maxTextField..text = hintMax,
+                      controller: maxTextField,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0,
-                        height: 1.25,
-                        color: Color.fromARGB(255, 48, 48, 48),
-                      ))),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.0,
+                          height: 1.25,
+                          color: Colors.black))),
               /*const SizedBox(
                 width: 50,
                 child: Text('max. '),
