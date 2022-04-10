@@ -8,6 +8,23 @@ import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 
+const MaterialColor primaryBlack = MaterialColor(
+  _blackPrimaryValue,
+  <int, Color>{
+    50: Color(0xFF000000),
+    100: Color(0xFF000000),
+    200: Color(0xFF000000),
+    300: Color(0xFF000000),
+    400: Color(0xFF000000),
+    500: Color(_blackPrimaryValue),
+    600: Color(0xFF000000),
+    700: Color(0xFF000000),
+    800: Color(0xFF000000),
+    900: Color(0xFF000000),
+  },
+);
+const int _blackPrimaryValue = 0xFF000000;
+
 const Map kColorMap = {
   'DarkBlue': Color.fromARGB(255, 69, 91, 138),
   'MediumBlue': Color.fromARGB(255, 124, 172, 223),
@@ -33,8 +50,8 @@ const List<String> StateProcessing = [
   'Need Courses',
   'Need People',
   'Inconsistent',
-  'Drop',
-  'Split',
+  'Drop and Split',
+  'Drop and Split',
   'Schedule'
 ];
 
@@ -43,7 +60,7 @@ int colorNum = 0;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
-    await DesktopWindow.setMinWindowSize(const Size(1000, 1100));
+    await DesktopWindow.setMinWindowSize(const Size(1200, 1300));
   }
   runApp(const MyApp());
 }
@@ -57,7 +74,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Omnilore Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: primaryBlack,
         textButtonTheme: TextButtonThemeData(
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.all(
@@ -96,10 +113,13 @@ class _ScreenState extends State<Screen> {
   int? numCourses;
   int? numPeople;
 
+  final minTextField = TextEditingController();
+  final maxTextField = TextEditingController();
+  String hintMax = 'Max', hintMin = 'Min';
   String minVal = '', maxVal = '';
-
   String curClass = '';
   String curCell = '';
+  String dropDownVal = '';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -118,11 +138,38 @@ class _ScreenState extends State<Screen> {
 
   void _setMinMaxClass() {
     setState(() {
-      if (minVal != '' || maxVal != '') {
+      if (kDebugMode) {
+        print('Current class selected $dropDownVal $minVal $maxVal');
+      }
+      if (minVal != '' && maxVal != '' && coursesImported) {
         try {
           int minV = int.parse(minVal);
           int maxV = int.parse(maxVal);
-          schedule.courseControl.setGlobalMinMaxClassSize(minV, maxV);
+          if (dropDownVal == 'ALL') {
+            schedule.courseControl.setGlobalMinMaxClassSize(minV, maxV);
+
+            schedule.courseControl.isMaxSizeMixed()
+                ? hintMax = 'Mix'
+                : hintMax = schedule.courseControl
+                    .getMaxClassSize(dropDownVal)
+                    .toString();
+            schedule.courseControl.isMinSizeMixed()
+                ? hintMin = 'Mix'
+                : hintMin = schedule.courseControl
+                    .getMinClassSize(dropDownVal)
+                    .toString();
+          } else {
+            schedule.courseControl
+                .setMinMaxClassSizeForClass(dropDownVal, minV, maxV);
+            hintMax =
+                schedule.courseControl.getMaxClassSize(dropDownVal).toString();
+            hintMin =
+                schedule.courseControl.getMinClassSize(dropDownVal).toString();
+          }
+          minVal = maxVal = '';
+          minTextField.clear();
+          maxTextField.clear();
+
           if (kDebugMode) {
             print('Min and max set with vals $minV $maxV');
           }
@@ -132,6 +179,8 @@ class _ScreenState extends State<Screen> {
           if (kDebugMode) {
             print('Error parsing the int');
           }
+          minTextField.clear();
+          maxTextField.clear();
         }
       }
     });
@@ -161,14 +210,27 @@ class _ScreenState extends State<Screen> {
                       numCourses = await schedule.loadCourses(path);
                       droppedList =
                           List<bool>.filled(numCourses!, false, growable: true);
+                      dropDownVal = 'ALL';
+                      hintMax = schedule.courseControl
+                          .getMaxClassSize('ALL')
+                          .toString();
+                      hintMin = schedule.courseControl
+                          .getMinClassSize('ALL')
+                          .toString();
+                      minVal = '';
+                      maxVal = '';
+                      minTextField.clear();
+                      maxTextField.clear();
+                      coursesImported = true;
                     } catch (e) {
                       _showMyDialog(e.toString(), 'courses');
                     }
                   } else {
+                    // ignore: todo
+                    //TODO: Add pop up box to show that the user canceled
                     //user canceled
                   }
                 }
-                // _fileExplorer();
                 setState(() {});
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
@@ -190,6 +252,16 @@ class _ScreenState extends State<Screen> {
                       _showMyDialog(e.toString(), 'people');
                     }
                   }
+                  dropDownVal = 'ALL';
+                  hintMax =
+                      schedule.courseControl.getMaxClassSize('ALL').toString();
+                  hintMin =
+                      schedule.courseControl.getMinClassSize('ALL').toString();
+                  minVal = '';
+                  maxVal = '';
+                  minTextField.clear();
+                  maxTextField.clear();
+                  peopleImported = true;
                 } else {
                   // User canceled the picker
                 }
@@ -409,7 +481,7 @@ class _ScreenState extends State<Screen> {
         schedule.splitControl.getClustByPerson(person) ?? <String>{};
     for (Set<String> item in clustColors.keys) {
       if (item.length == test.length && test.containsAll(item)) {
-        return clustColors[item] ?? Colors.black;
+        return clustColors[item] ?? Colors.grey;
       }
     }
     return Colors.black;
@@ -427,14 +499,21 @@ class _ScreenState extends State<Screen> {
           ),
           Container(
             alignment: Alignment.center,
-            child: const Text('Limit All courses to',
-                style: TextStyle(fontSize: 15)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Text('Limit ', style: TextStyle(fontSize: 15)),
+                classDropDownMenu(),
+                const Text('courses to', style: TextStyle(fontSize: 15))
+              ],
+            ),
           ),
-          Row(
-            children: const [
-              SizedBox(height: 10),
-            ],
-          ),
+          // Container(alignment: Alignment.center, child: classDropDownMenu()),
+          // Row(
+          //   children: [
+          //     const SizedBox(height: 10),
+          //   ],
+          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -442,29 +521,31 @@ class _ScreenState extends State<Screen> {
                   width: 100,
                   child: TextField(
                       onChanged: (value) => minVal = value,
-                      decoration: const InputDecoration(
-                        enabledBorder: OutlineInputBorder(),
-                        hintText: 'Min',
+                      decoration: InputDecoration(
+                        enabledBorder: const OutlineInputBorder(),
+                        hintText: hintMin,
                       ),
+                      controller: minTextField,
                       style: const TextStyle(
-                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
                         height: 1.25,
-                        color: Colors.grey,
+                        color: Colors.black,
                       ))),
-              /*const SizedBox(
-                width: 50,
-                child: Text('min. & '),
-              ),*/
               SizedBox(
                   width: 100,
                   child: TextField(
                       onChanged: (value) => maxVal = value,
-                      decoration: const InputDecoration(
-                        enabledBorder: OutlineInputBorder(),
-                        hintText: 'Max',
+                      decoration: InputDecoration(
+                        enabledBorder: const OutlineInputBorder(),
+                        hintText: hintMax,
                       ),
+                      controller: maxTextField,
                       style: const TextStyle(
-                          fontSize: 15.0, height: 1.25, color: Colors.grey))),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.0,
+                          height: 1.25,
+                          color: Colors.black))),
               /*const SizedBox(
                 width: 50,
                 child: Text('max. '),
@@ -476,6 +557,7 @@ class _ScreenState extends State<Screen> {
               SizedBox(height: 10),
             ],
           ),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -488,11 +570,6 @@ class _ScreenState extends State<Screen> {
                   onPressed: _setMinMaxClass, child: const Text('   set   ')),
             ],
           ),
-          Row(
-            children: const [
-              SizedBox(height: 10),
-            ],
-          )
         ],
       ),
     );
@@ -580,7 +657,50 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  Widget classDropDownMenu() {
+    //String dropDownVal = schedule.getCourseCodes().take(1).toString();
+    return DropdownButton(
+        hint: Text(dropDownVal),
+        items: (schedule.getCourseCodes().isEmpty
+                ? schedule.getCourseCodes()
+                : <String>['ALL'].followedBy(schedule.getCourseCodes()))
+            .map((String value)
+                // schedule.getCourseCodes().map((String value)
+                {
+          return DropdownMenuItem(
+            child: Text(value),
+            value: value,
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            dropDownVal = newValue!;
+            if (dropDownVal == 'ALL') {
+              // minVal = maxVal = '';
+              schedule.courseControl.isMaxSizeMixed()
+                  ? hintMax = 'Mix'
+                  : hintMax = schedule.courseControl
+                      .getMaxClassSize(dropDownVal)
+                      .toString();
+              schedule.courseControl.isMinSizeMixed()
+                  ? hintMin = 'Mix'
+                  : hintMin = schedule.courseControl
+                      .getMinClassSize(dropDownVal)
+                      .toString();
+            } else {
+              hintMax = schedule.courseControl
+                  .getMaxClassSize(dropDownVal)
+                  .toString();
+              hintMin = schedule.courseControl
+                  .getMinClassSize(dropDownVal)
+                  .toString();
+            }
+          });
+        });
+  }
+
   Widget tableData() {
+    // courseCodes = schedule.getCourseCodes().toList();
     final growableList = <String>[
       '',
       'First Choices',
@@ -603,6 +723,9 @@ class _ScreenState extends State<Screen> {
     var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
     var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
     var fromBU = List<int>.generate(arrSize, (index) => -1);
+    var dropBT = List<int>.generate(arrSize, (index) => -1);
+    var dropDC = List<int>.generate(arrSize, (index) => -1);
+    var dropCF = List<int>.generate(arrSize, (index) => -1);
     var resultingSize = List<int>.generate(arrSize, (index) => -1);
     int idx = 0;
     //creating the 2d array
@@ -633,6 +756,9 @@ class _ScreenState extends State<Screen> {
       fourthChoiceArr[idx] =
           schedule.overviewData.getNbrForClassRank(code, 3).size;
       fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code);
+      dropBT[idx] = schedule.overviewData.getNbrDropTime(code);
+      dropDC[idx] = schedule.overviewData.getNbrDropDup(code);
+      dropCF[idx] = schedule.overviewData.getNbrDropFull(code);
       resultingSize[idx] =
           schedule.overviewData.getResultingClassSize(code).size;
       dataList[0][idx] = code;
@@ -651,9 +777,15 @@ class _ScreenState extends State<Screen> {
       droppedList[idx]
           ? dataList[5][idx] = '0'
           : dataList[5][idx] = fromBU[idx].toString();
-      dataList[6][idx] = '0';
-      dataList[7][idx] = '0';
-      dataList[8][idx] = '0';
+      droppedList[idx]
+          ? dataList[6][idx] = '0'
+          : dataList[6][idx] = dropBT[idx].toString();
+      droppedList[idx]
+          ? dataList[7][idx] = '0'
+          : dataList[7][idx] = dropDC[idx].toString();
+      droppedList[idx]
+          ? dataList[8][idx] = '0'
+          : dataList[8][idx] = dropCF[idx].toString();
       droppedList[idx]
           ? dataList[9][idx] = '0'
           : dataList[9][idx] = resultingSize[idx].toString();
@@ -666,7 +798,7 @@ class _ScreenState extends State<Screen> {
 
     return Table(
       border: TableBorder.symmetric(
-          inside: const BorderSide(width: 1, color: Colors.blue),
+          inside: const BorderSide(width: 1, color: Colors.black),
           outside: const BorderSide(width: 1)),
       columnWidths: const {0: IntrinsicColumnWidth()},
       children: buildInfo(growableList, dataList),
@@ -702,9 +834,10 @@ class _ScreenState extends State<Screen> {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 1);
                   resultingClass = false;
-                } else if (growableList[i].toString() == 'second backup') {
+                } else if (growableList[i].toString() == 'Second backup') {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 2);
+                  print(curClassRoster);
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Third backup') {
                   curClassRoster = schedule.overviewData
@@ -1016,10 +1149,93 @@ class _ScreenState extends State<Screen> {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[Text(growableList[i].toString())])),
-        for (int j = 0; j < dataList[i].length; j++)
+        for (int j = 1; j < dataList[i].length; j++)
           TextButton(
             child: Text(dataList[i][j].toString()),
-            onPressed: null,
+            onPressed: () {
+              setState(() {
+                int timeIndex = -1;
+                if (growableList[i].toString() == '1st/3rd Mon AM') {
+                  timeIndex = 0;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Mon PM') {
+                  timeIndex = 1;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Tue AM') {
+                  timeIndex = 2;
+                  print(curClassRoster);
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Tue PM') {
+                  timeIndex = 3;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Wed AM') {
+                  timeIndex = 4;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Wed PM') {
+                  timeIndex = 5;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Thu AM') {
+                  timeIndex = 6;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Thu PM') {
+                  timeIndex = 7;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Fri AM') {
+                  timeIndex = 8;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Fri PM') {
+                  timeIndex = 9;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Mon AM') {
+                  timeIndex = 10;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Mon PM') {
+                  timeIndex = 11;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Tue AM') {
+                  timeIndex = 12;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Tue PM') {
+                  timeIndex = 13;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Wed AM') {
+                  timeIndex = 14;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Wed PM') {
+                  timeIndex = 15;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Thu AM') {
+                  timeIndex = 16;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Thu PM') {
+                  timeIndex = 17;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Fri AM') {
+                  timeIndex = 18;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Fri PM') {
+                  timeIndex = 19;
+                  resultingClass = false;
+                }
+
+                curClass = dataList[0][j].toString();
+                if (schedule.scheduleControl
+                    .isScheduledAt(curClass, timeIndex)) {}
+                curSelected.clear();
+                clustColors.clear();
+                curCell = growableList[i];
+                List<String> tempList = curClassRoster.toList();
+                tempList
+                    .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
+                curClassRoster = tempList;
+                for (var name in curClassRoster) {
+                  curSelected[name] = false;
+                }
+                if (kDebugMode) {
+                  print(curClassRoster);
+                }
+              });
+            },
           )
       ]));
     }
