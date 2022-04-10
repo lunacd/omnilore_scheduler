@@ -481,7 +481,7 @@ class _ScreenState extends State<Screen> {
         schedule.splitControl.getClustByPerson(person) ?? <String>{};
     for (Set<String> item in clustColors.keys) {
       if (item.length == test.length && test.containsAll(item)) {
-        return clustColors[item] ?? Colors.black;
+        return clustColors[item] ?? Colors.grey;
       }
     }
     return Colors.black;
@@ -723,6 +723,9 @@ class _ScreenState extends State<Screen> {
     var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
     var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
     var fromBU = List<int>.generate(arrSize, (index) => -1);
+    var dropBT = List<int>.generate(arrSize, (index) => -1);
+    var dropDC = List<int>.generate(arrSize, (index) => -1);
+    var dropCF = List<int>.generate(arrSize, (index) => -1);
     var resultingSize = List<int>.generate(arrSize, (index) => -1);
     int idx = 0;
     //creating the 2d array
@@ -753,6 +756,9 @@ class _ScreenState extends State<Screen> {
       fourthChoiceArr[idx] =
           schedule.overviewData.getNbrForClassRank(code, 3).size;
       fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code);
+      dropBT[idx] = schedule.overviewData.getNbrDropTime(code);
+      dropDC[idx] = schedule.overviewData.getNbrDropDup(code);
+      dropCF[idx] = schedule.overviewData.getNbrDropFull(code);
       resultingSize[idx] =
           schedule.overviewData.getResultingClassSize(code).size;
       dataList[0][idx] = code;
@@ -771,9 +777,15 @@ class _ScreenState extends State<Screen> {
       droppedList[idx]
           ? dataList[5][idx] = '0'
           : dataList[5][idx] = fromBU[idx].toString();
-      dataList[6][idx] = '0';
-      dataList[7][idx] = '0';
-      dataList[8][idx] = '0';
+      droppedList[idx]
+          ? dataList[6][idx] = '0'
+          : dataList[6][idx] = dropBT[idx].toString();
+      droppedList[idx]
+          ? dataList[7][idx] = '0'
+          : dataList[7][idx] = dropDC[idx].toString();
+      droppedList[idx]
+          ? dataList[8][idx] = '0'
+          : dataList[8][idx] = dropCF[idx].toString();
       droppedList[idx]
           ? dataList[9][idx] = '0'
           : dataList[9][idx] = resultingSize[idx].toString();
@@ -822,9 +834,10 @@ class _ScreenState extends State<Screen> {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 1);
                   resultingClass = false;
-                } else if (growableList[i].toString() == 'second backup') {
+                } else if (growableList[i].toString() == 'Second backup') {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 2);
+                  print(curClassRoster);
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Third backup') {
                   curClassRoster = schedule.overviewData
@@ -1136,10 +1149,93 @@ class _ScreenState extends State<Screen> {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[Text(growableList[i].toString())])),
-        for (int j = 0; j < dataList[i].length; j++)
+        for (int j = 1; j < dataList[i].length; j++)
           TextButton(
             child: Text(dataList[i][j].toString()),
-            onPressed: null,
+            onPressed: () {
+              setState(() {
+                int timeIndex = -1;
+                if (growableList[i].toString() == '1st/3rd Mon AM') {
+                  timeIndex = 0;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Mon PM') {
+                  timeIndex = 1;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Tue AM') {
+                  timeIndex = 2;
+                  print(curClassRoster);
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Tue PM') {
+                  timeIndex = 3;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Wed AM') {
+                  timeIndex = 4;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Wed PM') {
+                  timeIndex = 5;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Thu AM') {
+                  timeIndex = 6;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Thu PM') {
+                  timeIndex = 7;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Fri AM') {
+                  timeIndex = 8;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Fri PM') {
+                  timeIndex = 9;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Mon AM') {
+                  timeIndex = 10;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Mon PM') {
+                  timeIndex = 11;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Tue AM') {
+                  timeIndex = 12;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Tue PM') {
+                  timeIndex = 13;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Wed AM') {
+                  timeIndex = 14;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Wed PM') {
+                  timeIndex = 15;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Thu AM') {
+                  timeIndex = 16;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Thu PM') {
+                  timeIndex = 17;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '2nd/4th Fri AM') {
+                  timeIndex = 18;
+                  resultingClass = false;
+                } else if (growableList[i].toString() == '1st/3rd Fri PM') {
+                  timeIndex = 19;
+                  resultingClass = false;
+                }
+
+                curClass = dataList[0][j].toString();
+                if (schedule.scheduleControl
+                    .isScheduledAt(curClass, timeIndex)) {}
+                curSelected.clear();
+                clustColors.clear();
+                curCell = growableList[i];
+                List<String> tempList = curClassRoster.toList();
+                tempList
+                    .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
+                curClassRoster = tempList;
+                for (var name in curClassRoster) {
+                  curSelected[name] = false;
+                }
+                if (kDebugMode) {
+                  print(curClassRoster);
+                }
+              });
+            },
           )
       ]));
     }
