@@ -120,6 +120,7 @@ class _ScreenState extends State<Screen> {
   String curClass = '';
   String curCell = '';
   String dropDownVal = '';
+  String minMaxError = '';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -182,8 +183,51 @@ class _ScreenState extends State<Screen> {
           minTextField.clear();
           maxTextField.clear();
         }
-      } //else error popup and textfieldclear ^^^ 182
+      } else {
+        if (minVal == '' && maxVal == '') {
+          minMaxError = 'Please enter a value for min and max';
+        } else if (minVal == '') {
+          minMaxError = 'Please enter a value for min';
+        } else if (maxVal == '') {
+          minMaxError = 'Please enter a value for max';
+        } else {
+          minMaxError = 'Please import courses';
+        }
+        popUp();
+        minTextField.clear();
+        maxTextField.clear();
+        minVal = '';
+        maxVal = '';
+      }
     });
+  }
+
+  Future<void> popUp() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // must be dismissed
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error setting class size'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text('Hint'),
+                Text(minMaxError),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -525,12 +569,12 @@ class _ScreenState extends State<Screen> {
                         enabledBorder: const OutlineInputBorder(),
                         hintText: hintMin,
                       ),
-                      controller: minTextField..text = hintMin,
+                      controller: minTextField,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20.0,
                         height: 1.25,
-                        color: Color.fromARGB(255, 48, 48, 48),
+                        color: Colors.black,
                       ))),
               SizedBox(
                   width: 100,
@@ -540,13 +584,12 @@ class _ScreenState extends State<Screen> {
                         enabledBorder: const OutlineInputBorder(),
                         hintText: hintMax,
                       ),
-                      controller: maxTextField..text = hintMax,
+                      controller: maxTextField,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0,
-                        height: 1.25,
-                        color: Color.fromARGB(255, 48, 48, 48),
-                      ))),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.0,
+                          height: 1.25,
+                          color: Colors.black))),
               /*const SizedBox(
                 width: 50,
                 child: Text('max. '),
