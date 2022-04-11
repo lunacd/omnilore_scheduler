@@ -132,6 +132,8 @@ class SplitControl {
     _backupOffset = _peopleToSplit.length;
     _rot = List<int>.generate(_numSplits, (index) => index);
 
+    if (_numSplits == 1) return;
+
     _loadSplitMatrix();
     _loadClusterArray();
     _sortSplitArray();
