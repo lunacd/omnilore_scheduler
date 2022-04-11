@@ -838,7 +838,9 @@ class _ScreenState extends State<Screen> {
                 } else if (growableList[i].toString() == 'Second backup') {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 2);
-                  print(curClassRoster);
+                  if (kDebugMode) {
+                    print(curClassRoster);
+                  }
                   resultingClass = false;
                 } else if (growableList[i].toString() == 'Third backup') {
                   curClassRoster = schedule.overviewData
@@ -1180,7 +1182,9 @@ class _ScreenState extends State<Screen> {
               if (schedule.scheduleControl.isScheduledAt(
                   dataList[0][j].toString(),
                   getTimeIndex(growableList[i].toString()))) {
-                print("got here");
+                if (kDebugMode) {
+                  print('got here');
+                }
                 return ElevatedButton.styleFrom(primary: Colors.red);
               } else {
                 return ElevatedButton.styleFrom(primary: Colors.transparent);
@@ -1202,7 +1206,9 @@ class _ScreenState extends State<Screen> {
       resultingClass = false;
     } else if (c == '1st/3rd Tue AM') {
       timeIndex = 2;
-      print(curClassRoster);
+      if (kDebugMode) {
+        print(curClassRoster);
+      }
       resultingClass = false;
     } else if (c == '1st/3rd Tue PM') {
       timeIndex = 3;
