@@ -1200,67 +1200,47 @@ class _ScreenState extends State<Screen> {
     int timeIndex = -1;
     if (c == '1st/3rd Mon AM') {
       timeIndex = 0;
-      resultingClass = false;
     } else if (c == '1st/3rd Mon PM') {
       timeIndex = 1;
-      resultingClass = false;
     } else if (c == '1st/3rd Tue AM') {
       timeIndex = 2;
       if (kDebugMode) {
         print(curClassRoster);
       }
-      resultingClass = false;
     } else if (c == '1st/3rd Tue PM') {
       timeIndex = 3;
-      resultingClass = false;
     } else if (c == '1st/3rd Wed AM') {
       timeIndex = 4;
-      resultingClass = false;
     } else if (c == '1st/3rd Wed PM') {
       timeIndex = 5;
-      resultingClass = false;
     } else if (c == '1st/3rd Thu AM') {
       timeIndex = 6;
-      resultingClass = false;
     } else if (c == '1st/3rd Thu PM') {
       timeIndex = 7;
-      resultingClass = false;
     } else if (c == '1st/3rd Fri AM') {
       timeIndex = 8;
-      resultingClass = false;
     } else if (c == '1st/3rd Fri PM') {
       timeIndex = 9;
-      resultingClass = false;
     } else if (c == '2nd/4th Mon AM') {
       timeIndex = 10;
-      resultingClass = false;
     } else if (c == '2nd/4th Mon PM') {
       timeIndex = 11;
-      resultingClass = false;
     } else if (c == '2nd/4th Tue AM') {
       timeIndex = 12;
-      resultingClass = false;
     } else if (c == '2nd/4th Tue PM') {
       timeIndex = 13;
-      resultingClass = false;
     } else if (c == '2nd/4th Wed AM') {
       timeIndex = 14;
-      resultingClass = false;
     } else if (c == '2nd/4th Wed PM') {
       timeIndex = 15;
-      resultingClass = false;
     } else if (c == '2nd/4th Thu AM') {
       timeIndex = 16;
-      resultingClass = false;
     } else if (c == '2nd/4th Thu PM') {
       timeIndex = 17;
-      resultingClass = false;
     } else if (c == '2nd/4th Fri AM') {
       timeIndex = 18;
-      resultingClass = false;
     } else if (c == '2nd/4th Fri PM') {
       timeIndex = 19;
-      resultingClass = false;
     }
     return timeIndex;
   }
