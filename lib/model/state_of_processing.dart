@@ -5,5 +5,7 @@ enum StateOfProcessing {
   inconsistent,
   drop,
   split,
-  schedule
+  schedule,
+  coordinator,
+  output
 }

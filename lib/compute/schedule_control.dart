@@ -17,6 +17,7 @@ class ScheduleControl {
   final List<List<String>> _schedule =
       List<List<String>>.generate(20, (_) => <String>[], growable: false);
   final Map<String, List<int>> _unavailables = {};
+  final Set<String> _scheduled = {};
 
   /// Late initialize Scheduling
   void initialize(Scheduling scheduling) {
@@ -119,22 +120,34 @@ class ScheduleControl {
         _schedule[i].remove(course);
       }
     }
-    
+
     // Add new assignment
     _schedule[timeIndex].add(course);
     _scheduling.compute(Change(schedule: true));
+    _scheduled.add(course);
   }
 
   /// Unschedule a course at a given time slot
-  /// 
+  ///
   /// Does nothing if the given course is not scheduled at that time slot
   void unschedule(String course, int timeIndex) {
     _schedule[timeIndex].remove(course);
+    _scheduled.remove(course);
   }
 
   /// Get the number of people who are unavailable for a given course and time
   /// index
   int getNbrUnavailable(String course, int timeIndex) {
     return _unavailables[course]![timeIndex];
+  }
+
+  /// Check if all classes have been scheduled
+  bool allClassScheduled() {
+    for (var course in _scheduling.courseControl.getGo()) {
+      if (!_scheduled.contains(course)) {
+        return false;
+      }
+    }
+    return true;
   }
 }

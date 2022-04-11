@@ -4,11 +4,16 @@ import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:omnilore_scheduler/model/coordinators.dart';
+import 'package:omnilore_scheduler/store/courses.dart';
 
 enum SplitMode { split, limit }
 
 class CourseControl {
-  CourseControl();
+  CourseControl(Courses courses)
+      : _courses = courses,
+        _go = HashSet<String>.from(courses.getCodes());
+
+  final Courses _courses;
 
   // Config
   int _classMinSize = 8;
@@ -20,8 +25,8 @@ class CourseControl {
 
   // Internal states
   final _dropped = HashSet<String>();
+  final HashSet<String> _go;
 
-  // Readonly access to OverviewData
   late final Scheduling _scheduling;
 
   /// Late initialize Scheduling
@@ -29,20 +34,39 @@ class CourseControl {
     _scheduling = scheduling;
   }
 
+  /// Compute state in response to changes
+  void compute(Change change) {
+    if (change.course) {
+      _dropped.clear();
+      _go.clear();
+      for (var course in _courses.getCodes()) {
+        _go.add(course);
+      }
+    }
+  }
+
   /// Drop class
   void drop(String course) {
     _dropped.add(course);
+    _go.remove(course);
     _scheduling.compute(Change(drop: true));
   }
 
   /// Undrop class
   void undrop(String course) {
     _dropped.remove(course);
+    _go.add(course);
     _scheduling.compute(Change(drop: true));
   }
 
+  /// Get a set of dropped courses
   Set<String> getDropped() {
     return _dropped;
+  }
+
+  /// Get a set of go courses
+  Set<String> getGo() {
+    return _go;
   }
 
   /// Set global minimum and maximum class size
@@ -137,5 +161,15 @@ class CourseControl {
     }
     _coordinatorsMap[course] = Coordinators(equal: true);
     _coordinatorsMap[course]!.coordinators[0] = name;
+  }
+
+  /// Check if all courses have coordinators assigned
+  bool allCourseHasCoordinators() {
+    for (var course in _go) {
+      if (!_coordinatorsMap.containsKey(course)) {
+        return false;
+      }
+    }
+    return true;
   }
 }

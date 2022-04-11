@@ -1,12 +1,10 @@
 import 'dart:collection';
 
 import 'package:omnilore_scheduler/compute/course_control.dart';
-import 'package:omnilore_scheduler/compute/validate.dart';
 import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/class_size.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/person.dart';
-import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
@@ -14,15 +12,13 @@ import 'package:omnilore_scheduler/store/people.dart';
 enum PlacementResult { success, drop, time, full, dup }
 
 class OverviewData {
-  OverviewData(Courses courses, People people, Validate validate)
+  OverviewData(Courses courses, People people)
       : _courses = courses,
-        _people = people,
-        _validate = validate;
+        _people = people;
 
   // Global data
   final People _people;
   final Courses _courses;
-  final Validate _validate;
 
   // Internal states
   final _data = HashMap<String, CourseData>();
@@ -34,7 +30,6 @@ class OverviewData {
   int _nbrUnmetWants = 0;
   final Set<String> _unmetPeople = {};
 
-  // Readonly access to CourseControl
   late final Scheduling _scheduling;
 
   /// Late initialize Scheduling
@@ -312,26 +307,6 @@ class OverviewData {
     return _unmetPeople;
   }
 
-  /// Get the current status of processing
-  StateOfProcessing getStateOfProcessing() {
-    if (!_validate.isValid()) {
-      return StateOfProcessing.inconsistent;
-    }
-    if (_courses.getNumCourses() == 0) {
-      return StateOfProcessing.needCourses;
-    }
-    if (_people.people.isEmpty) {
-      return StateOfProcessing.needPeople;
-    }
-    if (_hasUndersizeClasses(_courses)) {
-      return StateOfProcessing.drop;
-    }
-    if (_hasOversizeClasses(_courses)) {
-      return StateOfProcessing.split;
-    }
-    return StateOfProcessing.schedule;
-  }
-
   /// Helper function that generates ClassSize object from raw integer
   ClassSize _getClassSizeFromRaw(String course, int size) {
     if (size > _scheduling.courseControl.getMaxClassSize(course)) {
@@ -343,7 +318,7 @@ class OverviewData {
   }
 
   /// Get whether there is class to split
-  bool _hasOversizeClasses(Courses courses) {
+  bool hasOversizeClasses(Courses courses) {
     for (var course in courses.getCodes()) {
       if (getNbrForClassRank(course, 0).state == ClassState.oversized) {
         return true;
@@ -353,7 +328,7 @@ class OverviewData {
   }
 
   /// Get whether there is class to drop
-  bool _hasUndersizeClasses(Courses courses) {
+  bool hasUndersizeClasses(Courses courses) {
     for (var course in courses.getCodes()) {
       if (getNbrForClassRank(course, 0).state == ClassState.undersized) {
         return true;

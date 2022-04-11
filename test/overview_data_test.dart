@@ -1,55 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:omnilore_scheduler/model/class_size.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
-import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 
 import 'test_util.dart';
 
 /// This file tests the overview data table.
 void main() {
-  test('Status of processing: drop', () async {
-    var scheduling = Scheduling();
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.needCourses);
-    expect(await scheduling.loadCourses('test/resources/course.txt'), 24);
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.needPeople);
-    expect(await scheduling.loadPeople('test/resources/people_drop.txt'), 1);
-    expect(
-        scheduling.overviewData.getStateOfProcessing(), StateOfProcessing.drop);
-    expect(
-        scheduling.overviewData.getStateOfProcessing(), StateOfProcessing.drop);
-  });
-
-  test('Status of processing: split', () async {
-    var scheduling = Scheduling();
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.needCourses);
-    expect(await scheduling.loadCourses('test/resources/course_split.txt'), 21);
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.needPeople);
-    expect(await scheduling.loadPeople('test/resources/people_split.txt'), 270);
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.split);
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.split);
-  });
-
-  test('Status of processing: schedule', () async {
-    var scheduling = Scheduling();
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.needCourses);
-    expect(await scheduling.loadCourses('test/resources/course_split.txt'), 21);
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.needPeople);
-    expect(
-        await scheduling.loadPeople('test/resources/people_schedule.txt'), 267);
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.schedule);
-    expect(scheduling.overviewData.getStateOfProcessing(),
-        StateOfProcessing.schedule);
-  });
 
   test('Get list of people for course rank', () async {
     var scheduling = Scheduling();

@@ -23,7 +23,7 @@ class SplitControl {
   /// this person is currently in
   static const numUnavail = 21;
 
-  SplitControl(People people, Courses courses)
+  SplitControl(Courses courses, People people)
       : _people = people,
         _courses = courses;
 

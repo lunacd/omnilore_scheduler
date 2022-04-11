@@ -335,7 +335,7 @@ class _ScreenState extends State<Screen> {
                   width: double.infinity,
                   color: kColorMap['MediumBlue'],
                   child: Text(
-                      'State of Processing: ${StateProcessing[schedule.overviewData.getStateOfProcessing().index]}',
+                      'State of Processing: ${StateProcessing[schedule.getStateOfProcessing().index]}',
                       style: const TextStyle(
                           fontSize: 25, fontWeight: FontWeight.bold)),
                 ),
@@ -1276,7 +1276,7 @@ class _ScreenState extends State<Screen> {
 }
 
 bool validSchedule(Scheduling sched) {
-  return StateProcessing[sched.overviewData.getStateOfProcessing().index] ==
+  return StateProcessing[sched.getStateOfProcessing().index] ==
       'Drop and Split';
 }
 

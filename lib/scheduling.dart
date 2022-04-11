@@ -9,14 +9,15 @@ import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/course.dart';
 import 'package:omnilore_scheduler/model/exceptions.dart';
 import 'package:omnilore_scheduler/model/person.dart';
+import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/store/courses.dart';
 import 'package:omnilore_scheduler/store/people.dart';
 
 class Scheduling {
   Scheduling() {
-    overviewData = OverviewData(_courses, _people, _validate);
-    courseControl = CourseControl();
-    splitControl = SplitControl(_people, _courses);
+    overviewData = OverviewData(_courses, _people);
+    courseControl = CourseControl(_courses);
+    splitControl = SplitControl(_courses, _people);
     scheduleControl = ScheduleControl(_courses, _people);
 
     courseControl.initialize(this);
@@ -40,6 +41,7 @@ class Scheduling {
   void compute(Change change) {
     overviewData.compute(change);
     scheduleControl.compute(change);
+    courseControl.compute(change);
   }
 
   /// Get an iterable list of course codes
@@ -128,5 +130,31 @@ class Scheduling {
       compute(Change(people: true));
     }
     return numPeople;
+  }
+
+  /// Get the current state of processing
+  StateOfProcessing getStateOfProcessing() {
+    if (!_validate.isValid()) {
+      return StateOfProcessing.inconsistent;
+    }
+    if (_courses.getNumCourses() == 0) {
+      return StateOfProcessing.needCourses;
+    }
+    if (_people.people.isEmpty) {
+      return StateOfProcessing.needPeople;
+    }
+    if (overviewData.hasUndersizeClasses(_courses)) {
+      return StateOfProcessing.drop;
+    }
+    if (overviewData.hasOversizeClasses(_courses)) {
+      return StateOfProcessing.split;
+    }
+    if (!scheduleControl.allClassScheduled()) {
+      return StateOfProcessing.schedule;
+    }
+    if (!courseControl.allCourseHasCoordinators()) {
+      return StateOfProcessing.coordinator;
+    }
+    return StateOfProcessing.output;
   }
 }
