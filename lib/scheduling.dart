@@ -157,4 +157,89 @@ class Scheduling {
     }
     return StateOfProcessing.output;
   }
+
+  /// Output roster with CC information
+  void outputRosterCC(String path) {
+    var output = File(path);
+    for (var course in courseControl.getGo()) {
+      var courseData = _courses.getCourse(course);
+      int timeSlot = scheduleControl.scheduledTimeFor(course);
+      var people = overviewData.getPeopleForResultingClass(course);
+      var cc = courseControl.getCoordinators(course);
+
+      output.writeAsStringSync('${courseData.name}\n');
+      output.writeAsStringSync(
+          '$course\t${getTimeslotDescription(timeSlot)}\n\n');
+
+      for (var person in people) {
+        if (person == cc.coordinators[0] && !cc.equal) {
+          output.writeAsStringSync('$person (C)\n');
+        } else if (person == cc.coordinators[0] ||
+            person == cc.coordinators[1]) {
+          output.writeAsStringSync('$person (CC)\n');
+        }
+        output.writeAsStringSync('$person\n');
+      }
+      if (course != courseControl.getGo().last) {
+        output.writeAsStringSync('\n\n');
+      }
+    }
+  }
+
+  void outputRosterPhone(String path) {
+    var output = File(path);
+    for (var course in courseControl.getGo()) {
+      var courseData = _courses.getCourse(course);
+      int timeSlot = scheduleControl.scheduledTimeFor(course);
+      var people = overviewData.getPeopleForResultingClass(course);
+
+      output.writeAsStringSync('${courseData.name}\n');
+      output.writeAsStringSync(
+          '$course\t${getTimeslotDescription(timeSlot)}\n\n');
+      for (var person in people) {
+        var personData = _people.people[person]!;
+        var personString = '${personData.lName}, ${personData.fName}';
+        output.writeAsStringSync(personString);
+        var padding = ' ' * (_people.maxLength - personString.length);
+        output.writeAsString(padding);
+        output.writeAsString(personData.phone);
+        output.writeAsString('\n');
+      }
+    }
+  }
+
+  String getTimeslotDescription(int timeIndex) {
+    if (timeIndex < 0 || timeIndex > 19) {
+      throw const InvalidArgument(message: 'Invalid time index');
+    }
+    String result = '';
+    if (timeIndex < 10) {
+      result += '1 & 3';
+    } else {
+      result += '2 & 4';
+    }
+    switch (((timeIndex % 10) / 2).floor()) {
+      case 0:
+        result += ' Mon';
+        break;
+      case 1:
+        result += ' Tue';
+        break;
+      case 2:
+        result += ' Wed';
+        break;
+      case 3:
+        result += ' Thu';
+        break;
+      case 4:
+        result += ' Fri';
+        break;
+    }
+    if (timeIndex % 10 % 2 == 0) {
+      result += ' AM';
+    } else {
+      result += ' PM';
+    }
+    return result;
+  }
 }

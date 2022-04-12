@@ -163,6 +163,11 @@ class CourseControl {
     _coordinatorsMap[course]!.coordinators[0] = name;
   }
 
+  /// Get coordinator for a course
+  Coordinators getCoordinators(String course) {
+    return _coordinatorsMap[course]!;
+  }
+
   /// Check if all courses have coordinators assigned
   bool allCourseHasCoordinators() {
     for (var course in _go) {

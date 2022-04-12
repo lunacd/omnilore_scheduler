@@ -9,6 +9,9 @@ class People {
   /// A list of people, ordered as is presented in the input file
   HashMap<String, Person> people = HashMap<String, Person>();
 
+  /// Maximum name length
+  int maxLength = 10;
+
   /// Load people from a text file
   ///
   /// Throws a [FileSystemException] when the given input file does not exist.
@@ -46,6 +49,9 @@ class People {
       }
       var lName = tokens[0];
       var fName = tokens[1];
+      if (lName.length + fName.length + 2 > maxLength) {
+        maxLength = lName.length + fName.length + 2;
+      }
       var phone = tokens[2];
       var numClassWanted = 0;
       var submissionOrder = 0;

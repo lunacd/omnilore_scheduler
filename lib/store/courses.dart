@@ -20,8 +20,8 @@ class Courses {
   }
 
   /// Get course information given a course code
-  Course? getCourse(String code) {
-    return _courses[code];
+  Course getCourse(String code) {
+    return _courses[code]!;
   }
 
   /// Check whether a given course exists
