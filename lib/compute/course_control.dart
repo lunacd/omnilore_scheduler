@@ -164,8 +164,8 @@ class CourseControl {
   }
 
   /// Get coordinator for a course
-  Coordinators getCoordinators(String course) {
-    return _coordinatorsMap[course]!;
+  Coordinators? getCoordinators(String course) {
+    return _coordinatorsMap[course];
   }
 
   /// Check if all courses have coordinators assigned

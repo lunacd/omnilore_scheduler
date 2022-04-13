@@ -165,7 +165,7 @@ class Scheduling {
       var courseData = _courses.getCourse(course);
       int timeSlot = scheduleControl.scheduledTimeFor(course);
       var people = overviewData.getPeopleForResultingClass(course);
-      var cc = courseControl.getCoordinators(course);
+      var cc = courseControl.getCoordinators(course)!;
 
       output.writeAsStringSync('${courseData.name}\n');
       output.writeAsStringSync(
@@ -186,6 +186,7 @@ class Scheduling {
     }
   }
 
+  /// Output roster with phone number
   void outputRosterPhone(String path) {
     var output = File(path);
     for (var course in courseControl.getGo()) {
@@ -208,6 +209,7 @@ class Scheduling {
     }
   }
 
+  /// Get timeslot desricription from time index
   String getTimeslotDescription(int timeIndex) {
     if (timeIndex < 0 || timeIndex > 19) {
       throw const InvalidArgument(message: 'Invalid time index');
@@ -241,5 +243,147 @@ class Scheduling {
       result += ' PM';
     }
     return result;
+  }
+
+  /// Export intermediate state
+  void exportState(String path) {
+    var output = File(path);
+    // Dropped
+    output.writeAsStringSync('Drop:\n');
+    var dropped = courseControl.getDropped();
+    for (var course in dropped) {
+      output.writeAsStringSync('$course\n');
+    }
+    // Split
+    output.writeAsStringSync('\nSplit:\n');
+    var history = splitControl.getHistory();
+    for (var entry in history) {
+      output.writeAsStringSync('Course: ${entry.item2}\n');
+      for (var cluster in entry.item1) {
+        output.writeAsStringSync('Cluster: ${cluster.join(",")}\n');
+      }
+    }
+    // Schedule
+    output.writeAsStringSync('\nSchedule:\n');
+    for (var course in courseControl.getGo()) {
+      var timeIndex = scheduleControl.scheduledTimeFor(course);
+      if (timeIndex >= 0) {
+        output.writeAsStringSync('$course: $timeIndex\n');
+      }
+    }
+    // Coordinator
+    output.writeAsStringSync('\nCoordinator:\n');
+    for (var course in courseControl.getGo()) {
+      var coordinator = courseControl.getCoordinators(course);
+      if (coordinator != null) {
+        output.writeAsStringSync('$course: ');
+        if (coordinator.equal) {
+          output.writeAsStringSync('equal');
+        } else {
+          output.writeAsStringSync('unequal');
+        }
+        for (var person in coordinator.coordinators) {
+          if (person.isNotEmpty) {
+            output.writeAsStringSync(',$person');
+          }
+        }
+        output.writeAsStringSync('\n');
+      }
+    }
+  }
+
+  /// Load intermediate state
+  void loadState(String path) {
+    var input = File(path);
+    List<String> lines = input.readAsLinesSync();
+    var i = 0;
+    // Drop
+    while (lines[i].trim() != 'Drop:') {
+      i += 1;
+    }
+    while (true) {
+      if (lines[i].isEmpty) {
+        i += 1;
+        continue;
+      }
+      if (lines[i].trim() == 'Split:') {
+        i += 1;
+        break;
+      }
+      var course = lines[i].trim();
+      courseControl.drop(course);
+    }
+
+    // Split
+    while (true) {
+      if (lines[i].isEmpty) {
+        i += 1;
+        continue;
+      }
+      if (lines[i].trim() == 'Schedule:') {
+        i += 1;
+        break;
+      }
+      var course = lines[i].split(':')[1].trim();
+      i += 1;
+      while (lines[i].split(':')[0].trim() == 'Cluster') {
+        var clusterStr = lines[i].split(':')[1].trim();
+        var cluster = Set<String>.from(
+            clusterStr.split(',').map((person) => person.trim()));
+        splitControl.addCluster(cluster);
+        i += 1;
+      }
+      splitControl.split(course);
+    }
+
+    // Schedule
+    while (true) {
+      if (lines[i].isEmpty) {
+        i += 1;
+        continue;
+      }
+      if (lines[i].trim() == 'Coordinator:') {
+        i += 1;
+        break;
+      }
+
+      var data = lines[i].split(':').map((e) => e.trim()).toList();
+      var index = int.parse(data[1]);
+      if (index >= 0) {
+        scheduleControl.schedule(data[0], index);
+      }
+      i += 1;
+    }
+
+    // Coordinator
+    while (i < lines.length) {
+      if (lines[i].isEmpty) {
+        i += 1;
+        continue;
+      }
+
+      var course = lines[i].split(':')[0].trim();
+      var data = lines[i]
+          .split(':')[1]
+          .trim()
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
+      if (data[0] == 'equal') {
+        if (data.length >= 2) {
+          courseControl.setEqualCoCoordinator(course, data[1]);
+        }
+        if (data.length >= 3) {
+          courseControl.setEqualCoCoordinator(course, data[1]);
+        }
+      } else {
+        if (data.length >= 2) {
+          courseControl.setMainCoCoordinator(course, data[1]);
+        }
+        if (data.length >= 3) {
+          courseControl.setMainCoCoordinator(course, data[1]);
+        }
+      }
+    }
   }
 }

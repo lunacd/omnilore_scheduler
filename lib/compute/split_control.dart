@@ -41,6 +41,9 @@ class SplitControl {
   int _backupOffset = 0;
   int _saveTest = 0;
 
+  /// Keeps history of performed splits
+  final List<Tuple2<List<Set<String>>, String>> _history = [];
+
   /// Each person has a row
   /// Second last column holds the number of people in this row
   /// Last column holds the total number of can't attends
@@ -93,6 +96,11 @@ class SplitControl {
     }
   }
 
+  /// Get split history
+  List<Tuple2<List<Set<String>>, String>> getHistory() {
+    return _history;
+  }
+
   /// Main split routine
   ///
   /// NOTE: This class does NOT support simultaneously splitting multiple
@@ -105,6 +113,9 @@ class SplitControl {
   ///
   /// The given course MUST be a valid 3-digit course code
   void split(String course) {
+    var clusterData = List<Set<String>>.from(_clusters);
+    _history.add(Tuple2(clusterData, course));
+
     if (course.length != 3) throw UnexpectedFatalException();
     _peopleToSplit = List.from(
         _scheduling.overviewData.getPeopleForResultingClass(course),
@@ -245,7 +256,7 @@ class SplitControl {
         clusterIndex++) {
       for (var person in _clusters[clusterIndex]) {
         var personIndex = _peopleToSplit.indexOf(person);
-        if (personIndex == -1) throw UnexpectedFatalException();
+        if (personIndex == -1) continue;
         var clusterPosition = _clusterArray[clusterIndex];
         if (clusterPosition == -1) {
           _clusterArray[clusterIndex] = personIndex;
