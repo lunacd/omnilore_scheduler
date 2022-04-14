@@ -315,7 +315,22 @@ class _ScreenState extends State<Screen> {
             ),
             MenuListItem(
               title: 'Save',
-              onPressed: () {},
+              onPressed: () async {
+                String? path = await FilePicker.platform.saveFile();
+
+                if (path != null) {
+                  if (path != '') {
+                    try {
+                      schedule.exportState(path);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'people');
+                    }
+                  }
+                } else {
+                  //file picker canceled
+                }
+                setState(() {});
+              },
             ),
             MenuListItem(
               title: 'Delete',
