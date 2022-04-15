@@ -160,53 +160,55 @@ class Scheduling {
 
   /// Output roster with CC information
   void outputRosterCC(String path) {
-    var output = File(path);
+    var content = '';
     for (var course in courseControl.getGo()) {
       var courseData = _courses.getCourse(course);
       int timeSlot = scheduleControl.scheduledTimeFor(course);
       var people = overviewData.getPeopleForResultingClass(course);
       var cc = courseControl.getCoordinators(course)!;
 
-      output.writeAsStringSync('${courseData.name}\n');
-      output.writeAsStringSync(
-          '$course\t${getTimeslotDescription(timeSlot)}\n\n');
+      content += '${courseData.name}\n';
+      content += '$course\t${getTimeslotDescription(timeSlot)}\n\n';
 
       for (var person in people) {
         if (person == cc.coordinators[0] && !cc.equal) {
-          output.writeAsStringSync('$person (C)\n');
+          content += '$person (C)\n';
         } else if (person == cc.coordinators[0] ||
             person == cc.coordinators[1]) {
-          output.writeAsStringSync('$person (CC)\n');
+          content += '$person (CC)\n';
         }
-        output.writeAsStringSync('$person\n');
+        content += '$person\n';
       }
       if (course != courseControl.getGo().last) {
-        output.writeAsStringSync('\n\n');
+        content += '\n\n';
       }
     }
+    var output = File(path);
+    output.writeAsStringSync(content);
   }
 
   /// Output roster with phone number
   void outputRosterPhone(String path) {
-    var output = File(path);
+    var content = '';
     for (var course in courseControl.getGo()) {
       var courseData = _courses.getCourse(course);
       int timeSlot = scheduleControl.scheduledTimeFor(course);
       var people = overviewData.getPeopleForResultingClass(course);
 
-      output.writeAsStringSync('${courseData.name}\n');
-      output.writeAsStringSync(
-          '$course\t${getTimeslotDescription(timeSlot)}\n\n');
+      content += '${courseData.name}\n';
+      content += '$course\t${getTimeslotDescription(timeSlot)}\n\n';
       for (var person in people) {
         var personData = _people.people[person]!;
         var personString = '${personData.lName}, ${personData.fName}';
-        output.writeAsStringSync(personString);
+        content += personString;
         var padding = ' ' * (_people.maxLength - personString.length);
-        output.writeAsString(padding);
-        output.writeAsString(personData.phone);
-        output.writeAsString('\n');
+        content += padding;
+        content += personData.phone;
+        content += '\n';
       }
     }
+    var output = File(path);
+    output.writeAsStringSync(content);
   }
 
   /// Get timeslot desricription from time index
@@ -247,49 +249,51 @@ class Scheduling {
 
   /// Export intermediate state
   void exportState(String path) {
-    var output = File(path);
+    var content = '';
     // Dropped
-    output.writeAsStringSync('Drop:\n');
+    content += 'Drop:\n';
     var dropped = courseControl.getDropped();
     for (var course in dropped) {
-      output.writeAsStringSync('$course\n');
+      content += '$course\n';
     }
     // Split
-    output.writeAsStringSync('\nSplit:\n');
+    content += '\nSplit:\n';
     var history = splitControl.getHistory();
     for (var entry in history) {
-      output.writeAsStringSync('Course: ${entry.item2}\n');
+      content += 'Course: ${entry.item2}\n';
       for (var cluster in entry.item1) {
-        output.writeAsStringSync('Cluster: ${cluster.join(",")}\n');
+        content += 'Cluster: ${cluster.join(",")}\n';
       }
     }
     // Schedule
-    output.writeAsStringSync('\nSchedule:\n');
+    content += '\nSchedule:\n';
     for (var course in courseControl.getGo()) {
       var timeIndex = scheduleControl.scheduledTimeFor(course);
       if (timeIndex >= 0) {
-        output.writeAsStringSync('$course: $timeIndex\n');
+        content += '$course: $timeIndex\n';
       }
     }
     // Coordinator
-    output.writeAsStringSync('\nCoordinator:\n');
+    content += '\nCoordinator:\n';
     for (var course in courseControl.getGo()) {
       var coordinator = courseControl.getCoordinators(course);
       if (coordinator != null) {
-        output.writeAsStringSync('$course: ');
+        content += '$course: ';
         if (coordinator.equal) {
-          output.writeAsStringSync('equal');
+          content += 'equal';
         } else {
-          output.writeAsStringSync('unequal');
+          content += 'unequal';
         }
         for (var person in coordinator.coordinators) {
           if (person.isNotEmpty) {
-            output.writeAsStringSync(',$person');
+            content += ',$person';
           }
         }
-        output.writeAsStringSync('\n');
+        content += '\n';
       }
     }
+    var output = File(path);
+    output.writeAsStringSync(content);
   }
 
   /// Load intermediate state
