@@ -333,7 +333,7 @@ class _ScreenState extends State<Screen> {
               },
             ),
             MenuListItem(
-              title: 'Delete',
+              title: 'Load',
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, alt: true),
               onPressed: () {},
             ),
