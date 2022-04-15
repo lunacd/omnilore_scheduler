@@ -323,7 +323,7 @@ class _ScreenState extends State<Screen> {
                     try {
                       schedule.exportState(path);
                     } catch (e) {
-                      _showMyDialog(e.toString(), 'people');
+                      _showMyDialog(e.toString(), 'save');
                     }
                   }
                 } else {
@@ -335,7 +335,42 @@ class _ScreenState extends State<Screen> {
             MenuListItem(
               title: 'Load',
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, alt: true),
-              onPressed: () {},
+              onPressed: () async {
+                if (peopleImported == true) {
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles();
+                  print('FILE PICKED');
+
+                  if (result != null) {
+                    String path = result.files.single.path ?? '';
+                    print(path);
+                    if (path != '') {
+                      try {
+                        print('its about to load');
+                        schedule.loadState(path);
+                        print('LOADINGGGGGGGGGGG\n');
+                      } catch (e) {
+                        _showMyDialog(e.toString(), 'load');
+                      }
+                      dropDownVal = 'ALL';
+                      hintMax = schedule.courseControl
+                          .getMaxClassSize('ALL')
+                          .toString();
+                      hintMin = schedule.courseControl
+                          .getMinClassSize('ALL')
+                          .toString();
+                      minVal = '';
+                      maxVal = '';
+                      minTextField.clear();
+                      maxTextField.clear();
+                      peopleImported = true;
+                    }
+                  } else {
+                    //file picker canceled
+                  }
+                  setState(() {});
+                }
+              },
             ),
           ]),
           MenuItem(title: 'View', isActive: true, menuListItems: [
