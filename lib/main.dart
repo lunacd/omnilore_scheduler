@@ -120,6 +120,7 @@ class _ScreenState extends State<Screen> {
   String curClass = '';
   String curCell = '';
   String dropDownVal = '';
+  String minMaxError = '';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -182,8 +183,51 @@ class _ScreenState extends State<Screen> {
           minTextField.clear();
           maxTextField.clear();
         }
+      } else {
+        if (minVal == '' && maxVal == '') {
+          minMaxError = 'Please enter a value for min and max';
+        } else if (minVal == '') {
+          minMaxError = 'Please enter a value for min';
+        } else if (maxVal == '') {
+          minMaxError = 'Please enter a value for max';
+        } else {
+          minMaxError = 'Please import courses';
+        }
+        popUp();
+        minTextField.clear();
+        maxTextField.clear();
+        minVal = '';
+        maxVal = '';
       }
     });
+  }
+
+  Future<void> popUp() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // must be dismissed
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error setting class size'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text('Hint'),
+                Text(minMaxError),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -271,12 +315,62 @@ class _ScreenState extends State<Screen> {
             ),
             MenuListItem(
               title: 'Save',
-              onPressed: () {},
+              onPressed: () async {
+                String? path = await FilePicker.platform.saveFile();
+
+                if (path != null) {
+                  if (path != '') {
+                    try {
+                      schedule.exportState(path);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'save');
+                    }
+                  }
+                } else {
+                  //file picker canceled
+                }
+                setState(() {});
+              },
             ),
             MenuListItem(
-              title: 'Delete',
+              title: 'Load',
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, alt: true),
-              onPressed: () {},
+              onPressed: () async {
+                if (peopleImported == true) {
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles();
+                  print('FILE PICKED');
+
+                  if (result != null) {
+                    String path = result.files.single.path ?? '';
+                    print(path);
+                    if (path != '') {
+                      try {
+                        print('its about to load');
+                        schedule.loadState(path);
+                        print('LOADINGGGGGGGGGGG\n');
+                      } catch (e) {
+                        _showMyDialog(e.toString(), 'load');
+                      }
+                      dropDownVal = 'ALL';
+                      hintMax = schedule.courseControl
+                          .getMaxClassSize('ALL')
+                          .toString();
+                      hintMin = schedule.courseControl
+                          .getMinClassSize('ALL')
+                          .toString();
+                      minVal = '';
+                      maxVal = '';
+                      minTextField.clear();
+                      maxTextField.clear();
+                      peopleImported = true;
+                    }
+                  } else {
+                    //file picker canceled
+                  }
+                  setState(() {});
+                }
+              },
             ),
           ]),
           MenuItem(title: 'View', isActive: true, menuListItems: [
