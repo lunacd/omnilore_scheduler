@@ -850,13 +850,7 @@ class _ScreenState extends State<Screen> {
       dataList[0][idx] = code;
       idx++;
     }
-    for (int i = 0; i < droppedList.length; i++) {
-      if (droppedList[i] == true) {
-        schedule.courseControl.drop(dataList[0][i]);
-      } else {
-        schedule.courseControl.undrop(dataList[0][i]);
-      }
-    }
+
     idx = 0;
     for (String code in schedule.getCourseCodes()) {
       firstChoiceArr[idx] =
