@@ -347,7 +347,9 @@ class _ScreenState extends State<Screen> {
                     if (path != '') {
                       try {
                         print('its about to load');
-                        schedule.loadState(path);
+                        setState(() {
+                          schedule.loadState(path);
+                        });
                         print('LOADINGGGGGGGGGGG\n');
                       } catch (e) {
                         _showMyDialog(e.toString(), 'load');
