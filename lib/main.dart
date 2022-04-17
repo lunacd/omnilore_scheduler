@@ -687,9 +687,17 @@ class _ScreenState extends State<Screen> {
               onPressed: resultingClass == true && curClass != ''
                   ? () {
                       setState(() {
-                        numCourses = numCourses! + 1;
-                        droppedList.add(false);
-                        schedule.splitControl.split(curClass);
+                        int splitNum = computeSplitSize(curClass);
+                        print(splitNum);
+                        numCourses = numCourses! + splitNum;
+                        Iterable<String> temp =
+                            schedule.getCourseCodes(); // get list of courses
+                        List<String> res = temp.toList(); // dumb type casting
+                        for (var i = 0; i < splitNum; i++) {
+                          droppedList.insert(res.indexOf(curClass), false);
+                        } // insert "not dropped" value for new class
+                        schedule.splitControl.split(
+                            curClass); // rest is reseting dynamic variables
                         schedule.splitControl.resetState();
                         curClass = '';
 
@@ -792,6 +800,14 @@ class _ScreenState extends State<Screen> {
             }
           });
         });
+  }
+
+  int computeSplitSize(String course) {
+    int courseSize = schedule.overviewData.getResultingClassSize(course).size;
+    int maxSize = schedule.courseControl.getMaxClassSize(course);
+    int numSplits = (courseSize / maxSize).ceil();
+
+    return numSplits - 1;
   }
 
   Widget tableData() {
