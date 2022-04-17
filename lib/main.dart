@@ -1015,6 +1015,13 @@ class _ScreenState extends State<Screen> {
         onChanged: (bool? value) {
           setState(() {
             droppedList[i] = value!;
+            if (droppedList[i] == true) {
+              schedule.courseControl
+                  .drop(schedule.getCourseCodes().toList()[i]);
+            } else {
+              schedule.courseControl
+                  .undrop(schedule.getCourseCodes().toList()[i]);
+            }
             if (kDebugMode) {
               print(
                   'dropped list index: $i drop list value: ${droppedList[i]}');
@@ -1143,13 +1150,7 @@ class _ScreenState extends State<Screen> {
       dataList[0][idx] = code;
       idx++;
     }
-    for (int i = 0; i < droppedList.length; i++) {
-      if (droppedList[i] == true) {
-        schedule.courseControl.drop(dataList[0][i]);
-      } else {
-        schedule.courseControl.undrop(dataList[0][i]);
-      }
-    }
+
     idx = 0;
     for (String code in schedule.getCourseCodes()) {
       firstMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 0);
