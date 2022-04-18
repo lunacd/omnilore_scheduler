@@ -319,6 +319,7 @@ class Scheduling {
       courseControl.drop(course, noCompute: true);
       i += 1;
     }
+    compute(Change(drop: true));
 
     // Split
     while (true) {
@@ -391,6 +392,5 @@ class Scheduling {
         }
       }
     }
-    compute(Change(course: true, drop: true, schedule: true, people: true));
   }
 }
