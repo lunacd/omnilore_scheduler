@@ -339,18 +339,26 @@ class _ScreenState extends State<Screen> {
                 if (peopleImported == true) {
                   FilePickerResult? result =
                       await FilePicker.platform.pickFiles();
-                  print('FILE PICKED');
+                  if (kDebugMode) {
+                    print('FILE PICKED');
+                  }
 
                   if (result != null) {
                     String path = result.files.single.path ?? '';
-                    print(path);
+                    if (kDebugMode) {
+                      print(path);
+                    }
                     if (path != '') {
                       try {
-                        print('its about to load');
+                        if (kDebugMode) {
+                          print('its about to load');
+                        }
                         setState(() {
                           schedule.loadState(path);
                         });
-                        print('LOADINGGGGGGGGGGG\n');
+                        if (kDebugMode) {
+                          print('LOADINGGGGGGGGGGG\n');
+                        }
                       } catch (e) {
                         _showMyDialog(e.toString(), 'load');
                       }
@@ -690,7 +698,9 @@ class _ScreenState extends State<Screen> {
                   ? () {
                       setState(() {
                         int splitNum = computeSplitSize(curClass);
-                        print(splitNum);
+                        if (kDebugMode) {
+                          print(splitNum);
+                        }
                         numCourses = numCourses! + splitNum;
                         Iterable<String> temp =
                             schedule.getCourseCodes(); // get list of courses

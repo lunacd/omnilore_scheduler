@@ -46,17 +46,21 @@ class CourseControl {
   }
 
   /// Drop class
-  void drop(String course) {
+  void drop(String course, {noCompute = false}) {
     _dropped.add(course);
     _go.remove(course);
-    _scheduling.compute(Change(drop: true));
+    if (!noCompute) {
+      _scheduling.compute(Change(drop: true));
+    }
   }
 
   /// Undrop class
-  void undrop(String course) {
+  void undrop(String course, {noCompute = false}) {
     _dropped.remove(course);
     _go.add(course);
-    _scheduling.compute(Change(drop: true));
+    if (!noCompute) {
+      _scheduling.compute(Change(drop: true));
+    }
   }
 
   /// Get a set of dropped courses

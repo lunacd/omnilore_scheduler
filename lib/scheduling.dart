@@ -211,7 +211,7 @@ class Scheduling {
     output.writeAsStringSync(content);
   }
 
-  /// Get timeslot desricription from time index
+  /// Get timeslot description for time index
   String getTimeslotDescription(int timeIndex) {
     if (timeIndex < 0 || timeIndex > 19) {
       throw const InvalidArgument(message: 'Invalid time index');
@@ -305,6 +305,7 @@ class Scheduling {
     while (lines[i].trim() != 'Drop:') {
       i += 1;
     }
+    i += 1;
     while (true) {
       if (lines[i].isEmpty) {
         i += 1;
@@ -315,7 +316,8 @@ class Scheduling {
         break;
       }
       var course = lines[i].trim();
-      courseControl.drop(course);
+      courseControl.drop(course, noCompute: true);
+      i += 1;
     }
 
     // Split
@@ -389,5 +391,6 @@ class Scheduling {
         }
       }
     }
+    compute(Change(course: true, drop: true, schedule: true, people: true));
   }
 }
