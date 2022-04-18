@@ -355,6 +355,7 @@ class _ScreenState extends State<Screen> {
                         }
                         setState(() {
                           schedule.loadState(path);
+                          updateDropped();
                         });
                         if (kDebugMode) {
                           print('LOADINGGGGGGGGGGG\n');
@@ -822,6 +823,18 @@ class _ScreenState extends State<Screen> {
     return numSplits - 1;
   }
 
+  void updateDropped() {
+    for (var i = 0; i < droppedList.length; i++) {
+      droppedList[i] = false;
+    }
+    List<String> classes = schedule.getCourseCodes().toList();
+    for (var i = 0; i < classes.length; i++) {
+      if (schedule.courseControl.isDropped(classes[i])) {
+        droppedList[i] = true;
+      }
+    }
+  }
+
   Widget tableData() {
     // courseCodes = schedule.getCourseCodes().toList();
     final growableList = <String>[
@@ -1140,12 +1153,6 @@ class _ScreenState extends State<Screen> {
     var secondFriAM = List<int>.generate(arrSize, (index) => -1);
     var secondFriPM = List<int>.generate(arrSize, (index) => -1);
 
-    // var firstChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    // var secondChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    // var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    // var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    // var fromBU = List<int>.generate(arrSize, (index) => -1);
-    // var resultingSize = List<int>.generate(arrSize, (index) => -1);
     int idx = 0;
     //creating the 2d array
     var dataList = List<List<String>>.generate(

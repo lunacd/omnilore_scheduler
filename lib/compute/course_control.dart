@@ -63,6 +63,10 @@ class CourseControl {
     }
   }
 
+  bool isDropped(String course) {
+    return _dropped.contains(course);
+  }
+
   /// Get a set of dropped courses
   Set<String> getDropped() {
     return _dropped;
