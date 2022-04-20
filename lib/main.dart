@@ -383,6 +383,7 @@ class _ScreenState extends State<Screen> {
                 }
               },
             ),
+            MenuListItem(title: 'Export Roster')
           ]),
           MenuItem(title: 'View', isActive: true, menuListItems: [
             MenuListItem(title: 'View all'),
@@ -870,7 +871,14 @@ class _ScreenState extends State<Screen> {
 
     //checking the values of the dropped list and updating the list accordingly
     for (String code in schedule.getCourseCodes()) {
-      dataList[0][idx] = code;
+      String testCode = '';
+      for (int i = 0; i < code.length - 1; i++) {
+        testCode += code[i];
+        testCode += '\n';
+      }
+      testCode += code[code.length - 1];
+
+      dataList[0][idx] = testCode;
       idx++;
     }
 
@@ -891,7 +899,7 @@ class _ScreenState extends State<Screen> {
       dropCF[idx] = schedule.overviewData.getNbrDropFull(code);
       resultingSize[idx] =
           schedule.overviewData.getResultingClassSize(code).size;
-      dataList[0][idx] = code;
+      // dataList[0][idx] = code;
       droppedList[idx]
           ? dataList[1][idx] = '0'
           : dataList[1][idx] = firstChoiceArr[idx].toString();
@@ -930,7 +938,7 @@ class _ScreenState extends State<Screen> {
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.black),
           outside: const BorderSide(width: 1)),
-      columnWidths: const {0: IntrinsicColumnWidth()},
+      columnWidths: const {0: FixedColumnWidth(150)},
       children: buildInfo(growableList, dataList),
     );
   }
@@ -1259,7 +1267,7 @@ class _ScreenState extends State<Screen> {
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.blue),
           outside: const BorderSide(width: 1)),
-      columnWidths: const {0: IntrinsicColumnWidth()},
+      columnWidths: const {0: FixedColumnWidth(150)},
       children: buildTimeInfo(growableList, dataList),
     );
   }
