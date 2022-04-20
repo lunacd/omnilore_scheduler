@@ -112,7 +112,7 @@ class SplitControl {
   /// MUST call [resetState] before preceding.
   ///
   /// The given course MUST be a valid 3-digit course code
-  void split(String course) {
+  void split(String course, {noCompute = false}) {
     var clusterData = List<Set<String>>.from(_clusters);
     _history.add(Tuple2(clusterData, course));
 
@@ -194,7 +194,9 @@ class SplitControl {
     // Update course data
     _courses.splitCourse(course, result.length);
 
-    _scheduling.compute(Change(course: true));
+    if (!noCompute) {
+      _scheduling.compute(Change(course: true));
+    }
   }
 
   bool isClustured(String person) {

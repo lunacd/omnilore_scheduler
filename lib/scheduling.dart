@@ -340,8 +340,9 @@ class Scheduling {
         splitControl.addCluster(cluster);
         i += 1;
       }
-      splitControl.split(course);
+      splitControl.split(course, noCompute: true);
     }
+    compute(Change(course: true));
 
     // Schedule
     while (true) {
@@ -357,10 +358,11 @@ class Scheduling {
       var data = lines[i].split(':').map((e) => e.trim()).toList();
       var index = int.parse(data[1]);
       if (index >= 0) {
-        scheduleControl.schedule(data[0], index);
+        scheduleControl.schedule(data[0], index, noCompute: true);
       }
       i += 1;
     }
+    compute(Change(schedule: true));
 
     // Coordinator
     while (i < lines.length) {

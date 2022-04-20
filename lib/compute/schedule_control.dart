@@ -102,7 +102,7 @@ class ScheduleControl {
   /// from 0 to 19.
   /// Does nothing if no more classes can be scheduled at the requested time
   /// slot.
-  void schedule(String course, int timeIndex) {
+  void schedule(String course, int timeIndex, {noCompute = false}) {
     // Check for error
     if (timeIndex >= _schedule.length || timeIndex < 0) {
       throw const InvalidArgument(message: 'Time index should be from 0 to 19');
@@ -123,8 +123,10 @@ class ScheduleControl {
 
     // Add new assignment
     _schedule[timeIndex].add(course);
-    _scheduling.compute(Change(schedule: true));
     _scheduled.add(course);
+    if (!noCompute) {
+      _scheduling.compute(Change(schedule: true));
+    }
   }
 
   /// Unschedule a course at a given time slot
