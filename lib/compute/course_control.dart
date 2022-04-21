@@ -141,6 +141,7 @@ class CourseControl {
   /// Set split mode of a class to the given mode
   void setSplitMode(String course, SplitMode mode) {
     _classSplitModeMap[course] = mode;
+    _scheduling.compute(Change(schedule: true));
   }
 
   /// Query the current split mode of a class
