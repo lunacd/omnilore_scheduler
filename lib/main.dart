@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:omnilore_scheduler/model/coordinators.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
@@ -24,6 +25,8 @@ const MaterialColor primaryBlack = MaterialColor(
   },
 );
 const int _blackPrimaryValue = 0xFF000000;
+
+bool kDebugMode = false;
 
 const Map kColorMap = {
   'DarkBlue': Color.fromARGB(255, 69, 91, 138),
@@ -126,6 +129,7 @@ class _ScreenState extends State<Screen> {
   List<List<String>> curClusters = [];
   Map<Set<String>, Color> clustColors = <Set<String>, Color>{};
   bool resultingClass = false;
+  bool classCodes = false;
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
@@ -620,6 +624,7 @@ class _ScreenState extends State<Screen> {
                       } else {
                         curSelected[val] = true;
                       }
+                      if (classCodes) {}
                     });
                   },
                   child: Text(val.toString()))
@@ -775,9 +780,59 @@ class _ScreenState extends State<Screen> {
                     }
                   : null,
               child: const Text('Imp. Splits')),
-          const ElevatedButton(onPressed: null, child: Text('Show Coord(s)')),
-          const ElevatedButton(onPressed: null, child: Text('Set C or CC2')),
-          const ElevatedButton(onPressed: null, child: Text('Set CC1')),
+          ElevatedButton(
+              onPressed: classCodes == true
+                  ? () {
+                      setState(() {
+                        Coordinators? coordinator =
+                            schedule.courseControl.getCoordinators(curClass);
+                        if (coordinator != null) {
+                          List<String> tempList = coordinator.coordinators;
+                          print('**********got coordinators*********');
+                          for (int i = 0; i < tempList.length; i++) {
+                            // if (kDebugMode) {
+                            print(tempList[i]);
+                            curSelected[tempList[i]] =
+                                !curSelected[tempList[i]];
+                            // }
+                          }
+                        }
+                      });
+                    }
+                  : null,
+              child: const Text('Show Coord(s)')),
+          ElevatedButton(
+              onPressed: classCodes == true
+                  ? () {
+                      setState(() {
+                        for (var item in curSelected.keys
+                            .where((element) => curSelected[element] == true)) {
+                          schedule.courseControl
+                              .setMainCoCoordinator(curClass, item);
+                        }
+                        curSelected.forEach((key, value) {
+                          curSelected[key] = false;
+                        });
+                      });
+                    }
+                  : null,
+              child: const Text('Set C or CC2')),
+          ElevatedButton(
+              onPressed: classCodes == true
+                  ? () {
+                      setState(() {
+                        for (var item in curSelected.keys
+                            .where((element) => curSelected[element] == true)) {
+                          schedule.courseControl
+                              .setEqualCoCoordinator(curClass, item);
+                        }
+                        curSelected.forEach((key, value) {
+                          curSelected[key] = false;
+                        });
+                      });
+                    }
+                  : null,
+              child: const Text('Set CC1')),
         ]));
   }
 
@@ -993,6 +1048,7 @@ class _ScreenState extends State<Screen> {
   List<TableRow> buildInfo(
       // builds the list of table rows. I had to do it in a function because for
       // some reason state doesn't update if its done the other way
+
       List<String> growableList,
       List<List<String>> dataList) {
     List<TableRow> result = [];
@@ -1011,14 +1067,17 @@ class _ScreenState extends State<Screen> {
                   curClassRoster = schedule.overviewData
                       .getPeopleForResultingClass(dataList[0][j].toString());
                   resultingClass = false;
+                  classCodes = true;
                 } else if (growableList[i].toString() == 'First Choices') {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 0);
                   resultingClass = false;
+                  classCodes = false;
                 } else if (growableList[i].toString() == 'First backup') {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 1);
                   resultingClass = false;
+                  classCodes = false;
                 } else if (growableList[i].toString() == 'Second backup') {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 2);
@@ -1026,28 +1085,35 @@ class _ScreenState extends State<Screen> {
                     print(curClassRoster);
                   }
                   resultingClass = false;
+                  classCodes = false;
                 } else if (growableList[i].toString() == 'Third backup') {
                   curClassRoster = schedule.overviewData
                       .getPeopleForClassRank(dataList[0][j].toString(), 3);
                   resultingClass = false;
+                  classCodes = false;
                 } else if (growableList[i].toString() == 'Add from BU\'s') {
                   curClassRoster = schedule.overviewData
                       .getPeopleAddFromBackup(dataList[0][j].toString());
                   resultingClass = false;
+                  classCodes = false;
                 } else if (growableList[i].toString() == 'Drop, bad time') {
                   curClassRoster = schedule.overviewData
                       .getPeopleDropTime(dataList[0][j].toString());
                   resultingClass = false;
+                  classCodes = false;
                 } else if (growableList[i].toString() == 'Drop, dup class') {
                   curClassRoster = [];
                   resultingClass = false;
+                  classCodes = false;
                 } else if (growableList[i].toString() == 'Drop class full') {
                   curClassRoster = [];
                   resultingClass = false;
+                  classCodes = false;
                 } else if (growableList[i].toString() == 'Resulting Size') {
                   curClassRoster = schedule.overviewData
                       .getPeopleForResultingClass(dataList[0][j].toString());
                   resultingClass = true;
+                  classCodes = false;
                 }
 
                 curClass = dataList[0][j].toString();
