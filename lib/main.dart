@@ -137,6 +137,22 @@ class _ScreenState extends State<Screen> {
   Color masterBackgroundColor = kColorMap['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
 
+  String _formatClassCode(String code, int index) {
+    if (code == Null || code == '') {
+      return '';
+    }
+    if (index != 0) {
+      return code;
+    }
+    String testCode = '';
+    for (int i = 0; i < code.length - 1; i++) {
+      testCode += code[i];
+      testCode += '\n';
+    }
+    testCode += code[code.length - 1];
+    return testCode;
+  }
+
   void _setMinMaxClass() {
     setState(() {
       if (kDebugMode) {
@@ -383,7 +399,45 @@ class _ScreenState extends State<Screen> {
                 }
               },
             ),
-            MenuListItem(title: 'Export Roster')
+            MenuListItem(
+                title: 'Export Roster',
+                onPressed: () async {
+                  String? path = await FilePicker.platform.saveFile();
+
+                  if (path != null) {
+                    if (path != '') {
+                      try {
+                        if (kDebugMode) {
+                          print('name of file $path');
+                        }
+                        schedule.outputRosterCC(path);
+                      } catch (e) {
+                        _showMyDialog(e.toString(), 'RosterCC');
+                      }
+                    }
+                  } else {
+                    //file picker canceled
+                  }
+                  setState(() {});
+                }),
+            MenuListItem(
+                title: 'Export Roster Phone',
+                onPressed: () async {
+                  String? path = await FilePicker.platform.saveFile();
+
+                  if (path != null) {
+                    if (path != '') {
+                      try {
+                        schedule.outputRosterPhone(path);
+                      } catch (e) {
+                        _showMyDialog(e.toString(), 'RosterPhone');
+                      }
+                    }
+                  } else {
+                    //file picker canceled
+                  }
+                  setState(() {});
+                }),
           ]),
           MenuItem(title: 'View', isActive: true, menuListItems: [
             MenuListItem(title: 'View all'),
@@ -871,14 +925,7 @@ class _ScreenState extends State<Screen> {
 
     //checking the values of the dropped list and updating the list accordingly
     for (String code in schedule.getCourseCodes()) {
-      String testCode = '';
-      for (int i = 0; i < code.length - 1; i++) {
-        testCode += code[i];
-        testCode += '\n';
-      }
-      testCode += code[code.length - 1];
-
-      dataList[0][idx] = testCode;
+      dataList[0][idx] = code;
       idx++;
     }
 
@@ -957,7 +1004,7 @@ class _ScreenState extends State<Screen> {
                 children: <Widget>[Text(growableList[i].toString())])),
         for (int j = 0; j < dataList[i].length; j++)
           TextButton(
-            child: Text(dataList[i][j].toString()),
+            child: Text(_formatClassCode(dataList[i][j], i)),
             onPressed: () {
               setState(() {
                 if (i == 0) {
