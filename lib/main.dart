@@ -156,6 +156,7 @@ class _ScreenState extends State<Screen> {
   }
 
   void _setMinMaxClass() {
+    print(schedule.courseControl.getSplitMode(dropDownVal).toString());
     setState(() {
       if (kDebugMode) {
         print('Current class selected $dropDownVal $minVal $maxVal');
@@ -727,12 +728,13 @@ class _ScreenState extends State<Screen> {
                       currmode.index == 1
                           ? mode = 'limiting'
                           : mode = 'splitting';
-                      /*currmode.index == 1
+                      currmode.index == 1
                           ? print('currently limiting')
-                          : print('currently splitting');*/
-                      schedule.courseControl
-                          .setSplitMode(dropDownVal, currmode);
+                          : print('currently splitting');
+                      // schedule.courseControl
+                      // .setSplitMode(dropDownVal, currmode);
                     }));
+                    setState(() {});
                   },
                   child: Text(mode),
                 ),
