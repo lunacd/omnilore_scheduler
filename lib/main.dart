@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
@@ -121,6 +122,7 @@ class _ScreenState extends State<Screen> {
   String curCell = '';
   String dropDownVal = '';
   String minMaxError = '';
+  String mode = 'splitting';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -669,12 +671,6 @@ class _ScreenState extends State<Screen> {
               ],
             ),
           ),
-          // Container(alignment: Alignment.center, child: classDropDownMenu()),
-          // Row(
-          //   children: [
-          //     const SizedBox(height: 10),
-          //   ],
-          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -707,10 +703,6 @@ class _ScreenState extends State<Screen> {
                           fontSize: 20.0,
                           height: 1.25,
                           color: Colors.black))),
-              /*const SizedBox(
-                width: 50,
-                child: Text('max. '),
-              ),*/
             ],
           ),
           Row(
@@ -718,17 +710,39 @@ class _ScreenState extends State<Screen> {
               SizedBox(height: 10),
             ],
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              //const Text('by'),
-              const ElevatedButton(
-                onPressed: null,
-                child: Text('splitting'),
+              SizedBox(
+                height: 25.0,
+                width: 100.0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState((() {
+                      SplitMode currmode =
+                          schedule.courseControl.getSplitMode(dropDownVal);
+                      currmode.index == 0
+                          ? currmode = SplitMode.limit
+                          : currmode = SplitMode.split;
+                      currmode.index == 1
+                          ? mode = 'limiting'
+                          : mode = 'splitting';
+                      /*currmode.index == 1
+                          ? print('currently limiting')
+                          : print('currently splitting');*/
+                      schedule.courseControl
+                          .setSplitMode(dropDownVal, currmode);
+                    }));
+                  },
+                  child: Text(mode),
+                ),
               ),
-              ElevatedButton(
-                  onPressed: _setMinMaxClass, child: const Text('   set   ')),
+              SizedBox(
+                height: 25.0,
+                width: 100.0,
+                child: ElevatedButton(
+                    onPressed: _setMinMaxClass, child: const Text('   set   ')),
+              ),
             ],
           ),
         ],
