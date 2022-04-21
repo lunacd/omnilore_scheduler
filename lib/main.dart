@@ -1339,8 +1339,12 @@ class _ScreenState extends State<Screen> {
                 int timeIndex = getTimeIndex(growableList[i].toString());
 
                 curClass = dataList[0][j].toString();
-
-                schedule.scheduleControl.schedule(curClass, timeIndex);
+                if (schedule.scheduleControl
+                    .isScheduledAt(curClass, timeIndex)) {
+                  schedule.scheduleControl.unschedule(curClass, timeIndex);
+                } else {
+                  schedule.scheduleControl.schedule(curClass, timeIndex);
+                }
 
                 curSelected.clear();
                 clustColors.clear();
