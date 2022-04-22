@@ -62,7 +62,7 @@ class OverviewData {
     }
 
     // Compute all statistics
-    if (change.course || change.people || change.drop) {
+    if (change.course || change.people || change.drop || change.schedule) {
       // Clear data
       for (var courseData in _data.values) {
         courseData.reset();

@@ -140,7 +140,7 @@ class _ScreenState extends State<Screen> {
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
 
   String _formatClassCode(String code, int index) {
-    if (code == Null || code == '') {
+    if (code.isEmpty) {
       return '';
     }
     if (index != 0) {
@@ -156,7 +156,9 @@ class _ScreenState extends State<Screen> {
   }
 
   void _setMinMaxClass() {
-    print(schedule.courseControl.getSplitMode(dropDownVal).toString());
+    if (kDebugMode) {
+      print(schedule.courseControl.getSplitMode(dropDownVal).toString());
+    }
     setState(() {
       if (kDebugMode) {
         print('Current class selected $dropDownVal $minVal $maxVal');
@@ -729,10 +731,12 @@ class _ScreenState extends State<Screen> {
                           ? mode = 'limiting'
                           : mode = 'splitting';
                       currmode.index == 1
+                          // ignore: avoid_print
                           ? print('currently limiting')
+                          // ignore: avoid_print
                           : print('currently splitting');
-                      // schedule.courseControl
-                      // .setSplitMode(dropDownVal, currmode);
+                      schedule.courseControl
+                      .setSplitMode(dropDownVal, currmode);
                     }));
                     setState(() {});
                   },
