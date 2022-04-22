@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
+import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
@@ -121,6 +122,7 @@ class _ScreenState extends State<Screen> {
   String curCell = '';
   String dropDownVal = '';
   String minMaxError = '';
+  String mode = 'splitting';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -137,7 +139,24 @@ class _ScreenState extends State<Screen> {
   Color masterBackgroundColor = kColorMap['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
 
+  String _formatClassCode(String code, int index) {
+    if (code == Null || code == '') {
+      return '';
+    }
+    if (index != 0) {
+      return code;
+    }
+    String testCode = '';
+    for (int i = 0; i < code.length - 1; i++) {
+      testCode += code[i];
+      testCode += '\n';
+    }
+    testCode += code[code.length - 1];
+    return testCode;
+  }
+
   void _setMinMaxClass() {
+    print(schedule.courseControl.getSplitMode(dropDownVal).toString());
     setState(() {
       if (kDebugMode) {
         print('Current class selected $dropDownVal $minVal $maxVal');
@@ -383,6 +402,45 @@ class _ScreenState extends State<Screen> {
                 }
               },
             ),
+            MenuListItem(
+                title: 'Export Roster',
+                onPressed: () async {
+                  String? path = await FilePicker.platform.saveFile();
+
+                  if (path != null) {
+                    if (path != '') {
+                      try {
+                        if (kDebugMode) {
+                          print('name of file $path');
+                        }
+                        schedule.outputRosterCC(path);
+                      } catch (e) {
+                        _showMyDialog(e.toString(), 'RosterCC');
+                      }
+                    }
+                  } else {
+                    //file picker canceled
+                  }
+                  setState(() {});
+                }),
+            MenuListItem(
+                title: 'Export Roster Phone',
+                onPressed: () async {
+                  String? path = await FilePicker.platform.saveFile();
+
+                  if (path != null) {
+                    if (path != '') {
+                      try {
+                        schedule.outputRosterPhone(path);
+                      } catch (e) {
+                        _showMyDialog(e.toString(), 'RosterPhone');
+                      }
+                    }
+                  } else {
+                    //file picker canceled
+                  }
+                  setState(() {});
+                }),
           ]),
           MenuItem(title: 'View', isActive: true, menuListItems: [
             MenuListItem(title: 'View all'),
@@ -614,12 +672,6 @@ class _ScreenState extends State<Screen> {
               ],
             ),
           ),
-          // Container(alignment: Alignment.center, child: classDropDownMenu()),
-          // Row(
-          //   children: [
-          //     const SizedBox(height: 10),
-          //   ],
-          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -652,10 +704,6 @@ class _ScreenState extends State<Screen> {
                           fontSize: 20.0,
                           height: 1.25,
                           color: Colors.black))),
-              /*const SizedBox(
-                width: 50,
-                child: Text('max. '),
-              ),*/
             ],
           ),
           Row(
@@ -663,17 +711,40 @@ class _ScreenState extends State<Screen> {
               SizedBox(height: 10),
             ],
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              //const Text('by'),
-              const ElevatedButton(
-                onPressed: null,
-                child: Text('splitting'),
+              SizedBox(
+                height: 25.0,
+                width: 100.0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState((() {
+                      SplitMode currmode =
+                          schedule.courseControl.getSplitMode(dropDownVal);
+                      currmode.index == 0
+                          ? currmode = SplitMode.limit
+                          : currmode = SplitMode.split;
+                      currmode.index == 1
+                          ? mode = 'limiting'
+                          : mode = 'splitting';
+                      currmode.index == 1
+                          ? print('currently limiting')
+                          : print('currently splitting');
+                      // schedule.courseControl
+                      // .setSplitMode(dropDownVal, currmode);
+                    }));
+                    setState(() {});
+                  },
+                  child: Text(mode),
+                ),
               ),
-              ElevatedButton(
-                  onPressed: _setMinMaxClass, child: const Text('   set   ')),
+              SizedBox(
+                height: 25.0,
+                width: 100.0,
+                child: ElevatedButton(
+                    onPressed: _setMinMaxClass, child: const Text('   set   ')),
+              ),
             ],
           ),
         ],
@@ -891,7 +962,7 @@ class _ScreenState extends State<Screen> {
       dropCF[idx] = schedule.overviewData.getNbrDropFull(code);
       resultingSize[idx] =
           schedule.overviewData.getResultingClassSize(code).size;
-      dataList[0][idx] = code;
+      // dataList[0][idx] = code;
       droppedList[idx]
           ? dataList[1][idx] = '0'
           : dataList[1][idx] = firstChoiceArr[idx].toString();
@@ -930,7 +1001,7 @@ class _ScreenState extends State<Screen> {
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.black),
           outside: const BorderSide(width: 1)),
-      columnWidths: const {0: IntrinsicColumnWidth()},
+      columnWidths: const {0: FixedColumnWidth(150)},
       children: buildInfo(growableList, dataList),
     );
   }
@@ -949,7 +1020,7 @@ class _ScreenState extends State<Screen> {
                 children: <Widget>[Text(growableList[i].toString())])),
         for (int j = 0; j < dataList[i].length; j++)
           TextButton(
-            child: Text(dataList[i][j].toString()),
+            child: Text(_formatClassCode(dataList[i][j], i)),
             onPressed: () {
               setState(() {
                 if (i == 0) {
@@ -1259,7 +1330,7 @@ class _ScreenState extends State<Screen> {
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.blue),
           outside: const BorderSide(width: 1)),
-      columnWidths: const {0: IntrinsicColumnWidth()},
+      columnWidths: const {0: FixedColumnWidth(150)},
       children: buildTimeInfo(growableList, dataList),
     );
   }
