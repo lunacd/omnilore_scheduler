@@ -7,6 +7,7 @@ import 'package:flutter_menu/flutter_menu.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:tuple/tuple.dart';
 
 const MaterialColor primaryBlack = MaterialColor(
   _blackPrimaryValue,
@@ -408,6 +409,7 @@ class _ScreenState extends State<Screen> {
     if (kDebugMode) {
       print('BUILD: masterPane');
     }
+
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -415,7 +417,7 @@ class _ScreenState extends State<Screen> {
           color: masterBackgroundColor,
           child: SingleChildScrollView(
               child: Column(
-            children: [screen1(), tableData(), tableTimeData()],
+            children: [screen1(), combineTables(tableData(), tableTimeData())],
           )),
         );
       },
@@ -835,7 +837,7 @@ class _ScreenState extends State<Screen> {
     }
   }
 
-  Widget tableData() {
+  Tuple2<List<String>, List<List<String>>> tableData() {
     // courseCodes = schedule.getCourseCodes().toList();
     final growableList = <String>[
       '',
@@ -926,12 +928,25 @@ class _ScreenState extends State<Screen> {
       print(dataList.length);
     }
 
-    return Table(
+    /*return Table(
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.black),
           outside: const BorderSide(width: 1)),
       columnWidths: const {0: IntrinsicColumnWidth()},
       children: buildInfo(growableList, dataList),
+    );*/
+    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
+  }
+
+  Widget combineTables(Tuple2<List<String>, List<List<String>>> infoTable,
+      Tuple2<List<String>, List<List<String>>> timeTable) {
+    return Table(
+      border: TableBorder.symmetric(
+          inside: const BorderSide(width: 1, color: Colors.black),
+          outside: const BorderSide(width: 1)),
+      columnWidths: const {0: IntrinsicColumnWidth()},
+      children: buildInfo(infoTable.item1, infoTable.item2) +
+          buildTimeInfo(timeTable.item1, timeTable.item2),
     );
   }
 
@@ -1103,7 +1118,7 @@ class _ScreenState extends State<Screen> {
     return list;
   }
 
-  Widget tableTimeData() {
+  Tuple2<List<String>, List<List<String>>> tableTimeData() {
     final growableList = <String>[
       '',
       '1st/3rd Mon AM',
@@ -1255,13 +1270,14 @@ class _ScreenState extends State<Screen> {
       print(dataList.length);
     }
 
-    return Table(
+    /*return Table(
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.blue),
           outside: const BorderSide(width: 1)),
       columnWidths: const {0: IntrinsicColumnWidth()},
       children: buildTimeInfo(growableList, dataList),
-    );
+    );*/
+    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
   }
 
   List<TableRow> buildTimeInfo(
