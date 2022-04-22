@@ -62,7 +62,7 @@ class OverviewData {
     }
 
     // Compute all statistics
-    if (change.course || change.people || change.drop) {
+    if (change.course || change.people || change.drop || change.schedule) {
       // Clear data
       for (var courseData in _data.values) {
         courseData.reset();
@@ -319,8 +319,8 @@ class OverviewData {
 
   /// Get whether there is class to split
   bool hasOversizeClasses(Courses courses) {
-    for (var course in courses.getCodes()) {
-      if (getNbrForClassRank(course, 0).state == ClassState.oversized) {
+    for (var course in _scheduling.courseControl.getGo()) {
+      if (getResultingClassSize(course).state == ClassState.oversized) {
         return true;
       }
     }
@@ -329,8 +329,8 @@ class OverviewData {
 
   /// Get whether there is class to drop
   bool hasUndersizeClasses(Courses courses) {
-    for (var course in courses.getCodes()) {
-      if (getNbrForClassRank(course, 0).state == ClassState.undersized) {
+    for (var course in _scheduling.courseControl.getGo()) {
+      if (getResultingClassSize(course).state == ClassState.undersized) {
         return true;
       }
     }

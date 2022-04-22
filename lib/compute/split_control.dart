@@ -112,58 +112,8 @@ class SplitControl {
   /// MUST call [resetState] before preceding.
   ///
   /// The given course MUST be a valid 3-digit course code
-  void split(String course) {
-    var clusterData = List<Set<String>>.from(_clusters);
-    _history.add(Tuple2(clusterData, course));
-
-    if (course.length != 3) throw UnexpectedFatalException();
-    _peopleToSplit = List.from(
-        _scheduling.overviewData.getPeopleForResultingClass(course),
-        growable: false);
-    _peopleInBackup = _people.people.values
-        .where((person) =>
-            person.firstChoices.contains(course) ||
-            person.backups.contains(course))
-        .map((person) => person.getName())
-        .where((name) => !_peopleToSplit.contains(name))
-        .toList(growable: false);
-    _max = _scheduling.courseControl.getMaxClassSize(course);
-    _numSplits = (_peopleToSplit.length / _max).ceil();
-    _maxSplitSize = (_peopleToSplit.length / _numSplits).ceil();
-    _splitMatrix = List<List<int>>.generate(
-        _peopleToSplit.length + _peopleInBackup.length + _numSplits,
-        (_) => List<int>.filled(22, 0, growable: false),
-        growable: false);
-    _clusterArray = List<int>.filled(_clusters.length, -1, growable: false);
-    _correlateMatrix = List<List<int>>.generate(_peopleToSplit.length,
-        (_) => List<int>.filled(_peopleToSplit.length, 0, growable: false),
-        growable: false);
-    _testArray = List<int>.filled(_numSplits, 0, growable: false);
-    _baseOffset = _peopleToSplit.length + _peopleInBackup.length;
-    _backupOffset = _peopleToSplit.length;
-    _rot = List<int>.generate(_numSplits, (index) => index);
-
-    if (_numSplits == 1) return;
-
-    _loadSplitMatrix();
-    _loadClusterArray();
-    _sortSplitArray();
-    _genPairMatrix();
-    _generalCorrelate(1, 0);
-    _moveBases();
-    _formGroups();
-    _assignRemnants();
-
-    var result = List<Set<String>>.generate(_numSplits, (_) => <String>{});
-    for (var personIndex = 0;
-        personIndex < _peopleToSplit.length;
-        personIndex++) {
-      if (_splitMatrix[personIndex][numPeople] != 0) {
-        throw UnexpectedFatalException();
-      }
-      result[_splitMatrix[personIndex][numUnavail] - _baseOffset]
-          .add(_peopleToSplit[personIndex]);
-    }
+  void split(String course, {noCompute = false}) {
+    var result = getSplitResult(course);
 
     // Update people's choices
     for (var splitIndex = 0; splitIndex < result.length; splitIndex++) {
@@ -194,7 +144,65 @@ class SplitControl {
     // Update course data
     _courses.splitCourse(course, result.length);
 
-    _scheduling.compute(Change(course: true));
+    if (!noCompute) {
+      _scheduling.compute(Change(course: true));
+    }
+  }
+
+  /// Compute the result of splitting without implementing the split
+  List<Set<String>> getSplitResult(String course) {
+    var clusterData = List<Set<String>>.from(_clusters);
+    _history.add(Tuple2(clusterData, course));
+
+    if (course.length != 3) throw UnexpectedFatalException();
+    _peopleToSplit = List.from(
+        _scheduling.overviewData.getPeopleForResultingClass(course),
+        growable: false);
+    _peopleInBackup = _people.people.values
+        .where((person) =>
+    person.firstChoices.contains(course) ||
+        person.backups.contains(course))
+        .map((person) => person.getName())
+        .where((name) => !_peopleToSplit.contains(name))
+        .toList(growable: false);
+    _max = _scheduling.courseControl.getMaxClassSize(course);
+    _numSplits = (_peopleToSplit.length / _max).ceil();
+    _maxSplitSize = (_peopleToSplit.length / _numSplits).ceil();
+    _splitMatrix = List<List<int>>.generate(
+        _peopleToSplit.length + _peopleInBackup.length + _numSplits,
+            (_) => List<int>.filled(22, 0, growable: false),
+        growable: false);
+    _clusterArray = List<int>.filled(_clusters.length, -1, growable: false);
+    _correlateMatrix = List<List<int>>.generate(_peopleToSplit.length,
+            (_) => List<int>.filled(_peopleToSplit.length, 0, growable: false),
+        growable: false);
+    _testArray = List<int>.filled(_numSplits, 0, growable: false);
+    _baseOffset = _peopleToSplit.length + _peopleInBackup.length;
+    _backupOffset = _peopleToSplit.length;
+    _rot = List<int>.generate(_numSplits, (index) => index);
+
+    if (_numSplits == 1) return [];
+
+    _loadSplitMatrix();
+    _loadClusterArray();
+    _sortSplitArray();
+    _genPairMatrix();
+    _generalCorrelate(1, 0);
+    _moveBases();
+    _formGroups();
+    _assignRemnants();
+
+    var result = List<Set<String>>.generate(_numSplits, (_) => <String>{});
+    for (var personIndex = 0;
+    personIndex < _peopleToSplit.length;
+    personIndex++) {
+      if (_splitMatrix[personIndex][numPeople] != 0) {
+        throw UnexpectedFatalException();
+      }
+      result[_splitMatrix[personIndex][numUnavail] - _baseOffset]
+          .add(_peopleToSplit[personIndex]);
+    }
+    return result;
   }
 
   bool isClustured(String person) {

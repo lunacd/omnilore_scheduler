@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
 import 'package:omnilore_scheduler/model/coordinators.dart';
+import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:tuple/tuple.dart';
 
 const MaterialColor primaryBlack = MaterialColor(
   _blackPrimaryValue,
@@ -26,7 +28,7 @@ const MaterialColor primaryBlack = MaterialColor(
 );
 const int _blackPrimaryValue = 0xFF000000;
 
-bool kDebugMode = false;
+// bool kDebugMode = true;
 
 const Map kColorMap = {
   'DarkBlue': Color.fromARGB(255, 69, 91, 138),
@@ -124,6 +126,7 @@ class _ScreenState extends State<Screen> {
   String curCell = '';
   String dropDownVal = '';
   String minMaxError = '';
+  String mode = 'splitting';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -142,7 +145,7 @@ class _ScreenState extends State<Screen> {
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
 
   String _formatClassCode(String code, int index) {
-    if (code == Null || code == '') {
+    if (code.isEmpty) {
       return '';
     }
     if (index != 0) {
@@ -158,6 +161,9 @@ class _ScreenState extends State<Screen> {
   }
 
   void _setMinMaxClass() {
+    if (kDebugMode) {
+      print(schedule.courseControl.getSplitMode(dropDownVal).toString());
+    }
     setState(() {
       if (kDebugMode) {
         print('Current class selected $dropDownVal $minVal $maxVal');
@@ -467,6 +473,7 @@ class _ScreenState extends State<Screen> {
     if (kDebugMode) {
       print('BUILD: masterPane');
     }
+
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -474,7 +481,7 @@ class _ScreenState extends State<Screen> {
           color: masterBackgroundColor,
           child: SingleChildScrollView(
               child: Column(
-            children: [screen1(), tableData(), tableTimeData()],
+            children: [screen1(), combineTables(tableData(), tableTimeData())],
           )),
         );
       },
@@ -674,12 +681,6 @@ class _ScreenState extends State<Screen> {
               ],
             ),
           ),
-          // Container(alignment: Alignment.center, child: classDropDownMenu()),
-          // Row(
-          //   children: [
-          //     const SizedBox(height: 10),
-          //   ],
-          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -712,10 +713,6 @@ class _ScreenState extends State<Screen> {
                           fontSize: 20.0,
                           height: 1.25,
                           color: Colors.black))),
-              /*const SizedBox(
-                width: 50,
-                child: Text('max. '),
-              ),*/
             ],
           ),
           Row(
@@ -723,17 +720,42 @@ class _ScreenState extends State<Screen> {
               SizedBox(height: 10),
             ],
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              //const Text('by'),
-              const ElevatedButton(
-                onPressed: null,
-                child: Text('splitting'),
+              SizedBox(
+                height: 25.0,
+                width: 100.0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState((() {
+                      SplitMode currmode =
+                          schedule.courseControl.getSplitMode(dropDownVal);
+                      currmode.index == 0
+                          ? currmode = SplitMode.limit
+                          : currmode = SplitMode.split;
+                      currmode.index == 1
+                          ? mode = 'limiting'
+                          : mode = 'splitting';
+                      currmode.index == 1
+                          // ignore: avoid_print
+                          ? print('currently limiting')
+                          // ignore: avoid_print
+                          : print('currently splitting');
+                      schedule.courseControl
+                          .setSplitMode(dropDownVal, currmode);
+                    }));
+                    setState(() {});
+                  },
+                  child: Text(mode),
+                ),
               ),
-              ElevatedButton(
-                  onPressed: _setMinMaxClass, child: const Text('   set   ')),
+              SizedBox(
+                height: 25.0,
+                width: 100.0,
+                child: ElevatedButton(
+                    onPressed: _setMinMaxClass, child: const Text('   set   ')),
+              ),
             ],
           ),
         ],
@@ -945,7 +967,7 @@ class _ScreenState extends State<Screen> {
     }
   }
 
-  Widget tableData() {
+  Tuple2<List<String>, List<List<String>>> tableData() {
     // courseCodes = schedule.getCourseCodes().toList();
     final growableList = <String>[
       '',
@@ -1036,12 +1058,25 @@ class _ScreenState extends State<Screen> {
       print(dataList.length);
     }
 
-    return Table(
+    /*return Table(
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.black),
           outside: const BorderSide(width: 1)),
       columnWidths: const {0: FixedColumnWidth(150)},
       children: buildInfo(growableList, dataList),
+    );*/
+    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
+  }
+
+  Widget combineTables(Tuple2<List<String>, List<List<String>>> infoTable,
+      Tuple2<List<String>, List<List<String>>> timeTable) {
+    return Table(
+      border: TableBorder.symmetric(
+          inside: const BorderSide(width: 1, color: Colors.black),
+          outside: const BorderSide(width: 1)),
+      columnWidths: const {0: IntrinsicColumnWidth()},
+      children: buildInfo(infoTable.item1, infoTable.item2) +
+          buildTimeInfo(timeTable.item1, timeTable.item2),
     );
   }
 
@@ -1224,7 +1259,7 @@ class _ScreenState extends State<Screen> {
     return list;
   }
 
-  Widget tableTimeData() {
+  Tuple2<List<String>, List<List<String>>> tableTimeData() {
     final growableList = <String>[
       '',
       '1st/3rd Mon AM',
@@ -1376,13 +1411,14 @@ class _ScreenState extends State<Screen> {
       print(dataList.length);
     }
 
-    return Table(
+    /*return Table(
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.blue),
           outside: const BorderSide(width: 1)),
       columnWidths: const {0: FixedColumnWidth(150)},
       children: buildTimeInfo(growableList, dataList),
-    );
+    );*/
+    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
   }
 
   List<TableRow> buildTimeInfo(

@@ -37,11 +37,14 @@ class CourseControl {
   /// Compute state in response to changes
   void compute(Change change) {
     if (change.course) {
-      _dropped.clear();
       _go.clear();
-      for (var course in _courses.getCodes()) {
-        _go.add(course);
+      var newCourses = _courses.getCodes();
+      for (var course in newCourses) {
+        if (!_dropped.contains(course)) {
+          _go.add(course);
+        }
       }
+      _dropped.removeWhere((course) => !newCourses.contains(course));
     }
   }
 
@@ -138,6 +141,7 @@ class CourseControl {
   /// Set split mode of a class to the given mode
   void setSplitMode(String course, SplitMode mode) {
     _classSplitModeMap[course] = mode;
+    _scheduling.compute(Change(schedule: true));
   }
 
   /// Query the current split mode of a class

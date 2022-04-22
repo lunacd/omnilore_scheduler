@@ -160,6 +160,7 @@ class Scheduling {
 
   /// Output roster with CC information
   void outputRosterCC(String path) {
+    if (getStateOfProcessing() != StateOfProcessing.output) return;
     var content = '';
     for (var course in courseControl.getGo()) {
       var courseData = _courses.getCourse(course);
@@ -189,6 +190,7 @@ class Scheduling {
 
   /// Output roster with phone number
   void outputRosterPhone(String path) {
+    if (getStateOfProcessing() != StateOfProcessing.output) return;
     var content = '';
     for (var course in courseControl.getGo()) {
       var courseData = _courses.getCourse(course);
@@ -209,6 +211,74 @@ class Scheduling {
     }
     var output = File(path);
     output.writeAsStringSync(content);
+  }
+
+  /// Output mail merge file
+  void outputMM(String path) {
+    if (getStateOfProcessing() != StateOfProcessing.output) return;
+    Map<String, List<String>> coursesGiven = {};
+    for (var person in _people.people.keys) {
+      coursesGiven[person] = <String>[];
+    }
+    for (var course in courseControl.getGo()) {
+      var resultingClass = overviewData.getPeopleForResultingClass(course);
+      for (var person in resultingClass) {
+        coursesGiven[person]!.add(course);
+      }
+    }
+    var output = File(path);
+    // This truncates existing file
+    output.writeAsStringSync('');
+
+    // Output one line for each person
+    for (var person in _people.people.keys) {
+      var line = List<String>.generate(33, (_) => '');
+      line[0] = person;
+      var personData = _people.people[person]!;
+      line[1] = personData.nbrClassWanted.toString();
+      var coursesGivenToPerson = coursesGiven[person]!;
+      line[2] = coursesGivenToPerson.length.toString();
+      var countGot = 0;
+
+      // Wanted course info
+      for (var i = 0;
+          i < personData.firstChoices.length + personData.backups.length;
+          i++) {
+        String course;
+        if (i < personData.firstChoices.length) {
+          course = personData.firstChoices[i];
+        } else {
+          course = personData.backups[i - personData.firstChoices.length];
+        }
+        var courseData = _courses.getCourse(course);
+        line[3 + i * 2] = '$course  ${courseData.name}';
+        if (coursesGivenToPerson.contains(course)) {
+          line[4 + i * 2] = 'OK';
+          countGot += 1;
+        } else if (countGot < personData.nbrClassWanted) {
+          line[4 + i * 2] = 'Dropped';
+        } else {
+          line[4 + i * 2] = 'Not needed';
+        }
+      }
+
+      // Given course info
+      for (var i = 0; i < coursesGivenToPerson.length; i++) {
+        var course = coursesGivenToPerson[i];
+        var courseData = _courses.getCourse(course);
+        line[15 + i * 3] =
+            '$course  ${getTimeslotDescription(scheduleControl.scheduledTimeFor(course))}';
+        var coordinators = courseControl.getCoordinators(course);
+        if (coordinators!.coordinators[1].isEmpty) {
+          line[16 + i * 3] = coordinators.coordinators[0];
+        } else {
+          line[16 + i * 3] =
+              '${coordinators.coordinators[0]} & ${coordinators.coordinators[1]}';
+        }
+        line[17 + i * 3] = courseData.reading;
+      }
+      output.writeAsStringSync(line.join('\t'), mode: FileMode.append);
+    }
   }
 
   /// Get timeslot description for time index
@@ -340,8 +410,9 @@ class Scheduling {
         splitControl.addCluster(cluster);
         i += 1;
       }
-      splitControl.split(course);
+      splitControl.split(course, noCompute: true);
     }
+    compute(Change(course: true));
 
     // Schedule
     while (true) {
@@ -357,10 +428,11 @@ class Scheduling {
       var data = lines[i].split(':').map((e) => e.trim()).toList();
       var index = int.parse(data[1]);
       if (index >= 0) {
-        scheduleControl.schedule(data[0], index);
+        scheduleControl.schedule(data[0], index, noCompute: true);
       }
       i += 1;
     }
+    compute(Change(schedule: true));
 
     // Coordinator
     while (i < lines.length) {
