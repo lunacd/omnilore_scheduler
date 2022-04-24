@@ -28,7 +28,7 @@ const MaterialColor primaryBlack = MaterialColor(
 );
 const int _blackPrimaryValue = 0xFF000000;
 
-// bool kDebugMode = true;
+bool kDebugMode = false;
 
 const Map kColorMap = {
   'DarkBlue': Color.fromARGB(255, 69, 91, 138),
@@ -57,7 +57,9 @@ const List<String> StateProcessing = [
   'Inconsistent',
   'Drop and Split',
   'Drop and Split',
-  'Schedule'
+  'Schedule',
+  'Coordinator',
+  'Output'
 ];
 
 int colorNum = 0;
