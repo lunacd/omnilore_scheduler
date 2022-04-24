@@ -196,6 +196,17 @@ class _ScreenState extends State<Screen> {
           if (kDebugMode) {
             print('Min and max set with vals $minV $maxV');
           }
+
+          //split and limit toggle goes here!
+          SplitMode currmode;
+
+          if (mode == 'splitting') {
+            currmode = SplitMode.split;
+          } else {
+            currmode = SplitMode.limit;
+          }
+
+          schedule.courseControl.setSplitMode(dropDownVal, currmode);
         } on Exception {
           // ignore: todo
           //TODO: Add the pop up alert to show the error
@@ -723,8 +734,7 @@ class _ScreenState extends State<Screen> {
                 width: 100.0,
                 child: ElevatedButton(
                   onPressed: () {
-                    setState((() {
-                      SplitMode currmode =
+                    /*SplitMode currmode =
                           schedule.courseControl.getSplitMode(dropDownVal);
                       currmode.index == 0
                           ? currmode = SplitMode.limit
@@ -738,9 +748,15 @@ class _ScreenState extends State<Screen> {
                           // ignore: avoid_print
                           : print('currently splitting');
                       schedule.courseControl
-                          .setSplitMode(dropDownVal, currmode);
+                      .setSplitMode(dropDownVal, currmode);*/
+
+                    setState((() {
+                      if (mode == 'limiting') {
+                        mode = 'splitting';
+                      } else {
+                        mode = 'limiting';
+                      }
                     }));
-                    setState(() {});
                   },
                   child: Text(mode),
                 ),
