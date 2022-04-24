@@ -157,9 +157,10 @@ class CourseControl {
             message: 'Cannot set co-coordinator with equal coordinators set');
       }
       _coordinatorsMap[course]!.coordinators[1] = name;
+    } else {
+      _coordinatorsMap[course] = Coordinators(equal: false);
+      _coordinatorsMap[course]!.coordinators[0] = name;
     }
-    _coordinatorsMap[course] = Coordinators(equal: false);
-    _coordinatorsMap[course]!.coordinators[0] = name;
   }
 
   /// Set equal coordinators
@@ -170,14 +171,20 @@ class CourseControl {
             message: 'Cannot set equal co-coordinator with a coordinator set');
       }
       _coordinatorsMap[course]!.coordinators[1] = name;
+    } else {
+      _coordinatorsMap[course] = Coordinators(equal: true);
+      _coordinatorsMap[course]!.coordinators[0] = name;
     }
-    _coordinatorsMap[course] = Coordinators(equal: true);
-    _coordinatorsMap[course]!.coordinators[0] = name;
   }
 
   /// Get coordinator for a course
   Coordinators? getCoordinators(String course) {
     return _coordinatorsMap[course];
+  }
+
+  /// Clear current coordinator assignment
+  void clearCoordinators(String course) {
+    _coordinatorsMap.remove(course);
   }
 
   /// Check if all courses have coordinators assigned
