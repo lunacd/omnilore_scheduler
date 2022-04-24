@@ -160,8 +160,8 @@ class SplitControl {
         growable: false);
     _peopleInBackup = _people.people.values
         .where((person) =>
-    person.firstChoices.contains(course) ||
-        person.backups.contains(course))
+            person.firstChoices.contains(course) ||
+            person.backups.contains(course))
         .map((person) => person.getName())
         .where((name) => !_peopleToSplit.contains(name))
         .toList(growable: false);
@@ -170,11 +170,11 @@ class SplitControl {
     _maxSplitSize = (_peopleToSplit.length / _numSplits).ceil();
     _splitMatrix = List<List<int>>.generate(
         _peopleToSplit.length + _peopleInBackup.length + _numSplits,
-            (_) => List<int>.filled(22, 0, growable: false),
+        (_) => List<int>.filled(22, 0, growable: false),
         growable: false);
     _clusterArray = List<int>.filled(_clusters.length, -1, growable: false);
     _correlateMatrix = List<List<int>>.generate(_peopleToSplit.length,
-            (_) => List<int>.filled(_peopleToSplit.length, 0, growable: false),
+        (_) => List<int>.filled(_peopleToSplit.length, 0, growable: false),
         growable: false);
     _testArray = List<int>.filled(_numSplits, 0, growable: false);
     _baseOffset = _peopleToSplit.length + _peopleInBackup.length;
@@ -194,8 +194,8 @@ class SplitControl {
 
     var result = List<Set<String>>.generate(_numSplits, (_) => <String>{});
     for (var personIndex = 0;
-    personIndex < _peopleToSplit.length;
-    personIndex++) {
+        personIndex < _peopleToSplit.length;
+        personIndex++) {
       if (_splitMatrix[personIndex][numPeople] != 0) {
         throw UnexpectedFatalException();
       }
@@ -225,6 +225,10 @@ class SplitControl {
       }
     }
     return null;
+  }
+
+  bool noClusters() {
+    return _clusters.isEmpty;
   }
 
   /// Initializes _splitMatrix with people's can't attends

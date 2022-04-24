@@ -409,7 +409,6 @@ class _ScreenState extends State<Screen> {
                 title: 'Export Roster',
                 onPressed: () async {
                   String? path = await FilePicker.platform.saveFile();
-
                   if (path != null) {
                     if (path != '') {
                       try {
@@ -609,7 +608,8 @@ class _ScreenState extends State<Screen> {
               ElevatedButton(
                   style: (() {
                     if (curSelected[val] == true) {
-                      return ElevatedButton.styleFrom(primary: Colors.red);
+                      return ElevatedButton.styleFrom(
+                          primary: Colors.red, onPrimary: Colors.white);
                     } else {
                       if (schedule.splitControl.isClustured(val.toString()) ==
                           true) {
@@ -652,7 +652,7 @@ class _ScreenState extends State<Screen> {
         return clustColors[item] ?? Colors.grey;
       }
     }
-    return Colors.black;
+    return Colors.yellow;
   }
 
   Widget classSizeControl() {
@@ -738,7 +738,7 @@ class _ScreenState extends State<Screen> {
                           // ignore: avoid_print
                           : print('currently splitting');
                       schedule.courseControl
-                      .setSplitMode(dropDownVal, currmode);
+                          .setSplitMode(dropDownVal, currmode);
                     }));
                     setState(() {});
                   },
@@ -790,7 +790,7 @@ class _ScreenState extends State<Screen> {
                             curClass); // rest is reseting dynamic variables
                         schedule.splitControl.resetState();
                         curClass = '';
-
+                        schedule.splitControl.resetState();
                         curCell = '';
                         curClassRoster = [];
                       });
@@ -1086,6 +1086,7 @@ class _ScreenState extends State<Screen> {
                 }
 
                 curClass = dataList[0][j].toString();
+                schedule.splitControl.resetState();
                 curSelected.clear();
                 clustColors.clear();
                 curCell = growableList[i];
@@ -1375,7 +1376,7 @@ class _ScreenState extends State<Screen> {
                 int timeIndex = getTimeIndex(growableList[i].toString());
 
                 curClass = dataList[0][j].toString();
-
+                schedule.splitControl.resetState();
                 schedule.scheduleControl.schedule(curClass, timeIndex);
 
                 curSelected.clear();
