@@ -609,7 +609,22 @@ class _ScreenState extends State<Screen> {
           ],
         ),
         Row(
-          children: [Text('$curCell of $curClass')],
+          children: (() {
+            if (curCell.startsWith('1') ||
+                curCell.startsWith('2') ||
+                curCell == '' ||
+                curClass == '') {
+              return [const Text('')];
+            } else {
+              return [
+                Text(
+                  '$curCell of $curClass',
+                  style: const TextStyle(
+                      fontSize: 40, fontWeight: FontWeight.bold),
+                )
+              ];
+            }
+          }()),
           mainAxisAlignment: MainAxisAlignment.start,
         ),
         Wrap(
