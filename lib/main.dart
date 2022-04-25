@@ -433,7 +433,6 @@ class _ScreenState extends State<Screen> {
                 title: 'Export Roster',
                 onPressed: () async {
                   String? path = await FilePicker.platform.saveFile();
-
                   if (path != null) {
                     if (path != '') {
                       try {
@@ -623,7 +622,22 @@ class _ScreenState extends State<Screen> {
           ],
         ),
         Row(
-          children: [Text('$curCell of $curClass')],
+          children: (() {
+            if (curCell.startsWith('1') ||
+                curCell.startsWith('2') ||
+                curCell == '' ||
+                curClass == '') {
+              return [const Text('')];
+            } else {
+              return [
+                Text(
+                  '$curCell of $curClass',
+                  style: const TextStyle(
+                      fontSize: 40, fontWeight: FontWeight.bold),
+                )
+              ];
+            }
+          }()),
           mainAxisAlignment: MainAxisAlignment.start,
         ),
         Wrap(
@@ -633,7 +647,8 @@ class _ScreenState extends State<Screen> {
               ElevatedButton(
                   style: (() {
                     if (curSelected[val] == true) {
-                      return ElevatedButton.styleFrom(primary: Colors.red);
+                      return ElevatedButton.styleFrom(
+                          primary: Colors.red, onPrimary: Colors.white);
                     } else {
                       if (schedule.splitControl.isClustured(val.toString()) ==
                           true) {
@@ -677,7 +692,7 @@ class _ScreenState extends State<Screen> {
         return clustColors[item] ?? Colors.grey;
       }
     }
-    return Colors.black;
+    return Colors.yellow;
   }
 
   Widget classSizeControl() {
@@ -820,7 +835,7 @@ class _ScreenState extends State<Screen> {
                             curClass); // rest is reseting dynamic variables
                         schedule.splitControl.resetState();
                         curClass = '';
-
+                        schedule.splitControl.resetState();
                         curCell = '';
                         curClassRoster = [];
                       });
@@ -1219,6 +1234,7 @@ class _ScreenState extends State<Screen> {
                 }
 
                 curClass = dataList[0][j].toString();
+                schedule.splitControl.resetState();
                 curSelected.clear();
                 clustColors.clear();
                 curCell = growableList[i];
@@ -1508,12 +1524,8 @@ class _ScreenState extends State<Screen> {
                 int timeIndex = getTimeIndex(growableList[i].toString());
 
                 curClass = dataList[0][j].toString();
-                if (schedule.scheduleControl
-                    .isScheduledAt(curClass, timeIndex)) {
-                  schedule.scheduleControl.unschedule(curClass, timeIndex);
-                } else {
-                  schedule.scheduleControl.schedule(curClass, timeIndex);
-                }
+                schedule.splitControl.resetState();
+                schedule.scheduleControl.schedule(curClass, timeIndex);
 
                 curSelected.clear();
                 clustColors.clear();
