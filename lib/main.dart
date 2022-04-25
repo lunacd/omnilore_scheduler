@@ -28,7 +28,7 @@ const MaterialColor primaryBlack = MaterialColor(
 );
 const int _blackPrimaryValue = 0xFF000000;
 
-bool kDebugMode = false;
+// bool kDebugMode = false;
 
 const Map kColorMap = {
   'DarkBlue': Color.fromARGB(255, 69, 91, 138),
@@ -838,12 +838,16 @@ class _ScreenState extends State<Screen> {
                         if (coordinator != null) {
                           List<String> coordinatorsList =
                               coordinator.coordinators;
-                          print('**********got coordinators*********');
+                          if (kDebugMode) {
+                            print('**********got coordinators*********');
+                          }
                           for (int i = 0;
                               i < coordinatorsList.length - 1;
                               i++) {
                             // if (kDebugMode) {
-                            print(coordinatorsList[i]);
+                            if (kDebugMode) {
+                              print(coordinatorsList[i]);
+                            }
                             curSelected[coordinatorsList[i]] =
                                 !curSelected[coordinatorsList[i]];
                             // }
