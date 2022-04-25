@@ -841,15 +841,16 @@ class _ScreenState extends State<Screen> {
                           if (kDebugMode) {
                             print('**********got coordinators*********');
                           }
-                          for (int i = 0;
-                              i < coordinatorsList.length - 1;
-                              i++) {
+                          for (int i = 0; i < coordinatorsList.length; i++) {
                             // if (kDebugMode) {
                             if (kDebugMode) {
                               print(coordinatorsList[i]);
                             }
-                            curSelected[coordinatorsList[i]] =
-                                !curSelected[coordinatorsList[i]];
+                            if (coordinatorsList[i] != '') {
+                              curSelected[coordinatorsList[i]] =
+                                  !curSelected[coordinatorsList[i]];
+                            }
+
                             // }
                           }
                         }
