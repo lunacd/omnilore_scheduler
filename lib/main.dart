@@ -119,7 +119,8 @@ class _ScreenState extends State<Screen> {
   bool peopleImported = false;
   int? numCourses;
   int? numPeople;
-
+  Map mainCoordinatorSelected = <String, bool>{};
+  Map coCoordinatorSelected = <String, bool>{};
   final minTextField = TextEditingController();
   final maxTextField = TextEditingController();
   String hintMax = 'Max', hintMin = 'Min';
@@ -305,6 +306,12 @@ class _ScreenState extends State<Screen> {
                       minTextField.clear();
                       maxTextField.clear();
                       coursesImported = true;
+                      //Setting the boolean map to check if main or coordinator
+                      //has been set
+                      for (var name in schedule.getCourseCodes()) {
+                        mainCoordinatorSelected[name] = false;
+                        coCoordinatorSelected[name] = false;
+                      }
                     } catch (e) {
                       _showMyDialog(e.toString(), 'courses');
                     }
@@ -821,19 +828,24 @@ class _ScreenState extends State<Screen> {
                   : null,
               child: const Text('Imp. Splits')),
           ElevatedButton(
-              onPressed: classCodes == true
+              onPressed: classCodes == true &&
+                      (mainCoordinatorSelected[curClass] ||
+                          coCoordinatorSelected[curClass])
                   ? () {
                       setState(() {
                         Coordinators? coordinator =
                             schedule.courseControl.getCoordinators(curClass);
                         if (coordinator != null) {
-                          List<String> tempList = coordinator.coordinators;
+                          List<String> coordinatorsList =
+                              coordinator.coordinators;
                           print('**********got coordinators*********');
-                          for (int i = 0; i < tempList.length; i++) {
+                          for (int i = 0;
+                              i < coordinatorsList.length - 1;
+                              i++) {
                             // if (kDebugMode) {
-                            print(tempList[i]);
-                            curSelected[tempList[i]] =
-                                !curSelected[tempList[i]];
+                            print(coordinatorsList[i]);
+                            curSelected[coordinatorsList[i]] =
+                                !curSelected[coordinatorsList[i]];
                             // }
                           }
                         }
@@ -842,14 +854,30 @@ class _ScreenState extends State<Screen> {
                   : null,
               child: const Text('Show Coord(s)')),
           ElevatedButton(
-              onPressed: classCodes == true
+              onPressed: classCodes == true &&
+                      (!coCoordinatorSelected[curClass])
                   ? () {
                       setState(() {
-                        for (var item in curSelected.keys
-                            .where((element) => curSelected[element] == true)) {
-                          schedule.courseControl
-                              .setMainCoCoordinator(curClass, item);
+                        Iterable keysSelected = curSelected.keys
+                            .where((element) => curSelected[element] == true);
+                        if (keysSelected.length != 1) {
+                          // ignore: todo
+                          // TODO: Add pop up box to indicate error
+                          // ignore: avoid_print
+                          print('Error: Must select only one name');
                         }
+                        for (var item in keysSelected) {
+                          try {
+                            schedule.courseControl
+                                .setMainCoCoordinator(curClass, item);
+                          } on Exception catch (ex) {
+                            // ignore: todo
+                            //TODO: print out exception
+                            // ignore: avoid_print
+                            print(ex);
+                          }
+                        }
+                        mainCoordinatorSelected[curClass] = true;
                         curSelected.forEach((key, value) {
                           curSelected[key] = false;
                         });
@@ -858,14 +886,30 @@ class _ScreenState extends State<Screen> {
                   : null,
               child: const Text('Set C or CC2')),
           ElevatedButton(
-              onPressed: classCodes == true
+              onPressed: classCodes == true &&
+                      !mainCoordinatorSelected[curClass]
                   ? () {
                       setState(() {
-                        for (var item in curSelected.keys
-                            .where((element) => curSelected[element] == true)) {
-                          schedule.courseControl
-                              .setEqualCoCoordinator(curClass, item);
+                        Iterable keysSelected = curSelected.keys
+                            .where((element) => curSelected[element] == true);
+                        if (keysSelected.length != 1) {
+                          // ignore: todo
+                          // TODO: Add pop up box to indicate error
+                          // ignore: avoid_print
+                          print('Error: Must select only one name');
                         }
+                        for (var item in keysSelected) {
+                          try {
+                            schedule.courseControl
+                                .setEqualCoCoordinator(curClass, item);
+                          } on Exception catch (ex) {
+                            // ignore: todo
+                            //TODO: print out exception
+                            // ignore: avoid_print
+                            print(ex);
+                          }
+                        }
+                        coCoordinatorSelected[curClass] = true;
                         curSelected.forEach((key, value) {
                           curSelected[key] = false;
                         });
