@@ -95,6 +95,21 @@ class CourseControl {
     _classMinSize = minSize;
   }
 
+  /// Get global min class size
+  int getGlobalMinClassSize() {
+    return _classMinSize;
+  }
+
+  /// Get global max class size
+  int getGlobalMaxClassSize() {
+    return _classMaxSize;
+  }
+
+  /// Get a list of classes with modified class size
+  Iterable<String> getCustomSizeClasses() {
+    return _classMinSizeMap.keys.toSet().union(_classMaxSizeMap.keys.toSet());
+  }
+
   /// Set maximum class size for a specific class
   ///
   /// This will overwrite the global configuration.

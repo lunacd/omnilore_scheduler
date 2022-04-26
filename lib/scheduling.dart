@@ -320,11 +320,28 @@ class Scheduling {
   /// Export intermediate state
   void exportState(String path) {
     var content = '';
+    // Global setting
+    content += 'Setting:\n';
+    content += 'Min: ${courseControl.getGlobalMinClassSize()}\n';
+    content += 'Max: ${courseControl.getGlobalMaxClassSize()}\n';
+    // Course size
+    content += '\nCourse size:\n';
+    for (var course in courseControl.getCustomSizeClasses()) {
+      content +=
+          '$course: ${courseControl.getMinClassSize(course)},${courseControl.getMaxClassSize(course)}\n';
+    }
     // Dropped
-    content += 'Drop:\n';
+    content += '\nDrop:\n';
     var dropped = courseControl.getDropped();
     for (var course in dropped) {
       content += '$course\n';
+    }
+    // Limit
+    content += '\nLimit:\n';
+    for (var course in courseControl.getGo()) {
+      if (courseControl.getSplitMode(course) == SplitMode.limit) {
+        content += '$course\n';
+      }
     }
     // Split
     content += '\nSplit:\n';
@@ -371,11 +388,54 @@ class Scheduling {
     var input = File(path);
     List<String> lines = input.readAsLinesSync();
     var i = 0;
-    // Drop
-    while (lines[i].trim() != 'Drop:') {
+    // Setting
+    while (lines[i].trim() != 'Setting:') {
       i += 1;
     }
     i += 1;
+    int minSize = int.parse(lines[i].split(':')[1].trim());
+    int maxSize = int.parse(lines[i].split(':')[1].trim());
+    courseControl.setGlobalMinMaxClassSize(minSize, maxSize);
+
+    // Course size
+    while (lines[i].trim() != 'Course size:') {
+      i += 1;
+    }
+    i += 1;
+    while (true) {
+      if (lines[i].isEmpty) {
+        i += 1;
+        continue;
+      }
+      if (lines[i].trim() == 'Drop:') {
+        i += 1;
+        break;
+      }
+      var course = lines[i].split(':')[0].trim();
+      var setting = lines[i].split(':')[1].trim();
+      var classMinSize = int.parse(setting.split(',')[0].trim());
+      var classMaxSize = int.parse(setting.split(',')[1].trim());
+      courseControl.setMinMaxClassSizeForClass(course, classMinSize, classMaxSize);
+      i += 1;
+    }
+
+    // Drop
+    while (true) {
+      if (lines[i].isEmpty) {
+        i += 1;
+        continue;
+      }
+      if (lines[i].trim() == 'Limit:') {
+        i += 1;
+        break;
+      }
+      var course = lines[i].trim();
+      courseControl.drop(course, noCompute: true);
+      i += 1;
+    }
+    compute(Change(drop: true));
+
+    // Limit
     while (true) {
       if (lines[i].isEmpty) {
         i += 1;
@@ -386,10 +446,9 @@ class Scheduling {
         break;
       }
       var course = lines[i].trim();
-      courseControl.drop(course, noCompute: true);
+      courseControl.setSplitMode(course, SplitMode.limit);
       i += 1;
     }
-    compute(Change(drop: true));
 
     // Split
     while (true) {
