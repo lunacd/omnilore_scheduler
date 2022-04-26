@@ -1519,29 +1519,32 @@ class _ScreenState extends State<Screen> {
         for (int j = 0; j < dataList[i].length; j++)
           TextButton(
             child: Text(dataList[i][j].toString()),
-            onPressed: () {
-              setState(() {
-                int timeIndex = getTimeIndex(growableList[i].toString());
+            onPressed: droppedList[j] == false
+                ? () {
+                    //check if the course is dropped
+                    setState(() {
+                      int timeIndex = getTimeIndex(growableList[i].toString());
 
-                curClass = dataList[0][j].toString();
-                schedule.splitControl.resetState();
-                schedule.scheduleControl.schedule(curClass, timeIndex);
+                      curClass = dataList[0][j].toString();
+                      schedule.splitControl.resetState();
+                      schedule.scheduleControl.schedule(curClass, timeIndex);
 
-                curSelected.clear();
-                clustColors.clear();
-                curCell = growableList[i];
-                List<String> tempList = curClassRoster.toList();
-                tempList
-                    .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
-                curClassRoster = tempList;
-                for (var name in curClassRoster) {
-                  curSelected[name] = false;
-                }
-                if (kDebugMode) {
-                  print(curClassRoster);
-                }
-              });
-            },
+                      curSelected.clear();
+                      clustColors.clear();
+                      curCell = growableList[i];
+                      List<String> tempList = curClassRoster.toList();
+                      tempList.sort(
+                          (a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
+                      curClassRoster = tempList;
+                      for (var name in curClassRoster) {
+                        curSelected[name] = false;
+                      }
+                      if (kDebugMode) {
+                        print(curClassRoster);
+                      }
+                    });
+                  }
+                : null,
             style: (() {
               if (schedule.scheduleControl.isScheduledAt(
                   dataList[0][j].toString(),
