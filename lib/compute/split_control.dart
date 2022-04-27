@@ -114,6 +114,7 @@ class SplitControl {
   /// The given course MUST be a valid 3-digit course code
   void split(String course, {noCompute = false}) {
     var result = getSplitResult(course);
+    if (result.isEmpty) return;
 
     // Update people's choices
     for (var splitIndex = 0; splitIndex < result.length; splitIndex++) {
