@@ -467,6 +467,25 @@ class _ScreenState extends State<Screen> {
                   }
                   setState(() {});
                 }),
+            MenuListItem(
+              title: 'Export MailMerge',
+              onPressed: () async {
+                String? path = await FilePicker.platform.saveFile();
+
+                if (path != null) {
+                  if (path != '') {
+                    try {
+                      schedule.outputMM(path);
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'MailMerge');
+                    }
+                  }
+                } else {
+                  //file picker canceled
+                }
+                setState(() {});
+              },
+            ),
           ]),
           MenuItem(title: 'View', isActive: true, menuListItems: [
             MenuListItem(title: 'View all'),
