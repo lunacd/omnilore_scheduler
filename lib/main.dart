@@ -1519,7 +1519,9 @@ class _ScreenState extends State<Screen> {
         for (int j = 0; j < dataList[i].length; j++)
           TextButton(
             child: Text(dataList[i][j].toString()),
-            onPressed: droppedList[j] == false
+            onPressed: droppedList[j] == false &&
+                    !(schedule.getStateOfProcessing().index == 3 ||
+                        schedule.getStateOfProcessing().index == 4)
                 ? () {
                     //check if the course is dropped
                     setState(() {
