@@ -67,7 +67,7 @@ int colorNum = 0;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
-    await DesktopWindow.setMinWindowSize(const Size(1200, 1300));
+    await DesktopWindow.setMinWindowSize(const Size(1200, 500));
   }
   runApp(const MyApp());
 }
