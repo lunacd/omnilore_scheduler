@@ -690,7 +690,16 @@ class _ScreenState extends State<Screen> {
                       if (classCodes) {}
                     });
                   },
-                  child: Text(val.toString()))
+                  child: Text(
+                    val.toString(),
+                    style: (() {
+                      if (schedule.splitControl.isClustured(val) == true) {
+                        return TextStyle(color: Colors.white);
+                      } else {
+                        TextStyle(color: Colors.black);
+                      }
+                    }()),
+                  ))
           ],
         ),
         Container(
