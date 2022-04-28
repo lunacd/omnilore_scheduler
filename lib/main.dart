@@ -934,7 +934,7 @@ class _ScreenState extends State<Screen> {
                       });
                     }
                   : null,
-              child: const Text('Set C or CC2')),
+              child: const Text('Set C and CC')),
           ElevatedButton(
               onPressed: classCodes == true &&
                       !mainCoordinatorSelected[curClass]
@@ -966,7 +966,7 @@ class _ScreenState extends State<Screen> {
                       });
                     }
                   : null,
-              child: const Text('Set CC1')),
+              child: const Text('Set CC1 and CC2')),
         ]));
   }
 
