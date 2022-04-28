@@ -401,6 +401,8 @@ class _ScreenState extends State<Screen> {
                         }
                         setState(() {
                           schedule.loadState(path);
+
+                          numCourses = schedule.getCourseCodes().length;
                           updateDropped();
                         });
                         if (kDebugMode) {
@@ -1057,6 +1059,9 @@ class _ScreenState extends State<Screen> {
   }
 
   void updateDropped() {
+    while (droppedList.length != numCourses) {
+      droppedList.add(false);
+    }
     for (var i = 0; i < droppedList.length; i++) {
       droppedList[i] = false;
     }

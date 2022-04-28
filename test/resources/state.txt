@@ -1,9 +1,28 @@
+Setting:
+Min: 8
+Max: 19
+
+Course size:
+ASA: 10,11
+EVC: 12,22
+
 Drop:
 QUR
-REF
+BIG
+SAF
+SCH
+SIS
+EVC
 FOO
+REF
+
+Limit:
+ASA
 
 Split:
+Course: FAC
+Course: SHK
+Cluster: Eddy Bay,Laura Guneau
 
 Schedule:
 
