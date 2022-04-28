@@ -693,7 +693,8 @@ class _ScreenState extends State<Screen> {
                   child: Text(
                     val.toString(),
                     style: (() {
-                      if (schedule.splitControl.isClustured(val) == true) {
+                      if (schedule.splitControl.isClustured(val) == true &&
+                          getColorKey(val) == Colors.brown) {
                         return TextStyle(color: Colors.white);
                       } else {
                         TextStyle(color: Colors.black);
