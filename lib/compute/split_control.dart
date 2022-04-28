@@ -181,6 +181,7 @@ class SplitControl {
     _baseOffset = _peopleToSplit.length + _peopleInBackup.length;
     _backupOffset = _peopleToSplit.length;
     _rot = List<int>.generate(_numSplits, (index) => index);
+    _bestTestArray.clear();
 
     if (_numSplits == 1) return [];
 

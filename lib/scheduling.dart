@@ -190,7 +190,9 @@ class Scheduling {
 
   /// Output roster with phone number
   void outputRosterPhone(String path) {
-    if (getStateOfProcessing() != StateOfProcessing.output) return;
+    var state = getStateOfProcessing();
+    if (state != StateOfProcessing.coordinator &&
+        state != StateOfProcessing.output) return;
     var content = '';
     for (var course in courseControl.getGo()) {
       var courseData = _courses.getCourse(course);
@@ -394,6 +396,7 @@ class Scheduling {
     }
     i += 1;
     int minSize = int.parse(lines[i].split(':')[1].trim());
+    i += 1;
     int maxSize = int.parse(lines[i].split(':')[1].trim());
     courseControl.setGlobalMinMaxClassSize(minSize, maxSize);
 
@@ -415,7 +418,8 @@ class Scheduling {
       var setting = lines[i].split(':')[1].trim();
       var classMinSize = int.parse(setting.split(',')[0].trim());
       var classMaxSize = int.parse(setting.split(',')[1].trim());
-      courseControl.setMinMaxClassSizeForClass(course, classMinSize, classMaxSize);
+      courseControl.setMinMaxClassSizeForClass(
+          course, classMinSize, classMaxSize);
       i += 1;
     }
 
@@ -522,6 +526,7 @@ class Scheduling {
           courseControl.setMainCoCoordinator(course, data[1]);
         }
       }
+      i += 1;
     }
   }
 }
