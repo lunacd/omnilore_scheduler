@@ -695,9 +695,9 @@ class _ScreenState extends State<Screen> {
                     style: (() {
                       if (schedule.splitControl.isClustured(val) == true &&
                           getColorKey(val) == Colors.brown) {
-                        return TextStyle(color: Colors.white);
+                        return const TextStyle(color: Colors.white);
                       } else {
-                        TextStyle(color: Colors.black);
+                        const TextStyle(color: Colors.black);
                       }
                     }()),
                   ))
@@ -915,27 +915,30 @@ class _ScreenState extends State<Screen> {
                       setState(() {
                         Iterable keysSelected = curSelected.keys
                             .where((element) => curSelected[element] == true);
-                        if (keysSelected.length != 1) {
+                        if (keysSelected.isNotEmpty) {
                           // ignore: todo
                           // TODO: Add pop up box to indicate error
                           // ignore: avoid_print
-                          print('Error: Must select only one name');
-                        }
-                        for (var item in keysSelected) {
-                          try {
-                            schedule.courseControl
-                                .setMainCoCoordinator(curClass, item);
-                          } on Exception catch (ex) {
-                            // ignore: todo
-                            //TODO: print out exception
-                            // ignore: avoid_print
-                            print(ex);
+                          for (var item in keysSelected) {
+                            try {
+                              schedule.courseControl
+                                  .setMainCoCoordinator(curClass, item);
+                            } on Exception catch (ex) {
+                              // ignore: todo
+                              //TODO: print out exception
+                              // ignore: avoid_print
+                              print(ex);
+                            }
+                          }
+                          mainCoordinatorSelected[curClass] = true;
+                          curSelected.forEach((key, value) {
+                            curSelected[key] = false;
+                          });
+                        } else {
+                          if (kDebugMode) {
+                            print('Error: Must select only one name');
                           }
                         }
-                        mainCoordinatorSelected[curClass] = true;
-                        curSelected.forEach((key, value) {
-                          curSelected[key] = false;
-                        });
                       });
                     }
                   : null,
@@ -951,27 +954,30 @@ class _ScreenState extends State<Screen> {
                       setState(() {
                         Iterable keysSelected = curSelected.keys
                             .where((element) => curSelected[element] == true);
-                        if (keysSelected.length != 1) {
+                        if (keysSelected.isNotEmpty) {
                           // ignore: todo
                           // TODO: Add pop up box to indicate error
                           // ignore: avoid_print
-                          print('Error: Must select only one name');
-                        }
-                        for (var item in keysSelected) {
-                          try {
-                            schedule.courseControl
-                                .setEqualCoCoordinator(curClass, item);
-                          } on Exception catch (ex) {
-                            // ignore: todo
-                            //TODO: print out exception
-                            // ignore: avoid_print
-                            print(ex);
+                          for (var item in keysSelected) {
+                            try {
+                              schedule.courseControl
+                                  .setEqualCoCoordinator(curClass, item);
+                            } on Exception catch (ex) {
+                              // ignore: todo
+                              //TODO: print out exception
+                              // ignore: avoid_print
+                              print(ex);
+                            }
+                          }
+                          coCoordinatorSelected[curClass] = true;
+                          curSelected.forEach((key, value) {
+                            curSelected[key] = false;
+                          });
+                        } else {
+                          if (kDebugMode) {
+                            print('Error: Must select only one name');
                           }
                         }
-                        coCoordinatorSelected[curClass] = true;
-                        curSelected.forEach((key, value) {
-                          curSelected[key] = false;
-                        });
                       });
                     }
                   : null,
@@ -982,14 +988,17 @@ class _ScreenState extends State<Screen> {
   bool updateAndShowCO() {
     // print("****************HELLO***********");
     List<String> classes = schedule.getCourseCodes().toList();
-    if (mainCoordinatorSelected.length != classes.length) {
-      for (int i = 0; i < classes.length; i++) {
-        if (!mainCoordinatorSelected.containsKey(classes[i])) {
-          mainCoordinatorSelected[classes[i]] = false;
-          coCoordinatorSelected[classes[i]] = false;
-        }
+    if (StateProcessing[schedule.getStateOfProcessing().index] == 'Schedule') {
+      // if (mainCoordinatorSelected.length != classes.length) {
+      mainCoordinatorSelected.clear();
+      coCoordinatorSelected.clear();
+      for (var name in classes) {
+        mainCoordinatorSelected[name] = false;
+        coCoordinatorSelected[name] = false;
+        // }
       }
     }
+
     return classCodes == true &&
         StateProcessing[schedule.getStateOfProcessing().index] ==
             'Coordinator' &&
@@ -1309,6 +1318,18 @@ class _ScreenState extends State<Screen> {
                 }
               });
             },
+            style: () {
+              List<String> classes = schedule.getCourseCodes().toList();
+              if (i == 0 &&
+                  StateProcessing[schedule.getStateOfProcessing().index] ==
+                      'Coordinator' &&
+                  (mainCoordinatorSelected[classes[j]] ||
+                      coCoordinatorSelected[classes[j]])) {
+                return ElevatedButton.styleFrom(
+                  primary: Colors.lightBlueAccent,
+                );
+              }
+            }(),
           )
       ]));
     }
