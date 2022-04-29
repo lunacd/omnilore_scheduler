@@ -162,20 +162,26 @@ class Scheduling {
   void outputRosterCC(String path) {
     if (getStateOfProcessing() != StateOfProcessing.output) return;
     var content = '';
-    for (var course in courseControl.getGo()) {
+    var goCourses = courseControl.getGo().toList(growable: false);
+    goCourses.sort((a, b) => a.compareTo(b));
+    for (var course in goCourses) {
       var courseData = _courses.getCourse(course);
       int timeSlot = scheduleControl.scheduledTimeFor(course);
-      var people = overviewData.getPeopleForResultingClass(course);
+      var people = overviewData
+          .getPeopleForResultingClass(course)
+          .map((name) => _people.people[name]!)
+          .toList(growable: false);
+      people.sort((a, b) => a.getReversedName().compareTo(b.getReversedName()));
       var cc = courseControl.getCoordinators(course)!;
 
       content += '${courseData.name}\n';
       content += '$course\t${getTimeslotDescription(timeSlot)}\n\n';
 
       for (var person in people) {
-        if (person == cc.coordinators[0] && !cc.equal) {
+        if (person.getName() == cc.coordinators[0] && !cc.equal) {
           content += '$person (C)\n';
-        } else if (person == cc.coordinators[0] ||
-            person == cc.coordinators[1]) {
+        } else if (person.getName() == cc.coordinators[0] ||
+            person.getName() == cc.coordinators[1]) {
           content += '$person (CC)\n';
         }
         content += '$person\n';
