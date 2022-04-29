@@ -529,14 +529,14 @@ class Scheduling {
           courseControl.setEqualCoCoordinator(course, data[1]);
         }
         if (data.length >= 3) {
-          courseControl.setEqualCoCoordinator(course, data[1]);
+          courseControl.setEqualCoCoordinator(course, data[2]);
         }
       } else {
         if (data.length >= 2) {
           courseControl.setMainCoCoordinator(course, data[1]);
         }
         if (data.length >= 3) {
-          courseControl.setMainCoCoordinator(course, data[1]);
+          courseControl.setMainCoCoordinator(course, data[2]);
         }
       }
       i += 1;
