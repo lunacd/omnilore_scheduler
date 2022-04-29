@@ -38,4 +38,9 @@ class Person {
   String getName() {
     return '$fName $lName';
   }
+
+  /// Get reversed name
+  String getReversedName() {
+    return '$lName, $fName';
+  }
 }

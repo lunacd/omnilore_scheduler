@@ -27,7 +27,7 @@ flutter run -d <windows/macOS/linux>
 
 Run unit tests with
 ```
-flutter run test
+flutter test
 ```
 
 ## Building Executables

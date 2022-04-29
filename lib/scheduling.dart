@@ -194,22 +194,28 @@ class Scheduling {
     if (state != StateOfProcessing.coordinator &&
         state != StateOfProcessing.output) return;
     var content = '';
-    for (var course in courseControl.getGo()) {
+    var goCourses = courseControl.getGo().toList(growable: false);
+    goCourses.sort((a, b) => a.compareTo(b));
+    for (var course in goCourses) {
       var courseData = _courses.getCourse(course);
       int timeSlot = scheduleControl.scheduledTimeFor(course);
-      var people = overviewData.getPeopleForResultingClass(course);
+      var people = overviewData
+          .getPeopleForResultingClass(course)
+          .map((name) => _people.people[name]!)
+          .toList(growable: false);
+      people.sort((a, b) => a.getReversedName().compareTo(b.getReversedName()));
 
       content += '${courseData.name}\n';
       content += '$course\t${getTimeslotDescription(timeSlot)}\n\n';
       for (var person in people) {
-        var personData = _people.people[person]!;
-        var personString = '${personData.lName}, ${personData.fName}';
+        var personString = person.getReversedName();
         content += personString;
         var padding = ' ' * (_people.maxLength - personString.length);
         content += padding;
-        content += personData.phone;
+        content += person.phone;
         content += '\n';
       }
+      content += '\n\n';
     }
     var output = File(path);
     output.writeAsStringSync(content);

@@ -1,4 +1,12 @@
+Setting:
+Min: 8
+Max: 19
+
+Course size:
+
 Drop:
+
+Limit:
 
 Split:
 
