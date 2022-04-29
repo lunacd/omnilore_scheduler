@@ -695,9 +695,9 @@ class _ScreenState extends State<Screen> {
                     style: (() {
                       if (schedule.splitControl.isClustured(val) == true &&
                           getColorKey(val) == Colors.brown) {
-                        return TextStyle(color: Colors.white);
+                        return const TextStyle(color: Colors.white);
                       } else {
-                        TextStyle(color: Colors.black);
+                        const TextStyle(color: Colors.black);
                       }
                     }()),
                   ))
