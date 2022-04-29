@@ -294,7 +294,7 @@ class OverviewData {
   /// Before scheduling classes, this is always equal to the number of classes
   /// wanted.
   int getNbrPlacesGiven() {
-    return _nbrRequested;
+    return _nbrRequested - _nbrUnmetWants;
   }
 
   /// Get the total number of unmet wants
