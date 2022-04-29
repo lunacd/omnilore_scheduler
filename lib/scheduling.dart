@@ -210,6 +210,7 @@ class Scheduling {
         content += personData.phone;
         content += '\n';
       }
+      content += '\n\n';
     }
     var output = File(path);
     output.writeAsStringSync(content);

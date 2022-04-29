@@ -50,7 +50,7 @@ class People {
       var lName = tokens[0];
       var fName = tokens[1];
       if (lName.length + fName.length + 2 > maxLength) {
-        maxLength = lName.length + fName.length + 2;
+        maxLength = lName.length + fName.length + 3;
       }
       var phone = tokens[2];
       var numClassWanted = 0;
