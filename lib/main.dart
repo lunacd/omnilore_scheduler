@@ -1000,8 +1000,10 @@ class _ScreenState extends State<Screen> {
     }
 
     return classCodes == true &&
-        StateProcessing[schedule.getStateOfProcessing().index] ==
-            'Coordinator' &&
+        (StateProcessing[schedule.getStateOfProcessing().index] ==
+                'Coordinator' ||
+            StateProcessing[schedule.getStateOfProcessing().index] ==
+                'Output') &&
         (mainCoordinatorSelected[curClass] || coCoordinatorSelected[curClass]);
   }
 
@@ -1175,31 +1177,31 @@ class _ScreenState extends State<Screen> {
           schedule.overviewData.getResultingClassSize(code).size;
       // dataList[0][idx] = code;
       droppedList[idx]
-          ? dataList[1][idx] = '0'
+          ? dataList[1][idx] = firstChoiceArr[idx].toString()
           : dataList[1][idx] = firstChoiceArr[idx].toString();
       droppedList[idx]
-          ? dataList[2][idx] = '0'
+          ? dataList[2][idx] = secondChoiceArr[idx].toString()
           : dataList[2][idx] = secondChoiceArr[idx].toString();
       droppedList[idx]
-          ? dataList[3][idx] = '0'
+          ? dataList[3][idx] = thirdChoiceArr[idx].toString()
           : dataList[3][idx] = thirdChoiceArr[idx].toString();
       droppedList[idx]
-          ? dataList[4][idx] = '0'
+          ? dataList[4][idx] = fourthChoiceArr[idx].toString()
           : dataList[4][idx] = fourthChoiceArr[idx].toString();
       droppedList[idx]
-          ? dataList[5][idx] = '0'
+          ? dataList[5][idx] = fromBU[idx].toString()
           : dataList[5][idx] = fromBU[idx].toString();
       droppedList[idx]
-          ? dataList[6][idx] = '0'
+          ? dataList[6][idx] = dropBT[idx].toString()
           : dataList[6][idx] = dropBT[idx].toString();
       droppedList[idx]
-          ? dataList[7][idx] = '0'
+          ? dataList[7][idx] = dropDC[idx].toString()
           : dataList[7][idx] = dropDC[idx].toString();
       droppedList[idx]
-          ? dataList[8][idx] = '0'
+          ? dataList[8][idx] = dropCF[idx].toString()
           : dataList[8][idx] = dropCF[idx].toString();
       droppedList[idx]
-          ? dataList[9][idx] = '0'
+          ? dataList[9][idx] = resultingSize[idx].toString()
           : dataList[9][idx] = resultingSize[idx].toString();
       idx++;
     }
@@ -1508,64 +1510,64 @@ class _ScreenState extends State<Screen> {
 
       dataList[0][idx] = code;
       droppedList[idx]
-          ? dataList[1][idx] = '0'
+          ? dataList[1][idx] = ''
           : dataList[1][idx] = firstMonAM[idx].toString();
       droppedList[idx]
-          ? dataList[2][idx] = '0'
+          ? dataList[2][idx] = ''
           : dataList[2][idx] = firstMonPM[idx].toString();
       droppedList[idx]
-          ? dataList[3][idx] = '0'
+          ? dataList[3][idx] = ''
           : dataList[3][idx] = firstTueAM[idx].toString();
       droppedList[idx]
-          ? dataList[4][idx] = '0'
+          ? dataList[4][idx] = ''
           : dataList[4][idx] = firstTuePM[idx].toString();
       droppedList[idx]
-          ? dataList[5][idx] = '0'
+          ? dataList[5][idx] = ''
           : dataList[5][idx] = firstWedAM[idx].toString();
       droppedList[idx]
-          ? dataList[6][idx] = '0'
+          ? dataList[6][idx] = ''
           : dataList[6][idx] = firstWedPM[idx].toString();
       droppedList[idx]
-          ? dataList[7][idx] = '0'
+          ? dataList[7][idx] = ''
           : dataList[7][idx] = firstThuAM[idx].toString();
       droppedList[idx]
-          ? dataList[8][idx] = '0'
+          ? dataList[8][idx] = ''
           : dataList[8][idx] = firstThuPM[idx].toString();
       droppedList[idx]
-          ? dataList[9][idx] = '0'
+          ? dataList[9][idx] = ''
           : dataList[9][idx] = firstFriAM[idx].toString();
       droppedList[idx]
-          ? dataList[10][idx] = '0'
+          ? dataList[10][idx] = ''
           : dataList[10][idx] = firstFriPM[idx].toString();
       droppedList[idx]
-          ? dataList[11][idx] = '0'
+          ? dataList[11][idx] = ''
           : dataList[11][idx] = secondMonAM[idx].toString();
       droppedList[idx]
-          ? dataList[12][idx] = '0'
+          ? dataList[12][idx] = ''
           : dataList[12][idx] = secondMonPM[idx].toString();
       droppedList[idx]
-          ? dataList[13][idx] = '0'
+          ? dataList[13][idx] = ''
           : dataList[13][idx] = secondTueAM[idx].toString();
       droppedList[idx]
-          ? dataList[14][idx] = '0'
+          ? dataList[14][idx] = ''
           : dataList[14][idx] = secondTuePM[idx].toString();
       droppedList[idx]
-          ? dataList[15][idx] = '0'
+          ? dataList[15][idx] = ''
           : dataList[15][idx] = secondWedAM[idx].toString();
       droppedList[idx]
-          ? dataList[16][idx] = '0'
+          ? dataList[16][idx] = ''
           : dataList[16][idx] = secondWedPM[idx].toString();
       droppedList[idx]
-          ? dataList[17][idx] = '0'
+          ? dataList[17][idx] = ''
           : dataList[17][idx] = secondThuAM[idx].toString();
       droppedList[idx]
-          ? dataList[18][idx] = '0'
+          ? dataList[18][idx] = ''
           : dataList[18][idx] = secondThuPM[idx].toString();
       droppedList[idx]
-          ? dataList[19][idx] = '0'
+          ? dataList[19][idx] = ''
           : dataList[19][idx] = secondFriAM[idx].toString();
       droppedList[idx]
-          ? dataList[20][idx] = '0'
+          ? dataList[20][idx] = ''
           : dataList[20][idx] = secondFriPM[idx].toString();
       idx++;
     }
