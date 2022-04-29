@@ -183,8 +183,9 @@ class Scheduling {
         } else if (person.getName() == cc.coordinators[0] ||
             person.getName() == cc.coordinators[1]) {
           content += '$person (CC)\n';
+        } else {
+          content += '$person\n';
         }
-        content += '$person\n';
       }
       if (course != courseControl.getGo().last) {
         content += '\n\n';
