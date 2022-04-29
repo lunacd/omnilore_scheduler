@@ -874,9 +874,7 @@ class _ScreenState extends State<Screen> {
                   : null,
               child: const Text('Imp. Splits')),
           ElevatedButton(
-              onPressed: classCodes == true &&
-                      (mainCoordinatorSelected[curClass] ||
-                          coCoordinatorSelected[curClass])
+              onPressed: updateAndShowCO()
                   ? () {
                       setState(() {
                         Coordinators? coordinator =
@@ -902,11 +900,17 @@ class _ScreenState extends State<Screen> {
                         }
                       });
                     }
-                  : null,
+                  : null, //(() {
+
+              //}),
               child: const Text('Show Coord(s)')),
           ElevatedButton(
               onPressed: classCodes == true &&
-                      (!coCoordinatorSelected[curClass])
+                      StateProcessing[schedule.getStateOfProcessing().index] ==
+                          'Coordinator' &&
+                      (coCoordinatorSelected.containsKey(curClass)
+                          ? !coCoordinatorSelected[curClass]
+                          : false)
                   ? () {
                       setState(() {
                         Iterable keysSelected = curSelected.keys
@@ -938,7 +942,11 @@ class _ScreenState extends State<Screen> {
               child: const Text('Set C and CC')),
           ElevatedButton(
               onPressed: classCodes == true &&
-                      !mainCoordinatorSelected[curClass]
+                      StateProcessing[schedule.getStateOfProcessing().index] ==
+                          'Coordinator' &&
+                      (mainCoordinatorSelected.containsKey(curClass)
+                          ? !mainCoordinatorSelected[curClass]
+                          : false)
                   ? () {
                       setState(() {
                         Iterable keysSelected = curSelected.keys
@@ -969,6 +977,23 @@ class _ScreenState extends State<Screen> {
                   : null,
               child: const Text('Set CC1 and CC2')),
         ]));
+  }
+
+  bool updateAndShowCO() {
+    // print("****************HELLO***********");
+    List<String> classes = schedule.getCourseCodes().toList();
+    if (mainCoordinatorSelected.length != classes.length) {
+      for (int i = 0; i < classes.length; i++) {
+        if (!mainCoordinatorSelected.containsKey(classes[i])) {
+          mainCoordinatorSelected[classes[i]] = false;
+          coCoordinatorSelected[classes[i]] = false;
+        }
+      }
+    }
+    return classCodes == true &&
+        StateProcessing[schedule.getStateOfProcessing().index] ==
+            'Coordinator' &&
+        (mainCoordinatorSelected[curClass] || coCoordinatorSelected[curClass]);
   }
 
   Widget selectProcess() {
