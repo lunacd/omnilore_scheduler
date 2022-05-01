@@ -75,7 +75,8 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  /// This widget is the root of your application.
+  /// this builds the widget tree
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -269,6 +270,7 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  /// creates an error popup for class sizing
   Future<void> popUp() async {
     return showDialog<void>(
       context: context,
@@ -407,7 +409,7 @@ class _ScreenState extends State<Screen> {
             ),
             MenuListItem(
               title: 'Load',
-              shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, alt: true),
+              shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, ctrl: true),
               onPressed: () async {
                 if (peopleImported == true) {
                   FilePickerResult? result =
@@ -1099,7 +1101,16 @@ class _ScreenState extends State<Screen> {
             Text('Go Courses ${scheduling.overviewData.getNbrGoCourses()}'),
             Text('Places Asked ${scheduling.overviewData.getNbrPlacesAsked()}'),
             Text('Places Given ${scheduling.overviewData.getNbrPlacesGiven()}'),
-            Text('Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}'),
+            TextButton(
+                onPressed: () => setState(() {
+                      curClassRoster =
+                          scheduling.overviewData.getPeopleUnmetWants();
+                      scheduling.splitControl.resetState();
+                      curSelected.clear();
+                      clustColors.clear();
+                    }),
+                child: Text(
+                    'Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}')),
             Text('On Leave ${scheduling.overviewData.getNbrOnLeave()}'),
             const Text('Missing 0'),
           ],
