@@ -248,7 +248,7 @@ class _ScreenState extends State<Screen> {
       barrierDismissible: false, // must be dismissed
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(message),
+          title: const Text('Invalid Choice'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
