@@ -242,6 +242,33 @@ class _ScreenState extends State<Screen> {
     });
   }
 
+  Future<void> customPopUp(String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // must be dismissed
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(message),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(message),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> popUp() async {
     return showDialog<void>(
       context: context,
@@ -423,6 +450,23 @@ class _ScreenState extends State<Screen> {
                       minTextField.clear();
                       maxTextField.clear();
                       peopleImported = true;
+                      //Coordinator code for load state
+                      for (var name in schedule.getCourseCodes()) {
+                        Coordinators? coordinator =
+                            schedule.courseControl.getCoordinators(name);
+                        if (coordinator != null) {
+                          if (coordinator.equal) {
+                            coCoordinatorSelected[name] = true;
+                            mainCoordinatorSelected[name] = false;
+                          } else {
+                            mainCoordinatorSelected[name] = true;
+                            coCoordinatorSelected[name] = false;
+                          }
+                          continue;
+                        }
+                        mainCoordinatorSelected[name] = false;
+                        coCoordinatorSelected[name] = false;
+                      }
                     }
                   } else {
                     //file picker canceled
@@ -648,7 +692,16 @@ class _ScreenState extends State<Screen> {
                 curCell.startsWith('2') ||
                 curCell == '' ||
                 curClass == '') {
+              // print('*********$curCell******');
               return [const Text('')];
+            } else if (curCell == '  ') {
+              return [
+                Text(
+                  'Current Class: $curClass',
+                  style: const TextStyle(
+                      fontSize: 40, fontWeight: FontWeight.bold),
+                )
+              ];
             } else {
               return [
                 Text(
@@ -915,7 +968,7 @@ class _ScreenState extends State<Screen> {
                       setState(() {
                         Iterable keysSelected = curSelected.keys
                             .where((element) => curSelected[element] == true);
-                        if (keysSelected.isNotEmpty) {
+                        if (keysSelected.length == 1) {
                           // ignore: todo
                           // TODO: Add pop up box to indicate error
                           // ignore: avoid_print
@@ -935,9 +988,10 @@ class _ScreenState extends State<Screen> {
                             curSelected[key] = false;
                           });
                         } else {
-                          if (kDebugMode) {
-                            print('Error: Must select only one name');
-                          }
+                          customPopUp('Error: Must select only one name');
+                          // if (kDebugMode) {
+                          //   print('Error: Must select only one name');
+                          // }
                         }
                       });
                     }
@@ -954,7 +1008,7 @@ class _ScreenState extends State<Screen> {
                       setState(() {
                         Iterable keysSelected = curSelected.keys
                             .where((element) => curSelected[element] == true);
-                        if (keysSelected.isNotEmpty) {
+                        if (keysSelected.length == 1) {
                           // ignore: todo
                           // TODO: Add pop up box to indicate error
                           // ignore: avoid_print
@@ -974,9 +1028,10 @@ class _ScreenState extends State<Screen> {
                             curSelected[key] = false;
                           });
                         } else {
-                          if (kDebugMode) {
-                            print('Error: Must select only one name');
-                          }
+                          customPopUp('Error: Must select only one name');
+                          // if (kDebugMode) {
+                          //   print('Error: Must select only one name');
+                          // }
                         }
                       });
                     }
@@ -1122,7 +1177,7 @@ class _ScreenState extends State<Screen> {
   Tuple2<List<String>, List<List<String>>> tableData() {
     // courseCodes = schedule.getCourseCodes().toList();
     final growableList = <String>[
-      '',
+      '  ',
       'First Choices',
       'First backup',
       'Second backup',
@@ -1308,6 +1363,7 @@ class _ScreenState extends State<Screen> {
                 curSelected.clear();
                 clustColors.clear();
                 curCell = growableList[i];
+                // print("*******grow: $curCell********");
                 List<String> tempList = curClassRoster.toList();
                 tempList
                     .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
