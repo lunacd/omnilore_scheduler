@@ -112,9 +112,10 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
-  // final ScrollController scrollController = ScrollController();
-  // TextEditingController controller = TextEditingController();
+  /// this is the main scheduling data structure that holds back end computation
   Scheduling schedule = Scheduling();
+
+  /// The current state that the program is in
   StateOfProcessing curState = StateOfProcessing.needCourses;
   bool coursesImported = false;
   bool peopleImported = false;
@@ -124,8 +125,10 @@ class _ScreenState extends State<Screen> {
   Map coCoordinatorSelected = <String, bool>{};
   final minTextField = TextEditingController();
   final maxTextField = TextEditingController();
-  String hintMax = 'Max', hintMin = 'Min';
-  String minVal = '', maxVal = '';
+  String hintMax = 'Max';
+  String hintMin = 'Min';
+  String minVal = '';
+  String maxVal = '';
   String curClass = '';
   String curCell = '';
   String dropDownVal = '';
@@ -141,13 +144,10 @@ class _ScreenState extends State<Screen> {
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
 
-  // String _message = 'Choose a MenuItem.';
-  // String _drawerTitle = 'Tap a drawerItem';
-  // IconData _drawerIcon = Icons.menu;
-
   Color masterBackgroundColor = kColorMap['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
 
+  /// A helper function that format class codes to be shown vertically
   String _formatClassCode(String code, int index) {
     if (code.isEmpty) {
       return '';
@@ -164,6 +164,8 @@ class _ScreenState extends State<Screen> {
     return testCode;
   }
 
+  /// This class is a private computation function that sets the min and max class
+  /// size for each class
   void _setMinMaxClass() {
     if (kDebugMode) {
       print(schedule.courseControl.getSplitMode(dropDownVal).toString());
@@ -511,6 +513,8 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  /// This function builds the entire user interface which is split into the main
+  /// datatable and screen1
   Builder masterPane() {
     if (kDebugMode) {
       print('BUILD: masterPane');
@@ -530,6 +534,7 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  /// This is the base widget that holds everything in the UI that is not the datatable
   Widget screen1() {
     // ignore: sized_box_for_whitespace
     return Container(
@@ -587,6 +592,8 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  /// Creates the class name display portion of the User interface. buttons referencing
+  /// clustering and current class roster is displayed here
   Widget classNameDisplay() {
     return Container(
       color: kColorMap['MoreBlue'],
@@ -712,11 +719,14 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  /// Returns a random color from the cluster colors list
   Color randomColor() {
     colorNum++;
     return clusterColors[colorNum % clusterColors.length];
   }
 
+  /// given a person return its given clustering color. If this person is not in
+  /// a cluster it will return yellow
   Color getColorKey(String person) {
     Set<String> test =
         schedule.splitControl.getClustByPerson(person) ?? <String>{};
@@ -728,6 +738,7 @@ class _ScreenState extends State<Screen> {
     return Colors.yellow;
   }
 
+  /// Creates widget that allows for viewing and modifying of class sizes
   Widget classSizeControl() {
     return Container(
       color: kColorMap['LightBlue'],
@@ -796,22 +807,6 @@ class _ScreenState extends State<Screen> {
                 width: 100.0,
                 child: ElevatedButton(
                   onPressed: () {
-                    /*SplitMode currmode =
-                          schedule.courseControl.getSplitMode(dropDownVal);
-                      currmode.index == 0
-                          ? currmode = SplitMode.limit
-                          : currmode = SplitMode.split;
-                      currmode.index == 1
-                          ? mode = 'limiting'
-                          : mode = 'splitting';
-                      currmode.index == 1
-                          // ignore: avoid_print
-                          ? print('currently limiting')
-                          // ignore: avoid_print
-                          : print('currently splitting');
-                      schedule.courseControl
-                      .setSplitMode(dropDownVal, currmode);*/
-
                     setState((() {
                       if (mode == 'limiting') {
                         mode = 'splitting';
@@ -836,6 +831,8 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  /// Creates the name display mode set of buttons. This includes show splits,
+  /// show BU & CA, Implement splits, Show Coord(s), Set C and CC, Set CC1 and CC2
   Widget namesDisplayMode() {
     return Container(
         // height: double.infinity,
@@ -973,6 +970,7 @@ class _ScreenState extends State<Screen> {
         ]));
   }
 
+  /// Creates the widget that shows the set of select process buttons
   Widget selectProcess() {
     return Container(
         color: kColorMap['KindaBlue'],
@@ -998,6 +996,8 @@ class _ScreenState extends State<Screen> {
         ));
   }
 
+  /// Creates the widget that displats overview data course takers, go
+  /// courses, places asked, places given, un-met wants, on leave, and missing
   Widget overviewData(Scheduling scheduling) {
     return Container(
       color: kColorMap['LightBlue'],
@@ -1029,6 +1029,8 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  /// Widget that creates a drop down menu of courses used to display class size
+  /// maximums and minimums
   Widget classDropDownMenu() {
     //String dropDownVal = schedule.getCourseCodes().take(1).toString();
     return DropdownButton(
@@ -1071,6 +1073,8 @@ class _ScreenState extends State<Screen> {
         });
   }
 
+  /// This is a helper function that will compute the number of new colums needed
+  /// in the table if a given course were to be split.
   int computeSplitSize(String course) {
     int courseSize = schedule.overviewData.getResultingClassSize(course).size;
     int maxSize = schedule.courseControl.getMaxClassSize(course);
@@ -1079,6 +1083,9 @@ class _ScreenState extends State<Screen> {
     return numSplits - 1;
   }
 
+  /// This is a helper function ran after a save state is imported. The function
+  /// will update the front end to reflect the new information on the back end
+  /// regarding which classes are dropped
   void updateDropped() {
     while (droppedList.length != numCourses) {
       droppedList.add(false);
@@ -1094,6 +1101,10 @@ class _ScreenState extends State<Screen> {
     }
   }
 
+  /// Generates the information needed for buildInfo()
+  /// returns a touple where the first item is a list of strings repersenting
+  /// the names of each row and the second item is a 2D array of strings that
+  /// hold the value of each cell
   Tuple2<List<String>, List<List<String>>> tableData() {
     // courseCodes = schedule.getCourseCodes().toList();
     final growableList = <String>[
@@ -1184,17 +1195,12 @@ class _ScreenState extends State<Screen> {
       print(growableList.length);
       print(dataList.length);
     }
-
-    /*return Table(
-      border: TableBorder.symmetric(
-          inside: const BorderSide(width: 1, color: Colors.black),
-          outside: const BorderSide(width: 1)),
-      columnWidths: const {0: FixedColumnWidth(150)},
-      children: buildInfo(growableList, dataList),
-    );*/
     return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
   }
 
+  /// This Widget takes the resulting data from tableData and timeTableData and
+  /// produces the table widget displayed to the user by running buildInfo() and
+  /// buildTimeInfo()
   Widget combineTables(Tuple2<List<String>, List<List<String>>> infoTable,
       Tuple2<List<String>, List<List<String>>> timeTable) {
     return Table(
@@ -1207,6 +1213,8 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  /// Generates the portion of the data table that contains class data returns
+  /// a list of TableRow objects
   List<TableRow> buildInfo(
       // builds the list of table rows. I had to do it in a function because for
       // some reason state doesn't update if its done the other way
@@ -1308,6 +1316,10 @@ class _ScreenState extends State<Screen> {
     return result;
   }
 
+  /// Creates a checkbox widget to be used in the class data portion of the main
+  /// data table. The checkbox will be linked to a given colum index i. When
+  /// selected the corosponding class at index i will be dropped which will
+  /// be reflected in the front end and backend data structures
   Widget droppedCheck(int i) {
     // makes a checkmark widget that corresponds to the passed index of dropped
     // list
@@ -1333,60 +1345,10 @@ class _ScreenState extends State<Screen> {
         });
   }
 
-  List<DataRow> buildTable() {
-    List<DataRow> list = <DataRow>[];
-
-    for (String code in schedule.getCourseCodes()) {
-      int first = schedule.overviewData.getNbrForClassRank(code, 0).size;
-      int second = schedule.overviewData.getNbrForClassRank(code, 1).size;
-      int third = schedule.overviewData.getNbrForClassRank(code, 2).size;
-      int fourth = schedule.overviewData.getNbrForClassRank(code, 3).size;
-      int fromBU = schedule.overviewData.getNbrAddFromBackup(code);
-      list.add(DataRow(
-        cells: <DataCell>[
-          DataCell(Text(code)),
-          DataCell(Text(
-            '$first',
-            textAlign: TextAlign.center,
-          )),
-          DataCell(Text(
-            '$second',
-            textAlign: TextAlign.center,
-          )),
-          DataCell(Text(
-            '$third',
-            textAlign: TextAlign.center,
-          )),
-          DataCell(Text(
-            '$fourth',
-            textAlign: TextAlign.center,
-          )),
-          DataCell(Text(
-            '$fromBU',
-            textAlign: TextAlign.center,
-          )),
-          const DataCell(Text(
-            '0',
-            textAlign: TextAlign.center,
-          )),
-          const DataCell(Text(
-            '0',
-            textAlign: TextAlign.center,
-          )),
-          const DataCell(Text(
-            '0',
-            textAlign: TextAlign.center,
-          )),
-          DataCell(Text(
-            '$first',
-            textAlign: TextAlign.center,
-          )),
-        ],
-      ));
-    }
-    return list;
-  }
-
+  /// Generates the information needed for buildTimeInfo()
+  /// returns a touple where the first item is a list of strings repersenting
+  /// the names of each row and the second item is a 2D array of strings that
+  /// hold the value of each cell
   Tuple2<List<String>, List<List<String>>> tableTimeData() {
     final growableList = <String>[
       '',
@@ -1539,16 +1501,11 @@ class _ScreenState extends State<Screen> {
       print(dataList.length);
     }
 
-    /*return Table(
-      border: TableBorder.symmetric(
-          inside: const BorderSide(width: 1, color: Colors.blue),
-          outside: const BorderSide(width: 1)),
-      columnWidths: const {0: FixedColumnWidth(150)},
-      children: buildTimeInfo(growableList, dataList),
-    );*/
     return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
   }
 
+  /// creates the scheduling portion of the main data table returns a list of
+  /// TableRow objects
   List<TableRow> buildTimeInfo(
       // builds the list of table rows. I had to do it in a function because for
       // some reason state doesn't update if its done the other way
@@ -1610,6 +1567,8 @@ class _ScreenState extends State<Screen> {
     return result;
   }
 
+  /// translation function that will take a time slot and return the correct
+  /// index used by input files. Returns -1 on an unknown timeslot name
   int getTimeIndex(String c) {
     int timeIndex = -1;
     if (c == '1st/3rd Mon AM') {
@@ -1659,6 +1618,8 @@ class _ScreenState extends State<Screen> {
     return timeIndex;
   }
 
+  /// generic error pop up generator. Will produce a popup dialog box
+  /// on the screen and show what error has been thrown to the user
   Future<void> _showMyDialog(String error, String loadType) async {
     // found at https://docs.flutter.dev/cookbook/forms/text-input
     return showDialog<void>(
@@ -1689,11 +1650,15 @@ class _ScreenState extends State<Screen> {
   }
 }
 
+/// checks to see if the current state is set to drop and split
+
 bool validSchedule(Scheduling sched) {
   return StateProcessing[sched.getStateOfProcessing().index] ==
       'Drop and Split';
 }
 
+/// Deprecated function
+/// deleting this from source code causes an error  ¯\_(ツ)_/¯
 Widget auxData(Scheduling scheduling) {
   return SizedBox(
     height: 200,
