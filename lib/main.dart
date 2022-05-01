@@ -432,7 +432,25 @@ class _ScreenState extends State<Screen> {
               },
             ),
             MenuListItem(
-                title: 'Export Roster',
+                title: 'Export Early Roster',
+                onPressed: () async {
+                  String? path = await FilePicker.platform.saveFile();
+
+                  if (path != null) {
+                    if (path != '') {
+                      try {
+                        schedule.outputRosterPhone(path);
+                      } catch (e) {
+                        _showMyDialog(e.toString(), 'EarlyRoster');
+                      }
+                    }
+                  } else {
+                    //file picker canceled
+                  }
+                  setState(() {});
+                }),
+            MenuListItem(
+                title: 'Export Final Roster',
                 onPressed: () async {
                   String? path = await FilePicker.platform.saveFile();
                   if (path != null) {
@@ -444,24 +462,6 @@ class _ScreenState extends State<Screen> {
                         schedule.outputRosterCC(path);
                       } catch (e) {
                         _showMyDialog(e.toString(), 'RosterCC');
-                      }
-                    }
-                  } else {
-                    //file picker canceled
-                  }
-                  setState(() {});
-                }),
-            MenuListItem(
-                title: 'Export Roster Phone',
-                onPressed: () async {
-                  String? path = await FilePicker.platform.saveFile();
-
-                  if (path != null) {
-                    if (path != '') {
-                      try {
-                        schedule.outputRosterPhone(path);
-                      } catch (e) {
-                        _showMyDialog(e.toString(), 'RosterPhone');
                       }
                     }
                   } else {
