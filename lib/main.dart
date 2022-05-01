@@ -243,6 +243,33 @@ class _ScreenState extends State<Screen> {
     });
   }
 
+  Future<void> customPopUp(String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // must be dismissed
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Invalid Choice'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(message),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   /// creates an error popup for class sizing
   Future<void> popUp() async {
     return showDialog<void>(
@@ -425,6 +452,23 @@ class _ScreenState extends State<Screen> {
                       minTextField.clear();
                       maxTextField.clear();
                       peopleImported = true;
+                      //Coordinator code for load state
+                      for (var name in schedule.getCourseCodes()) {
+                        Coordinators? coordinator =
+                            schedule.courseControl.getCoordinators(name);
+                        if (coordinator != null) {
+                          if (coordinator.equal) {
+                            coCoordinatorSelected[name] = true;
+                            mainCoordinatorSelected[name] = false;
+                          } else {
+                            mainCoordinatorSelected[name] = true;
+                            coCoordinatorSelected[name] = false;
+                          }
+                          continue;
+                        }
+                        mainCoordinatorSelected[name] = false;
+                        coCoordinatorSelected[name] = false;
+                      }
                     }
                   } else {
                     //file picker canceled
@@ -650,7 +694,16 @@ class _ScreenState extends State<Screen> {
                 curCell.startsWith('2') ||
                 curCell == '' ||
                 curClass == '') {
+              // print('*********$curCell******');
               return [const Text('')];
+            } else if (curCell == '  ') {
+              return [
+                Text(
+                  'Current Class: $curClass',
+                  style: const TextStyle(
+                      fontSize: 40, fontWeight: FontWeight.bold),
+                )
+              ];
             } else {
               return [
                 Text(
@@ -876,9 +929,7 @@ class _ScreenState extends State<Screen> {
                   : null,
               child: const Text('Imp. Splits')),
           ElevatedButton(
-              onPressed: classCodes == true &&
-                      (mainCoordinatorSelected[curClass] ||
-                          coCoordinatorSelected[curClass])
+              onPressed: updateAndShowCO()
                   ? () {
                       setState(() {
                         Coordinators? coordinator =
@@ -904,73 +955,113 @@ class _ScreenState extends State<Screen> {
                         }
                       });
                     }
-                  : null,
+                  : null, //(() {
+
+              //}),
               child: const Text('Show Coord(s)')),
           ElevatedButton(
               onPressed: classCodes == true &&
-                      (!coCoordinatorSelected[curClass])
+                      StateProcessing[schedule.getStateOfProcessing().index] ==
+                          'Coordinator' &&
+                      (coCoordinatorSelected.containsKey(curClass)
+                          ? !coCoordinatorSelected[curClass]
+                          : false)
                   ? () {
                       setState(() {
                         Iterable keysSelected = curSelected.keys
                             .where((element) => curSelected[element] == true);
-                        if (keysSelected.length != 1) {
+                        if (keysSelected.length == 1) {
                           // ignore: todo
                           // TODO: Add pop up box to indicate error
                           // ignore: avoid_print
-                          print('Error: Must select only one name');
-                        }
-                        for (var item in keysSelected) {
-                          try {
-                            schedule.courseControl
-                                .setMainCoCoordinator(curClass, item);
-                          } on Exception catch (ex) {
-                            // ignore: todo
-                            //TODO: print out exception
-                            // ignore: avoid_print
-                            print(ex);
+                          for (var item in keysSelected) {
+                            try {
+                              schedule.courseControl
+                                  .setMainCoCoordinator(curClass, item);
+                            } on Exception catch (ex) {
+                              // ignore: todo
+                              //TODO: print out exception
+                              // ignore: avoid_print
+                              print(ex);
+                            }
                           }
+                          mainCoordinatorSelected[curClass] = true;
+                          curSelected.forEach((key, value) {
+                            curSelected[key] = false;
+                          });
+                        } else {
+                          customPopUp('Error: Must select only one name');
+                          // if (kDebugMode) {
+                          //   print('Error: Must select only one name');
+                          // }
                         }
-                        mainCoordinatorSelected[curClass] = true;
-                        curSelected.forEach((key, value) {
-                          curSelected[key] = false;
-                        });
                       });
                     }
                   : null,
               child: const Text('Set C and CC')),
           ElevatedButton(
               onPressed: classCodes == true &&
-                      !mainCoordinatorSelected[curClass]
+                      StateProcessing[schedule.getStateOfProcessing().index] ==
+                          'Coordinator' &&
+                      (mainCoordinatorSelected.containsKey(curClass)
+                          ? !mainCoordinatorSelected[curClass]
+                          : false)
                   ? () {
                       setState(() {
                         Iterable keysSelected = curSelected.keys
                             .where((element) => curSelected[element] == true);
-                        if (keysSelected.length != 1) {
+                        if (keysSelected.length == 1) {
                           // ignore: todo
                           // TODO: Add pop up box to indicate error
                           // ignore: avoid_print
-                          print('Error: Must select only one name');
-                        }
-                        for (var item in keysSelected) {
-                          try {
-                            schedule.courseControl
-                                .setEqualCoCoordinator(curClass, item);
-                          } on Exception catch (ex) {
-                            // ignore: todo
-                            //TODO: print out exception
-                            // ignore: avoid_print
-                            print(ex);
+                          for (var item in keysSelected) {
+                            try {
+                              schedule.courseControl
+                                  .setEqualCoCoordinator(curClass, item);
+                            } on Exception catch (ex) {
+                              // ignore: todo
+                              //TODO: print out exception
+                              // ignore: avoid_print
+                              print(ex);
+                            }
                           }
+                          coCoordinatorSelected[curClass] = true;
+                          curSelected.forEach((key, value) {
+                            curSelected[key] = false;
+                          });
+                        } else {
+                          customPopUp('Error: Must select only one name');
+                          // if (kDebugMode) {
+                          //   print('Error: Must select only one name');
+                          // }
                         }
-                        coCoordinatorSelected[curClass] = true;
-                        curSelected.forEach((key, value) {
-                          curSelected[key] = false;
-                        });
                       });
                     }
                   : null,
               child: const Text('Set CC1 and CC2')),
         ]));
+  }
+
+  bool updateAndShowCO() {
+    // print("****************HELLO***********");
+    List<String> classes = schedule.getCourseCodes().toList();
+    if (StateProcessing[schedule.getStateOfProcessing().index] == 'Schedule') {
+      // if (mainCoordinatorSelected.length != classes.length) {
+      mainCoordinatorSelected.clear();
+      coCoordinatorSelected.clear();
+      for (var name in classes) {
+        mainCoordinatorSelected[name] = false;
+        coCoordinatorSelected[name] = false;
+        // }
+      }
+    }
+
+    return classCodes == true &&
+        (StateProcessing[schedule.getStateOfProcessing().index] ==
+                'Coordinator' ||
+            StateProcessing[schedule.getStateOfProcessing().index] ==
+                'Output') &&
+        (mainCoordinatorSelected[curClass] || coCoordinatorSelected[curClass]);
   }
 
   Widget selectProcess() {
@@ -1097,7 +1188,7 @@ class _ScreenState extends State<Screen> {
   Tuple2<List<String>, List<List<String>>> tableData() {
     // courseCodes = schedule.getCourseCodes().toList();
     final growableList = <String>[
-      '',
+      '  ',
       'First Choices',
       'First backup',
       'Second backup',
@@ -1152,31 +1243,31 @@ class _ScreenState extends State<Screen> {
           schedule.overviewData.getResultingClassSize(code).size;
       // dataList[0][idx] = code;
       droppedList[idx]
-          ? dataList[1][idx] = '0'
+          ? dataList[1][idx] = firstChoiceArr[idx].toString()
           : dataList[1][idx] = firstChoiceArr[idx].toString();
       droppedList[idx]
-          ? dataList[2][idx] = '0'
+          ? dataList[2][idx] = secondChoiceArr[idx].toString()
           : dataList[2][idx] = secondChoiceArr[idx].toString();
       droppedList[idx]
-          ? dataList[3][idx] = '0'
+          ? dataList[3][idx] = thirdChoiceArr[idx].toString()
           : dataList[3][idx] = thirdChoiceArr[idx].toString();
       droppedList[idx]
-          ? dataList[4][idx] = '0'
+          ? dataList[4][idx] = fourthChoiceArr[idx].toString()
           : dataList[4][idx] = fourthChoiceArr[idx].toString();
       droppedList[idx]
-          ? dataList[5][idx] = '0'
+          ? dataList[5][idx] = fromBU[idx].toString()
           : dataList[5][idx] = fromBU[idx].toString();
       droppedList[idx]
-          ? dataList[6][idx] = '0'
+          ? dataList[6][idx] = dropBT[idx].toString()
           : dataList[6][idx] = dropBT[idx].toString();
       droppedList[idx]
-          ? dataList[7][idx] = '0'
+          ? dataList[7][idx] = dropDC[idx].toString()
           : dataList[7][idx] = dropDC[idx].toString();
       droppedList[idx]
-          ? dataList[8][idx] = '0'
+          ? dataList[8][idx] = dropCF[idx].toString()
           : dataList[8][idx] = dropCF[idx].toString();
       droppedList[idx]
-          ? dataList[9][idx] = '0'
+          ? dataList[9][idx] = resultingSize[idx].toString()
           : dataList[9][idx] = resultingSize[idx].toString();
       idx++;
     }
@@ -1283,6 +1374,7 @@ class _ScreenState extends State<Screen> {
                 curSelected.clear();
                 clustColors.clear();
                 curCell = growableList[i];
+                // print("*******grow: $curCell********");
                 List<String> tempList = curClassRoster.toList();
                 tempList
                     .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
@@ -1295,6 +1387,18 @@ class _ScreenState extends State<Screen> {
                 }
               });
             },
+            style: () {
+              List<String> classes = schedule.getCourseCodes().toList();
+              if (i == 0 &&
+                  StateProcessing[schedule.getStateOfProcessing().index] ==
+                      'Coordinator' &&
+                  (mainCoordinatorSelected[classes[j]] ||
+                      coCoordinatorSelected[classes[j]])) {
+                return ElevatedButton.styleFrom(
+                  primary: Colors.lightBlueAccent,
+                );
+              }
+            }(),
           )
       ]));
     }
@@ -1473,64 +1577,64 @@ class _ScreenState extends State<Screen> {
 
       dataList[0][idx] = code;
       droppedList[idx]
-          ? dataList[1][idx] = '0'
+          ? dataList[1][idx] = ''
           : dataList[1][idx] = firstMonAM[idx].toString();
       droppedList[idx]
-          ? dataList[2][idx] = '0'
+          ? dataList[2][idx] = ''
           : dataList[2][idx] = firstMonPM[idx].toString();
       droppedList[idx]
-          ? dataList[3][idx] = '0'
+          ? dataList[3][idx] = ''
           : dataList[3][idx] = firstTueAM[idx].toString();
       droppedList[idx]
-          ? dataList[4][idx] = '0'
+          ? dataList[4][idx] = ''
           : dataList[4][idx] = firstTuePM[idx].toString();
       droppedList[idx]
-          ? dataList[5][idx] = '0'
+          ? dataList[5][idx] = ''
           : dataList[5][idx] = firstWedAM[idx].toString();
       droppedList[idx]
-          ? dataList[6][idx] = '0'
+          ? dataList[6][idx] = ''
           : dataList[6][idx] = firstWedPM[idx].toString();
       droppedList[idx]
-          ? dataList[7][idx] = '0'
+          ? dataList[7][idx] = ''
           : dataList[7][idx] = firstThuAM[idx].toString();
       droppedList[idx]
-          ? dataList[8][idx] = '0'
+          ? dataList[8][idx] = ''
           : dataList[8][idx] = firstThuPM[idx].toString();
       droppedList[idx]
-          ? dataList[9][idx] = '0'
+          ? dataList[9][idx] = ''
           : dataList[9][idx] = firstFriAM[idx].toString();
       droppedList[idx]
-          ? dataList[10][idx] = '0'
+          ? dataList[10][idx] = ''
           : dataList[10][idx] = firstFriPM[idx].toString();
       droppedList[idx]
-          ? dataList[11][idx] = '0'
+          ? dataList[11][idx] = ''
           : dataList[11][idx] = secondMonAM[idx].toString();
       droppedList[idx]
-          ? dataList[12][idx] = '0'
+          ? dataList[12][idx] = ''
           : dataList[12][idx] = secondMonPM[idx].toString();
       droppedList[idx]
-          ? dataList[13][idx] = '0'
+          ? dataList[13][idx] = ''
           : dataList[13][idx] = secondTueAM[idx].toString();
       droppedList[idx]
-          ? dataList[14][idx] = '0'
+          ? dataList[14][idx] = ''
           : dataList[14][idx] = secondTuePM[idx].toString();
       droppedList[idx]
-          ? dataList[15][idx] = '0'
+          ? dataList[15][idx] = ''
           : dataList[15][idx] = secondWedAM[idx].toString();
       droppedList[idx]
-          ? dataList[16][idx] = '0'
+          ? dataList[16][idx] = ''
           : dataList[16][idx] = secondWedPM[idx].toString();
       droppedList[idx]
-          ? dataList[17][idx] = '0'
+          ? dataList[17][idx] = ''
           : dataList[17][idx] = secondThuAM[idx].toString();
       droppedList[idx]
-          ? dataList[18][idx] = '0'
+          ? dataList[18][idx] = ''
           : dataList[18][idx] = secondThuPM[idx].toString();
       droppedList[idx]
-          ? dataList[19][idx] = '0'
+          ? dataList[19][idx] = ''
           : dataList[19][idx] = secondFriAM[idx].toString();
       droppedList[idx]
-          ? dataList[20][idx] = '0'
+          ? dataList[20][idx] = ''
           : dataList[20][idx] = secondFriPM[idx].toString();
       idx++;
     }
