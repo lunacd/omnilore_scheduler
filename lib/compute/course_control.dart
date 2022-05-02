@@ -171,7 +171,9 @@ class CourseControl {
         throw const InvalidArgument(
             message: 'Cannot set co-coordinator with equal coordinators set');
       }
-      _coordinatorsMap[course]!.coordinators[1] = name;
+      if (_coordinatorsMap[course]!.coordinators[0] != name) {
+        _coordinatorsMap[course]!.coordinators[1] = name;
+      }
     } else {
       _coordinatorsMap[course] = Coordinators(equal: false);
       _coordinatorsMap[course]!.coordinators[0] = name;
@@ -185,7 +187,9 @@ class CourseControl {
         throw const InvalidArgument(
             message: 'Cannot set equal co-coordinator with a coordinator set');
       }
-      _coordinatorsMap[course]!.coordinators[1] = name;
+      if (_coordinatorsMap[course]!.coordinators[0] != name) {
+        _coordinatorsMap[course]!.coordinators[1] = name;
+      }
     } else {
       _coordinatorsMap[course] = Coordinators(equal: true);
       _coordinatorsMap[course]!.coordinators[0] = name;
