@@ -1109,7 +1109,9 @@ class _ScreenState extends State<Screen> {
                       clustColors.clear();
                     }),
                 child: Text(
-                    'Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}')),
+                  'Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}',
+                  style: const TextStyle(fontSize: 20, color: Colors.black),
+                )),
             Text('On Leave ${scheduling.overviewData.getNbrOnLeave()}'),
             const Text('Missing 0'),
           ],
