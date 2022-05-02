@@ -67,7 +67,7 @@ int colorNum = 0;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
-    await DesktopWindow.setMinWindowSize(const Size(1200, 500));
+    await DesktopWindow.setMinWindowSize(const Size(1400, 500));
   }
   runApp(const MyApp());
 }
@@ -1109,7 +1109,9 @@ class _ScreenState extends State<Screen> {
                       clustColors.clear();
                     }),
                 child: Text(
-                    'Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}')),
+                  'Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}',
+                  style: const TextStyle(fontSize: 20, color: Colors.black),
+                )),
             Text('On Leave ${scheduling.overviewData.getNbrOnLeave()}'),
             const Text('Missing 0'),
           ],
@@ -1416,6 +1418,19 @@ class _ScreenState extends State<Screen> {
               children: const <Widget>[Text('class dropped')])),
       for (int i = 0; i < droppedList.length; i++) droppedCheck(i)
     ]));
+
+    result.add(TableRow(children: [
+      TableCell(
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[Text(growableList[0].toString())])),
+      for (int j = 0; j < dataList[0].length; j++)
+        Text(
+          _formatClassCode(dataList[0][j], 0),
+          textAlign: TextAlign.center,
+        )
+    ]));
+
     return result;
   }
 
