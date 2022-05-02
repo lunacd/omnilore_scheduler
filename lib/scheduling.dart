@@ -179,12 +179,12 @@ class Scheduling {
 
       for (var person in people) {
         if (person.getName() == cc.coordinators[0] && !cc.equal) {
-          content += '$person (C)\n';
+          content += '${person.getReversedName()} (C)\n';
         } else if (person.getName() == cc.coordinators[0] ||
             person.getName() == cc.coordinators[1]) {
-          content += '$person (CC)\n';
+          content += '${person.getReversedName()} (CC)\n';
         } else {
-          content += '$person\n';
+          content += '${person.getReversedName()}\n';
         }
       }
       if (course != courseControl.getGo().last) {
