@@ -3,6 +3,7 @@ import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:omnilore_scheduler/widgets/screen.dart';
+import 'package:omnilore_scheduler/theme.dart';
 
 const MaterialColor primaryBlack = MaterialColor(
   _blackPrimaryValue,
@@ -63,7 +64,8 @@ class MyApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all(Colors.black),
-            backgroundColor: MaterialStateProperty.all(kColorMap['WhiteBlue']),
+            backgroundColor:
+                MaterialStateProperty.all(themeColors['WhiteBlue']),
             overlayColor: MaterialStateProperty.all(
                 Colors.blueGrey[600]), // Set Button hover color
           ),

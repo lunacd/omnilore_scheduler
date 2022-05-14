@@ -8,16 +8,9 @@ import 'package:omnilore_scheduler/compute/course_control.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:omnilore_scheduler/theme.dart';
+import 'package:omnilore_scheduler/widgets/overview_data.dart';
 import 'package:tuple/tuple.dart';
-
-const Map kColorMap = {
-  'DarkBlue': Color.fromARGB(255, 69, 91, 138),
-  'MediumBlue': Color.fromARGB(255, 124, 172, 223),
-  'LightBlue': Color.fromARGB(255, 189, 209, 247),
-  'KindaBlue': Color.fromARGB(255, 204, 219, 242),
-  'MoreBlue': Color.fromARGB(255, 217, 223, 248),
-  'WhiteBlue': Color.fromARGB(255, 231, 226, 220),
-};
 
 const List<String> stateDescriptions = [
   'Need Courses',
@@ -70,8 +63,25 @@ class _ScreenState extends State<Screen> {
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
 
-  Color masterBackgroundColor = kColorMap['WhiteBlue'];
+  Color masterBackgroundColor = themeColors['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
+
+  late int courseTakers = schedule.overviewData.getNbrCourseTakers();
+  late int goCourses = schedule.overviewData.getNbrGoCourses();
+  late int placesAsked = schedule.overviewData.getNbrPlacesAsked();
+  late int placesGiven = schedule.overviewData.getNbrPlacesGiven();
+  late int unmetWants = schedule.overviewData.getNbrUnmetWants();
+  late int onLeave = schedule.overviewData.getNbrOnLeave();
+
+  /// Helper function to update all of overviewData
+  void _updateOverViewData() {
+    courseTakers = schedule.overviewData.getNbrCourseTakers();
+    goCourses = schedule.overviewData.getNbrGoCourses();
+    placesAsked = schedule.overviewData.getNbrPlacesAsked();
+    placesGiven = schedule.overviewData.getNbrPlacesGiven();
+    unmetWants = schedule.overviewData.getNbrUnmetWants();
+    onLeave = schedule.overviewData.getNbrOnLeave();
+  }
 
   /// A helper function that format class codes to be shown vertically
   String _formatClassCode(String code, int index) {
@@ -168,6 +178,7 @@ class _ScreenState extends State<Screen> {
         minVal = '';
         maxVal = '';
       }
+      _updateOverViewData();
     });
   }
 
@@ -278,7 +289,9 @@ class _ScreenState extends State<Screen> {
                     //user canceled
                   }
                 }
-                setState(() {});
+                setState(() {
+                  _updateOverViewData();
+                });
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
@@ -312,7 +325,9 @@ class _ScreenState extends State<Screen> {
                 } else {
                   // User canceled the picker
                 }
-                setState(() {});
+                setState(() {
+                  _updateOverViewData();
+                });
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyP, ctrl: true),
             ),
@@ -332,7 +347,9 @@ class _ScreenState extends State<Screen> {
                 } else {
                   //file picker canceled
                 }
-                setState(() {});
+                setState(() {
+                  _updateOverViewData();
+                });
               },
             ),
             MenuListItem(
@@ -361,6 +378,7 @@ class _ScreenState extends State<Screen> {
 
                           numCourses = schedule.getCourseCodes().length;
                           updateDropped();
+                          _updateOverViewData();
                         });
                         if (kDebugMode) {
                           print('LOADINGGGGGGGGGGG\n');
@@ -401,7 +419,9 @@ class _ScreenState extends State<Screen> {
                   } else {
                     //file picker canceled
                   }
-                  setState(() {});
+                  setState(() {
+                    _updateOverViewData();
+                  });
                 }
               },
             ),
@@ -421,7 +441,9 @@ class _ScreenState extends State<Screen> {
                   } else {
                     //file picker canceled
                   }
-                  setState(() {});
+                  setState(() {
+                    _updateOverViewData();
+                  });
                 }),
             MenuListItem(
                 title: 'Export Final Roster',
@@ -441,7 +463,9 @@ class _ScreenState extends State<Screen> {
                   } else {
                     //file picker canceled
                   }
-                  setState(() {});
+                  setState(() {
+                    _updateOverViewData();
+                  });
                 }),
             MenuListItem(
               title: 'Export MailMerge',
@@ -459,7 +483,9 @@ class _ScreenState extends State<Screen> {
                 } else {
                   //file picker canceled
                 }
-                setState(() {});
+                setState(() {
+                  _updateOverViewData();
+                });
               },
             ),
           ]),
@@ -521,7 +547,7 @@ class _ScreenState extends State<Screen> {
                 // TODO: Update this to a string that changes based on the state
                 Container(
                   width: double.infinity,
-                  color: kColorMap['MediumBlue'],
+                  color: themeColors['MediumBlue'],
                   child: Text(
                       'State of Processing: ${stateDescriptions[schedule.getStateOfProcessing().index]}',
                       style: const TextStyle(
@@ -553,7 +579,23 @@ class _ScreenState extends State<Screen> {
             child: Column(
               children: [
                 selectProcess(),
-                Expanded(child: overviewData(schedule)),
+                Expanded(
+                    child: OverviewData(
+                        placesAsked: placesAsked,
+                        placesGiven: placesGiven,
+                        goCourses: goCourses,
+                        unmetWants: unmetWants,
+                        onLeave: onLeave,
+                        courseTakers: courseTakers,
+                        onUnmetWantsClicked: () {
+                          setState(() {
+                            curClassRoster =
+                                schedule.overviewData.getPeopleUnmetWants();
+                            schedule.splitControl.resetState();
+                            curSelected.clear();
+                            clustColors.clear();
+                          });
+                        })),
               ],
             ),
           )
@@ -566,7 +608,7 @@ class _ScreenState extends State<Screen> {
   /// clustering and current class roster is displayed here
   Widget classNameDisplay() {
     return Container(
-      color: kColorMap['MoreBlue'],
+      color: themeColors['MoreBlue'],
       child: Column(children: [
         Container(
           alignment: Alignment.center,
@@ -592,6 +634,7 @@ class _ScreenState extends State<Screen> {
                           curSelected.forEach((key, value) {
                             curSelected[key] = false;
                           });
+                          _updateOverViewData();
                         });
                       }
                     : null,
@@ -613,6 +656,7 @@ class _ScreenState extends State<Screen> {
                           if (kDebugMode) {
                             print(result);
                           }
+                          _updateOverViewData();
                         });
                       }
                     : null,
@@ -676,6 +720,7 @@ class _ScreenState extends State<Screen> {
                         curSelected[val] = true;
                       }
                       if (classCodes) {}
+                      _updateOverViewData();
                     });
                   },
                   child: Text(
@@ -720,7 +765,7 @@ class _ScreenState extends State<Screen> {
   /// Creates widget that allows for viewing and modifying of class sizes
   Widget classSizeControl() {
     return Container(
-      color: kColorMap['LightBlue'],
+      color: themeColors['LightBlue'],
       child: Column(
         children: [
           Container(
@@ -792,6 +837,7 @@ class _ScreenState extends State<Screen> {
                       } else {
                         mode = 'limiting';
                       }
+                      _updateOverViewData();
                     }));
                   },
                   child: Text(mode),
@@ -815,7 +861,7 @@ class _ScreenState extends State<Screen> {
   Widget namesDisplayMode() {
     return Container(
         // height: double.infinity,
-        color: kColorMap['KindaBlue'],
+        color: themeColors['KindaBlue'],
         child:
             Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           Container(
@@ -847,6 +893,7 @@ class _ScreenState extends State<Screen> {
                         schedule.splitControl.resetState();
                         curCell = '';
                         curClassRoster = [];
+                        _updateOverViewData();
                       });
                     }
                   : null,
@@ -876,6 +923,7 @@ class _ScreenState extends State<Screen> {
                             // }
                           }
                         }
+                        _updateOverViewData();
                       });
                     }
                   : null, //(() {
@@ -919,6 +967,7 @@ class _ScreenState extends State<Screen> {
                           //   print('Error: Must select only one name');
                           // }
                         }
+                        _updateOverViewData();
                       });
                     }
                   : null,
@@ -960,6 +1009,7 @@ class _ScreenState extends State<Screen> {
                           //   print('Error: Must select only one name');
                           // }
                         }
+                        _updateOverViewData();
                       });
                     }
                   : null,
@@ -992,7 +1042,7 @@ class _ScreenState extends State<Screen> {
 
   Widget selectProcess() {
     return Container(
-        color: kColorMap['KindaBlue'],
+        color: themeColors['KindaBlue'],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -1013,41 +1063,6 @@ class _ScreenState extends State<Screen> {
                 onPressed: null, child: Text('Cont. Old Curriculum')),
           ],
         ));
-  }
-
-  /// Creates the widget that displats overview data course takers, go
-  /// courses, places asked, places given, un-met wants, on leave, and missing
-  Widget overviewData(Scheduling scheduling) {
-    return Container(
-      color: kColorMap['LightBlue'],
-      constraints: const BoxConstraints.expand(),
-      child: DefaultTextStyle(
-        child: Column(
-          children: [
-            Text(
-                '\nCourse Takers ${scheduling.overviewData.getNbrCourseTakers()}'),
-            Text('Go Courses ${scheduling.overviewData.getNbrGoCourses()}'),
-            Text('Places Asked ${scheduling.overviewData.getNbrPlacesAsked()}'),
-            Text('Places Given ${scheduling.overviewData.getNbrPlacesGiven()}'),
-            TextButton(
-                onPressed: () => setState(() {
-                      curClassRoster =
-                          scheduling.overviewData.getPeopleUnmetWants();
-                      scheduling.splitControl.resetState();
-                      curSelected.clear();
-                      clustColors.clear();
-                    }),
-                child: Text(
-                  'Un-met Wants ${scheduling.overviewData.getNbrUnmetWants()}',
-                  style: const TextStyle(fontSize: 20, color: Colors.black),
-                )),
-            Text('On Leave ${scheduling.overviewData.getNbrOnLeave()}'),
-            const Text('Missing 0'),
-          ],
-        ),
-        style: const TextStyle(fontSize: 20, color: Colors.black),
-      ),
-    );
   }
 
   /// Widget that creates a drop down menu of courses used to display class size
@@ -1090,6 +1105,7 @@ class _ScreenState extends State<Screen> {
                   .getMinClassSize(dropDownVal)
                   .toString();
             }
+            _updateOverViewData();
           });
         });
   }
@@ -1323,6 +1339,7 @@ class _ScreenState extends State<Screen> {
                 if (kDebugMode) {
                   print(curClassRoster);
                 }
+                _updateOverViewData();
               });
             },
             style: () {
@@ -1388,6 +1405,7 @@ class _ScreenState extends State<Screen> {
               print(
                   'dropped list index: $i drop list value: ${droppedList[i]}');
             }
+            _updateOverViewData();
           });
         });
   }
@@ -1593,6 +1611,7 @@ class _ScreenState extends State<Screen> {
                       if (kDebugMode) {
                         print(curClassRoster);
                       }
+                      _updateOverViewData();
                     });
                   }
                 : null,
