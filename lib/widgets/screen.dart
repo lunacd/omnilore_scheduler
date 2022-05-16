@@ -9,6 +9,7 @@ import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:omnilore_scheduler/theme.dart';
+import 'package:omnilore_scheduler/widgets/main_table.dart';
 import 'package:omnilore_scheduler/widgets/overview_data.dart';
 import 'package:tuple/tuple.dart';
 
@@ -62,6 +63,7 @@ class _ScreenState extends State<Screen> {
   List<bool> droppedList = List<bool>.filled(14, false,
       growable:
           true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
+  Map<String, int> scheduleData = <String, int>{};
 
   Color masterBackgroundColor = themeColors['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
@@ -73,6 +75,262 @@ class _ScreenState extends State<Screen> {
   late int unmetWants = schedule.overviewData.getNbrUnmetWants();
   late int onLeave = schedule.overviewData.getNbrOnLeave();
 
+  /// Generates the information needed for buildTimeInfo()
+  /// returns a touple where the first item is a list of strings repersenting
+  /// the names of each row and the second item is a 2D array of strings that
+  /// hold the value of each cell
+  Tuple2<List<String>, List<List<String>>> tableTimeData() {
+    final growableList = <String>[
+      '',
+      '1st/3rd Mon AM',
+      '1st/3rd Mon PM',
+      '1st/3rd Tue AM',
+      '1st/3rd Tue PM',
+      '1st/3rd Wed AM',
+      '1st/3rd Wed PM',
+      '1st/3rd Thu AM',
+      '1st/3rd Thu PM',
+      '1st/3rd Fri AM',
+      '1st/3rd Fri PM',
+      '2nd/4th Mon AM',
+      '2nd/4th Mon PM',
+      '2nd/4th Tue AM',
+      '2nd/4th Tue PM',
+      '2nd/4th Wed AM',
+      '2nd/4th Wed PM',
+      '2nd/4th Thu AM',
+      '2nd/4th Thu PM',
+      '2nd/4th Fri AM',
+      '2nd/4th Fri PM'
+    ];
+    if (kDebugMode) {
+      print('num of course $numCourses');
+    }
+    int arrSize = numCourses ?? 14;
+
+    var firstMonAM = List<int>.generate(arrSize, (index) => -1);
+    var firstMonPM = List<int>.generate(arrSize, (index) => -1);
+    var firstTueAM = List<int>.generate(arrSize, (index) => -1);
+    var firstTuePM = List<int>.generate(arrSize, (index) => -1);
+    var firstWedAM = List<int>.generate(arrSize, (index) => -1);
+    var firstWedPM = List<int>.generate(arrSize, (index) => -1);
+    var firstThuAM = List<int>.generate(arrSize, (index) => -1);
+    var firstThuPM = List<int>.generate(arrSize, (index) => -1);
+    var firstFriAM = List<int>.generate(arrSize, (index) => -1);
+    var firstFriPM = List<int>.generate(arrSize, (index) => -1);
+    var secondMonAM = List<int>.generate(arrSize, (index) => -1);
+    var secondMonPM = List<int>.generate(arrSize, (index) => -1);
+    var secondTueAM = List<int>.generate(arrSize, (index) => -1);
+    var secondTuePM = List<int>.generate(arrSize, (index) => -1);
+    var secondWedAM = List<int>.generate(arrSize, (index) => -1);
+    var secondWedPM = List<int>.generate(arrSize, (index) => -1);
+    var secondThuAM = List<int>.generate(arrSize, (index) => -1);
+    var secondThuPM = List<int>.generate(arrSize, (index) => -1);
+    var secondFriAM = List<int>.generate(arrSize, (index) => -1);
+    var secondFriPM = List<int>.generate(arrSize, (index) => -1);
+
+    int idx = 0;
+    //creating the 2d array
+    var dataList = List<List<String>>.generate(
+        21, (i) => List<String>.generate(arrSize, (j) => ''));
+
+    //checking the values of the dropped list and updating the list accordingly
+    for (String code in schedule.getCourseCodes()) {
+      dataList[0][idx] = code;
+      idx++;
+    }
+
+    idx = 0;
+    for (String code in schedule.getCourseCodes()) {
+      firstMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 0);
+      firstMonPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 1);
+      firstTueAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 2);
+      firstTuePM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 3);
+      firstWedAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 4);
+      firstWedPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 5);
+      firstThuAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 6);
+      firstThuPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 7);
+      firstFriAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 8);
+      firstFriPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 9);
+      secondMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 10);
+      secondMonPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 11);
+      secondTueAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 12);
+      secondTuePM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 13);
+      secondWedAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 14);
+      secondWedPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 15);
+      secondThuAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 16);
+      secondThuPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 17);
+      secondFriAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 18);
+      secondFriPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 19);
+
+      dataList[0][idx] = code;
+      droppedList[idx]
+          ? dataList[1][idx] = ''
+          : dataList[1][idx] = firstMonAM[idx].toString();
+      droppedList[idx]
+          ? dataList[2][idx] = ''
+          : dataList[2][idx] = firstMonPM[idx].toString();
+      droppedList[idx]
+          ? dataList[3][idx] = ''
+          : dataList[3][idx] = firstTueAM[idx].toString();
+      droppedList[idx]
+          ? dataList[4][idx] = ''
+          : dataList[4][idx] = firstTuePM[idx].toString();
+      droppedList[idx]
+          ? dataList[5][idx] = ''
+          : dataList[5][idx] = firstWedAM[idx].toString();
+      droppedList[idx]
+          ? dataList[6][idx] = ''
+          : dataList[6][idx] = firstWedPM[idx].toString();
+      droppedList[idx]
+          ? dataList[7][idx] = ''
+          : dataList[7][idx] = firstThuAM[idx].toString();
+      droppedList[idx]
+          ? dataList[8][idx] = ''
+          : dataList[8][idx] = firstThuPM[idx].toString();
+      droppedList[idx]
+          ? dataList[9][idx] = ''
+          : dataList[9][idx] = firstFriAM[idx].toString();
+      droppedList[idx]
+          ? dataList[10][idx] = ''
+          : dataList[10][idx] = firstFriPM[idx].toString();
+      droppedList[idx]
+          ? dataList[11][idx] = ''
+          : dataList[11][idx] = secondMonAM[idx].toString();
+      droppedList[idx]
+          ? dataList[12][idx] = ''
+          : dataList[12][idx] = secondMonPM[idx].toString();
+      droppedList[idx]
+          ? dataList[13][idx] = ''
+          : dataList[13][idx] = secondTueAM[idx].toString();
+      droppedList[idx]
+          ? dataList[14][idx] = ''
+          : dataList[14][idx] = secondTuePM[idx].toString();
+      droppedList[idx]
+          ? dataList[15][idx] = ''
+          : dataList[15][idx] = secondWedAM[idx].toString();
+      droppedList[idx]
+          ? dataList[16][idx] = ''
+          : dataList[16][idx] = secondWedPM[idx].toString();
+      droppedList[idx]
+          ? dataList[17][idx] = ''
+          : dataList[17][idx] = secondThuAM[idx].toString();
+      droppedList[idx]
+          ? dataList[18][idx] = ''
+          : dataList[18][idx] = secondThuPM[idx].toString();
+      droppedList[idx]
+          ? dataList[19][idx] = ''
+          : dataList[19][idx] = secondFriAM[idx].toString();
+      droppedList[idx]
+          ? dataList[20][idx] = ''
+          : dataList[20][idx] = secondFriPM[idx].toString();
+      idx++;
+    }
+    if (kDebugMode) {
+      print(growableList.length);
+      print(dataList.length);
+    }
+
+    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
+  }
+
+  /// Generates the information needed for buildInfo()
+  /// returns a touple where the first item is a list of strings repersenting
+  /// the names of each row and the second item is a 2D array of strings that
+  /// hold the value of each cell
+  Tuple2<List<String>, List<List<String>>> tableData() {
+    // courseCodes = schedule.getCourseCodes().toList();
+    final growableList = <String>[
+      '  ',
+      'First Choices',
+      'First backup',
+      'Second backup',
+      'Third backup',
+      'Add from BUs',
+      'Drop, bad time',
+      'Drop, dup class',
+      'Drop class full',
+      'Resulting Size'
+    ];
+    if (kDebugMode) {
+      print('num of course $numCourses');
+    }
+    int arrSize = numCourses ?? 14;
+
+    var firstChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var secondChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
+    var fromBU = List<int>.generate(arrSize, (index) => -1);
+    var dropBT = List<int>.generate(arrSize, (index) => -1);
+    var dropDC = List<int>.generate(arrSize, (index) => -1);
+    var dropCF = List<int>.generate(arrSize, (index) => -1);
+    var resultingSize = List<int>.generate(arrSize, (index) => -1);
+    int idx = 0;
+    //creating the 2d array
+    var dataList = List<List<String>>.generate(
+        10, (i) => List<String>.generate(arrSize, (j) => ''));
+
+    //checking the values of the dropped list and updating the list accordingly
+    for (String code in schedule.getCourseCodes()) {
+      dataList[0][idx] = code;
+      idx++;
+    }
+
+    idx = 0;
+    for (String code in schedule.getCourseCodes()) {
+      firstChoiceArr[idx] =
+          schedule.overviewData.getNbrForClassRank(code, 0).size;
+
+      secondChoiceArr[idx] =
+          schedule.overviewData.getNbrForClassRank(code, 1).size;
+      thirdChoiceArr[idx] =
+          schedule.overviewData.getNbrForClassRank(code, 2).size;
+      fourthChoiceArr[idx] =
+          schedule.overviewData.getNbrForClassRank(code, 3).size;
+      fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code);
+      dropBT[idx] = schedule.overviewData.getNbrDropTime(code);
+      dropDC[idx] = schedule.overviewData.getNbrDropDup(code);
+      dropCF[idx] = schedule.overviewData.getNbrDropFull(code);
+      resultingSize[idx] =
+          schedule.overviewData.getResultingClassSize(code).size;
+      // dataList[0][idx] = code;
+      droppedList[idx]
+          ? dataList[1][idx] = firstChoiceArr[idx].toString()
+          : dataList[1][idx] = firstChoiceArr[idx].toString();
+      droppedList[idx]
+          ? dataList[2][idx] = secondChoiceArr[idx].toString()
+          : dataList[2][idx] = secondChoiceArr[idx].toString();
+      droppedList[idx]
+          ? dataList[3][idx] = thirdChoiceArr[idx].toString()
+          : dataList[3][idx] = thirdChoiceArr[idx].toString();
+      droppedList[idx]
+          ? dataList[4][idx] = fourthChoiceArr[idx].toString()
+          : dataList[4][idx] = fourthChoiceArr[idx].toString();
+      droppedList[idx]
+          ? dataList[5][idx] = fromBU[idx].toString()
+          : dataList[5][idx] = fromBU[idx].toString();
+      droppedList[idx]
+          ? dataList[6][idx] = dropBT[idx].toString()
+          : dataList[6][idx] = dropBT[idx].toString();
+      droppedList[idx]
+          ? dataList[7][idx] = dropDC[idx].toString()
+          : dataList[7][idx] = dropDC[idx].toString();
+      droppedList[idx]
+          ? dataList[8][idx] = dropCF[idx].toString()
+          : dataList[8][idx] = dropCF[idx].toString();
+      droppedList[idx]
+          ? dataList[9][idx] = resultingSize[idx].toString()
+          : dataList[9][idx] = resultingSize[idx].toString();
+      idx++;
+    }
+    if (kDebugMode) {
+      print(growableList.length);
+      print(dataList.length);
+    }
+    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
+  }
+
   /// Helper function to update all of overviewData
   void _updateOverViewData() {
     courseTakers = schedule.overviewData.getNbrCourseTakers();
@@ -83,21 +341,16 @@ class _ScreenState extends State<Screen> {
     onLeave = schedule.overviewData.getNbrOnLeave();
   }
 
-  /// A helper function that format class codes to be shown vertically
-  String _formatClassCode(String code, int index) {
-    if (code.isEmpty) {
-      return '';
+  void _updateScheduleData() {
+    var courses = schedule.getCourseCodes();
+    for (var course in scheduleData.keys) {
+      if (!courses.contains(course)) {
+        scheduleData.remove(course);
+      }
     }
-    if (index != 0) {
-      return code;
+    for (var course in courses) {
+      scheduleData[course] = schedule.scheduleControl.scheduledTimeFor(course);
     }
-    String testCode = '';
-    for (int i = 0; i < code.length - 1; i++) {
-      testCode += code[i];
-      testCode += '\n';
-    }
-    testCode += code[code.length - 1];
-    return testCode;
   }
 
   /// This class is a private computation function that sets the min and max class
@@ -523,7 +776,130 @@ class _ScreenState extends State<Screen> {
           color: masterBackgroundColor,
           child: SingleChildScrollView(
               child: Column(
-            children: [screen1(), combineTables(tableData(), tableTimeData())],
+            children: [
+              screen1(),
+              MainTable(
+                  state: schedule.getStateOfProcessing(),
+                  tableData: tableData(),
+                  timeTableData: tableTimeData(),
+                  droppedList: droppedList,
+                  scheduleData: scheduleData,
+                  onCellPressed: (String row, String course) {
+                    setState(() {
+                      if (row.isEmpty) {
+                        curClassRoster = schedule.overviewData
+                            .getPeopleForResultingClass(course);
+                        resultingClass = false;
+                        classCodes = true;
+                      } else if (row == 'First Choices') {
+                        curClassRoster = schedule.overviewData
+                            .getPeopleForClassRank(course, 0);
+                        resultingClass = false;
+                        classCodes = false;
+                      } else if (row == 'First backup') {
+                        curClassRoster = schedule.overviewData
+                            .getPeopleForClassRank(course, 1);
+                        resultingClass = false;
+                        classCodes = false;
+                      } else if (row == 'Second backup') {
+                        curClassRoster = schedule.overviewData
+                            .getPeopleForClassRank(course, 2);
+                        if (kDebugMode) {
+                          print(curClassRoster);
+                        }
+                        resultingClass = false;
+                        classCodes = false;
+                      } else if (row == 'Third backup') {
+                        curClassRoster = schedule.overviewData
+                            .getPeopleForClassRank(course, 3);
+                        resultingClass = false;
+                        classCodes = false;
+                      } else if (row == 'Add from BU\'s') {
+                        curClassRoster = schedule.overviewData
+                            .getPeopleAddFromBackup(course);
+                        resultingClass = false;
+                        classCodes = false;
+                      } else if (row == 'Drop, bad time') {
+                        curClassRoster =
+                            schedule.overviewData.getPeopleDropTime(course);
+                        resultingClass = false;
+                        classCodes = false;
+                      } else if (row == 'Drop, dup class') {
+                        curClassRoster = [];
+                        resultingClass = false;
+                        classCodes = false;
+                      } else if (row == 'Drop class full') {
+                        curClassRoster = [];
+                        resultingClass = false;
+                        classCodes = false;
+                      } else if (row == 'Resulting Size') {
+                        curClassRoster = schedule.overviewData
+                            .getPeopleForResultingClass(course);
+                        resultingClass = true;
+                        classCodes = false;
+                      }
+
+                      curClass = course;
+                      schedule.splitControl.resetState();
+                      curSelected.clear();
+                      clustColors.clear();
+                      curCell = row;
+                      List<String> tempList = curClassRoster.toList();
+                      tempList.sort(
+                          (a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
+                      curClassRoster = tempList;
+                      for (var name in curClassRoster) {
+                        curSelected[name] = false;
+                      }
+                      if (kDebugMode) {
+                        print(curClassRoster);
+                      }
+                      _updateOverViewData();
+                    });
+                  },
+                  onDroppedChanged: (int i) {
+                    setState(() {
+                      droppedList[i] = !droppedList[i];
+                      if (droppedList[i] == true) {
+                        schedule.courseControl
+                            .drop(schedule.getCourseCodes().toList()[i]);
+                      } else {
+                        schedule.courseControl
+                            .undrop(schedule.getCourseCodes().toList()[i]);
+                      }
+                      if (kDebugMode) {
+                        print(
+                            'dropped list index: $i drop list value: ${droppedList[i]}');
+                      }
+                      _updateOverViewData();
+                    });
+                  },
+                  onSchedule: (String course, String time) {
+                    setState(() {
+                      int timeIndex = getTimeIndex(time);
+
+                      curClass = course;
+                      schedule.splitControl.resetState();
+                      schedule.scheduleControl.schedule(curClass, timeIndex);
+
+                      curSelected.clear();
+                      clustColors.clear();
+                      curCell = time;
+                      List<String> tempList = curClassRoster.toList();
+                      tempList.sort(
+                          (a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
+                      curClassRoster = tempList;
+                      for (var name in curClassRoster) {
+                        curSelected[name] = false;
+                      }
+                      if (kDebugMode) {
+                        print(curClassRoster);
+                      }
+                      _updateOverViewData();
+                      _updateScheduleData();
+                    });
+                  })
+            ],
           )),
         );
       },
@@ -1136,501 +1512,6 @@ class _ScreenState extends State<Screen> {
         droppedList[i] = true;
       }
     }
-  }
-
-  /// Generates the information needed for buildInfo()
-  /// returns a touple where the first item is a list of strings repersenting
-  /// the names of each row and the second item is a 2D array of strings that
-  /// hold the value of each cell
-  Tuple2<List<String>, List<List<String>>> tableData() {
-    // courseCodes = schedule.getCourseCodes().toList();
-    final growableList = <String>[
-      '  ',
-      'First Choices',
-      'First backup',
-      'Second backup',
-      'Third backup',
-      'Add from BUs',
-      'Drop, bad time',
-      'Drop, dup class',
-      'Drop class full',
-      'Resulting Size'
-    ];
-    if (kDebugMode) {
-      print('num of course $numCourses');
-    }
-    int arrSize = numCourses ?? 14;
-
-    var firstChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var secondChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var fromBU = List<int>.generate(arrSize, (index) => -1);
-    var dropBT = List<int>.generate(arrSize, (index) => -1);
-    var dropDC = List<int>.generate(arrSize, (index) => -1);
-    var dropCF = List<int>.generate(arrSize, (index) => -1);
-    var resultingSize = List<int>.generate(arrSize, (index) => -1);
-    int idx = 0;
-    //creating the 2d array
-    var dataList = List<List<String>>.generate(
-        10, (i) => List<String>.generate(arrSize, (j) => ''));
-
-    //checking the values of the dropped list and updating the list accordingly
-    for (String code in schedule.getCourseCodes()) {
-      dataList[0][idx] = code;
-      idx++;
-    }
-
-    idx = 0;
-    for (String code in schedule.getCourseCodes()) {
-      firstChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 0).size;
-
-      secondChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 1).size;
-      thirdChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 2).size;
-      fourthChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 3).size;
-      fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code);
-      dropBT[idx] = schedule.overviewData.getNbrDropTime(code);
-      dropDC[idx] = schedule.overviewData.getNbrDropDup(code);
-      dropCF[idx] = schedule.overviewData.getNbrDropFull(code);
-      resultingSize[idx] =
-          schedule.overviewData.getResultingClassSize(code).size;
-      // dataList[0][idx] = code;
-      droppedList[idx]
-          ? dataList[1][idx] = firstChoiceArr[idx].toString()
-          : dataList[1][idx] = firstChoiceArr[idx].toString();
-      droppedList[idx]
-          ? dataList[2][idx] = secondChoiceArr[idx].toString()
-          : dataList[2][idx] = secondChoiceArr[idx].toString();
-      droppedList[idx]
-          ? dataList[3][idx] = thirdChoiceArr[idx].toString()
-          : dataList[3][idx] = thirdChoiceArr[idx].toString();
-      droppedList[idx]
-          ? dataList[4][idx] = fourthChoiceArr[idx].toString()
-          : dataList[4][idx] = fourthChoiceArr[idx].toString();
-      droppedList[idx]
-          ? dataList[5][idx] = fromBU[idx].toString()
-          : dataList[5][idx] = fromBU[idx].toString();
-      droppedList[idx]
-          ? dataList[6][idx] = dropBT[idx].toString()
-          : dataList[6][idx] = dropBT[idx].toString();
-      droppedList[idx]
-          ? dataList[7][idx] = dropDC[idx].toString()
-          : dataList[7][idx] = dropDC[idx].toString();
-      droppedList[idx]
-          ? dataList[8][idx] = dropCF[idx].toString()
-          : dataList[8][idx] = dropCF[idx].toString();
-      droppedList[idx]
-          ? dataList[9][idx] = resultingSize[idx].toString()
-          : dataList[9][idx] = resultingSize[idx].toString();
-      idx++;
-    }
-    if (kDebugMode) {
-      print(growableList.length);
-      print(dataList.length);
-    }
-    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
-  }
-
-  /// This Widget takes the resulting data from tableData and timeTableData and
-  /// produces the table widget displayed to the user by running buildInfo() and
-  /// buildTimeInfo()
-  Widget combineTables(Tuple2<List<String>, List<List<String>>> infoTable,
-      Tuple2<List<String>, List<List<String>>> timeTable) {
-    return Table(
-      border: TableBorder.symmetric(
-          inside: const BorderSide(width: 1, color: Colors.black),
-          outside: const BorderSide(width: 1)),
-      columnWidths: const {0: IntrinsicColumnWidth()},
-      children: buildInfo(infoTable.item1, infoTable.item2) +
-          buildTimeInfo(timeTable.item1, timeTable.item2),
-    );
-  }
-
-  /// Generates the portion of the data table that contains class data returns
-  /// a list of TableRow objects
-  List<TableRow> buildInfo(
-      // builds the list of table rows. I had to do it in a function because for
-      // some reason state doesn't update if its done the other way
-
-      List<String> growableList,
-      List<List<String>> dataList) {
-    List<TableRow> result = [];
-    for (int i = 0; i < growableList.length; i++) {
-      result.add(TableRow(children: [
-        TableCell(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[Text(growableList[i].toString())])),
-        for (int j = 0; j < dataList[i].length; j++)
-          TextButton(
-            child: Text(_formatClassCode(dataList[i][j], i)),
-            onPressed: () {
-              setState(() {
-                if (i == 0) {
-                  curClassRoster = schedule.overviewData
-                      .getPeopleForResultingClass(dataList[0][j].toString());
-                  resultingClass = false;
-                  classCodes = true;
-                } else if (growableList[i].toString() == 'First Choices') {
-                  curClassRoster = schedule.overviewData
-                      .getPeopleForClassRank(dataList[0][j].toString(), 0);
-                  resultingClass = false;
-                  classCodes = false;
-                } else if (growableList[i].toString() == 'First backup') {
-                  curClassRoster = schedule.overviewData
-                      .getPeopleForClassRank(dataList[0][j].toString(), 1);
-                  resultingClass = false;
-                  classCodes = false;
-                } else if (growableList[i].toString() == 'Second backup') {
-                  curClassRoster = schedule.overviewData
-                      .getPeopleForClassRank(dataList[0][j].toString(), 2);
-                  if (kDebugMode) {
-                    print(curClassRoster);
-                  }
-                  resultingClass = false;
-                  classCodes = false;
-                } else if (growableList[i].toString() == 'Third backup') {
-                  curClassRoster = schedule.overviewData
-                      .getPeopleForClassRank(dataList[0][j].toString(), 3);
-                  resultingClass = false;
-                  classCodes = false;
-                } else if (growableList[i].toString() == 'Add from BU\'s') {
-                  curClassRoster = schedule.overviewData
-                      .getPeopleAddFromBackup(dataList[0][j].toString());
-                  resultingClass = false;
-                  classCodes = false;
-                } else if (growableList[i].toString() == 'Drop, bad time') {
-                  curClassRoster = schedule.overviewData
-                      .getPeopleDropTime(dataList[0][j].toString());
-                  resultingClass = false;
-                  classCodes = false;
-                } else if (growableList[i].toString() == 'Drop, dup class') {
-                  curClassRoster = [];
-                  resultingClass = false;
-                  classCodes = false;
-                } else if (growableList[i].toString() == 'Drop class full') {
-                  curClassRoster = [];
-                  resultingClass = false;
-                  classCodes = false;
-                } else if (growableList[i].toString() == 'Resulting Size') {
-                  curClassRoster = schedule.overviewData
-                      .getPeopleForResultingClass(dataList[0][j].toString());
-                  resultingClass = true;
-                  classCodes = false;
-                }
-
-                curClass = dataList[0][j].toString();
-                schedule.splitControl.resetState();
-                curSelected.clear();
-                clustColors.clear();
-                curCell = growableList[i];
-                // print("*******grow: $curCell********");
-                List<String> tempList = curClassRoster.toList();
-                tempList
-                    .sort((a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
-                curClassRoster = tempList;
-                for (var name in curClassRoster) {
-                  curSelected[name] = false;
-                }
-                if (kDebugMode) {
-                  print(curClassRoster);
-                }
-                _updateOverViewData();
-              });
-            },
-            style: () {
-              List<String> classes = schedule.getCourseCodes().toList();
-              if (i == 0 &&
-                  stateDescriptions[schedule.getStateOfProcessing().index] ==
-                      'Coordinator' &&
-                  (mainCoordinatorSelected[classes[j]] ||
-                      coCoordinatorSelected[classes[j]])) {
-                return ElevatedButton.styleFrom(
-                  primary: Colors.lightBlueAccent,
-                );
-              }
-            }(),
-          )
-      ]));
-    }
-    result.add(TableRow(children: [
-      TableCell(
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const <Widget>[Text('class dropped')])),
-      for (int i = 0; i < droppedList.length; i++) droppedCheck(i)
-    ]));
-
-    result.add(TableRow(children: [
-      TableCell(
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[Text(growableList[0].toString())])),
-      for (int j = 0; j < dataList[0].length; j++)
-        Text(
-          _formatClassCode(dataList[0][j], 0),
-          textAlign: TextAlign.center,
-        )
-    ]));
-
-    return result;
-  }
-
-  /// Creates a checkbox widget to be used in the class data portion of the main
-  /// data table. The checkbox will be linked to a given colum index i. When
-  /// selected the corosponding class at index i will be dropped which will
-  /// be reflected in the front end and backend data structures
-  Widget droppedCheck(int i) {
-    // makes a checkmark widget that corresponds to the passed index of dropped
-    // list
-    return Checkbox(
-        checkColor: Colors.white,
-        fillColor: null,
-        value: droppedList[i],
-        onChanged: (bool? value) {
-          setState(() {
-            droppedList[i] = value!;
-            if (droppedList[i] == true) {
-              schedule.courseControl
-                  .drop(schedule.getCourseCodes().toList()[i]);
-            } else {
-              schedule.courseControl
-                  .undrop(schedule.getCourseCodes().toList()[i]);
-            }
-            if (kDebugMode) {
-              print(
-                  'dropped list index: $i drop list value: ${droppedList[i]}');
-            }
-            _updateOverViewData();
-          });
-        });
-  }
-
-  /// Generates the information needed for buildTimeInfo()
-  /// returns a touple where the first item is a list of strings repersenting
-  /// the names of each row and the second item is a 2D array of strings that
-  /// hold the value of each cell
-  Tuple2<List<String>, List<List<String>>> tableTimeData() {
-    final growableList = <String>[
-      '',
-      '1st/3rd Mon AM',
-      '1st/3rd Mon PM',
-      '1st/3rd Tue AM',
-      '1st/3rd Tue PM',
-      '1st/3rd Wed AM',
-      '1st/3rd Wed PM',
-      '1st/3rd Thu AM',
-      '1st/3rd Thu PM',
-      '1st/3rd Fri AM',
-      '1st/3rd Fri PM',
-      '2nd/4th Mon AM',
-      '2nd/4th Mon PM',
-      '2nd/4th Tue AM',
-      '2nd/4th Tue PM',
-      '2nd/4th Wed AM',
-      '2nd/4th Wed PM',
-      '2nd/4th Thu AM',
-      '2nd/4th Thu PM',
-      '2nd/4th Fri AM',
-      '2nd/4th Fri PM'
-    ];
-    if (kDebugMode) {
-      print('num of course $numCourses');
-    }
-    int arrSize = numCourses ?? 14;
-
-    var firstMonAM = List<int>.generate(arrSize, (index) => -1);
-    var firstMonPM = List<int>.generate(arrSize, (index) => -1);
-    var firstTueAM = List<int>.generate(arrSize, (index) => -1);
-    var firstTuePM = List<int>.generate(arrSize, (index) => -1);
-    var firstWedAM = List<int>.generate(arrSize, (index) => -1);
-    var firstWedPM = List<int>.generate(arrSize, (index) => -1);
-    var firstThuAM = List<int>.generate(arrSize, (index) => -1);
-    var firstThuPM = List<int>.generate(arrSize, (index) => -1);
-    var firstFriAM = List<int>.generate(arrSize, (index) => -1);
-    var firstFriPM = List<int>.generate(arrSize, (index) => -1);
-    var secondMonAM = List<int>.generate(arrSize, (index) => -1);
-    var secondMonPM = List<int>.generate(arrSize, (index) => -1);
-    var secondTueAM = List<int>.generate(arrSize, (index) => -1);
-    var secondTuePM = List<int>.generate(arrSize, (index) => -1);
-    var secondWedAM = List<int>.generate(arrSize, (index) => -1);
-    var secondWedPM = List<int>.generate(arrSize, (index) => -1);
-    var secondThuAM = List<int>.generate(arrSize, (index) => -1);
-    var secondThuPM = List<int>.generate(arrSize, (index) => -1);
-    var secondFriAM = List<int>.generate(arrSize, (index) => -1);
-    var secondFriPM = List<int>.generate(arrSize, (index) => -1);
-
-    int idx = 0;
-    //creating the 2d array
-    var dataList = List<List<String>>.generate(
-        21, (i) => List<String>.generate(arrSize, (j) => ''));
-
-    //checking the values of the dropped list and updating the list accordingly
-    for (String code in schedule.getCourseCodes()) {
-      dataList[0][idx] = code;
-      idx++;
-    }
-
-    idx = 0;
-    for (String code in schedule.getCourseCodes()) {
-      firstMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 0);
-      firstMonPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 1);
-      firstTueAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 2);
-      firstTuePM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 3);
-      firstWedAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 4);
-      firstWedPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 5);
-      firstThuAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 6);
-      firstThuPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 7);
-      firstFriAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 8);
-      firstFriPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 9);
-      secondMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 10);
-      secondMonPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 11);
-      secondTueAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 12);
-      secondTuePM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 13);
-      secondWedAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 14);
-      secondWedPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 15);
-      secondThuAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 16);
-      secondThuPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 17);
-      secondFriAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 18);
-      secondFriPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 19);
-
-      dataList[0][idx] = code;
-      droppedList[idx]
-          ? dataList[1][idx] = ''
-          : dataList[1][idx] = firstMonAM[idx].toString();
-      droppedList[idx]
-          ? dataList[2][idx] = ''
-          : dataList[2][idx] = firstMonPM[idx].toString();
-      droppedList[idx]
-          ? dataList[3][idx] = ''
-          : dataList[3][idx] = firstTueAM[idx].toString();
-      droppedList[idx]
-          ? dataList[4][idx] = ''
-          : dataList[4][idx] = firstTuePM[idx].toString();
-      droppedList[idx]
-          ? dataList[5][idx] = ''
-          : dataList[5][idx] = firstWedAM[idx].toString();
-      droppedList[idx]
-          ? dataList[6][idx] = ''
-          : dataList[6][idx] = firstWedPM[idx].toString();
-      droppedList[idx]
-          ? dataList[7][idx] = ''
-          : dataList[7][idx] = firstThuAM[idx].toString();
-      droppedList[idx]
-          ? dataList[8][idx] = ''
-          : dataList[8][idx] = firstThuPM[idx].toString();
-      droppedList[idx]
-          ? dataList[9][idx] = ''
-          : dataList[9][idx] = firstFriAM[idx].toString();
-      droppedList[idx]
-          ? dataList[10][idx] = ''
-          : dataList[10][idx] = firstFriPM[idx].toString();
-      droppedList[idx]
-          ? dataList[11][idx] = ''
-          : dataList[11][idx] = secondMonAM[idx].toString();
-      droppedList[idx]
-          ? dataList[12][idx] = ''
-          : dataList[12][idx] = secondMonPM[idx].toString();
-      droppedList[idx]
-          ? dataList[13][idx] = ''
-          : dataList[13][idx] = secondTueAM[idx].toString();
-      droppedList[idx]
-          ? dataList[14][idx] = ''
-          : dataList[14][idx] = secondTuePM[idx].toString();
-      droppedList[idx]
-          ? dataList[15][idx] = ''
-          : dataList[15][idx] = secondWedAM[idx].toString();
-      droppedList[idx]
-          ? dataList[16][idx] = ''
-          : dataList[16][idx] = secondWedPM[idx].toString();
-      droppedList[idx]
-          ? dataList[17][idx] = ''
-          : dataList[17][idx] = secondThuAM[idx].toString();
-      droppedList[idx]
-          ? dataList[18][idx] = ''
-          : dataList[18][idx] = secondThuPM[idx].toString();
-      droppedList[idx]
-          ? dataList[19][idx] = ''
-          : dataList[19][idx] = secondFriAM[idx].toString();
-      droppedList[idx]
-          ? dataList[20][idx] = ''
-          : dataList[20][idx] = secondFriPM[idx].toString();
-      idx++;
-    }
-    if (kDebugMode) {
-      print(growableList.length);
-      print(dataList.length);
-    }
-
-    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
-  }
-
-  /// creates the scheduling portion of the main data table returns a list of
-  /// TableRow objects
-  List<TableRow> buildTimeInfo(
-      // builds the list of table rows. I had to do it in a function because for
-      // some reason state doesn't update if its done the other way
-      List<String> growableList,
-      List<List<String>> dataList) {
-    List<TableRow> result = [];
-    for (int i = 1; i < growableList.length; i++) {
-      result.add(TableRow(children: [
-        TableCell(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[Text(growableList[i].toString())])),
-        for (int j = 0; j < dataList[i].length; j++)
-          TextButton(
-            child: Text(dataList[i][j].toString()),
-            onPressed: droppedList[j] == false &&
-                    !(schedule.getStateOfProcessing().index == 3 ||
-                        schedule.getStateOfProcessing().index == 4)
-                ? () {
-                    //check if the course is dropped
-                    setState(() {
-                      int timeIndex = getTimeIndex(growableList[i].toString());
-
-                      curClass = dataList[0][j].toString();
-                      schedule.splitControl.resetState();
-                      schedule.scheduleControl.schedule(curClass, timeIndex);
-
-                      curSelected.clear();
-                      clustColors.clear();
-                      curCell = growableList[i];
-                      List<String> tempList = curClassRoster.toList();
-                      tempList.sort(
-                          (a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
-                      curClassRoster = tempList;
-                      for (var name in curClassRoster) {
-                        curSelected[name] = false;
-                      }
-                      if (kDebugMode) {
-                        print(curClassRoster);
-                      }
-                      _updateOverViewData();
-                    });
-                  }
-                : null,
-            style: (() {
-              if (schedule.scheduleControl.isScheduledAt(
-                  dataList[0][j].toString(),
-                  getTimeIndex(growableList[i].toString()))) {
-                if (kDebugMode) {
-                  print('got here');
-                }
-                return ElevatedButton.styleFrom(primary: Colors.red);
-              } else {
-                return ElevatedButton.styleFrom(primary: Colors.transparent);
-              }
-            }()),
-          )
-      ]));
-    }
-    return result;
   }
 
   /// translation function that will take a time slot and return the correct
