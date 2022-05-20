@@ -117,9 +117,15 @@ class OverviewData {
   /// Attempt to place person into the given course and return the result
   PlacementResult _placePersonInCourse(Person person, String course,
       Set<String> dropped, bool firstChoice, List<bool> hasClass) {
+    // Count first choices
+    if (firstChoice) {
+      _data[course]!.firstChoices.add(person.getName());
+    }
+    // Check drop
     if (dropped.contains(course)) {
       return PlacementResult.drop;
     }
+    // Check time
     var time = _scheduling.scheduleControl.scheduledTimeFor(course);
     if (time != -1 && !person.availability[time]) {
       _data[course]!.dropTime.add(person.getName());
@@ -135,11 +141,13 @@ class OverviewData {
       _data[course]!.dropFull.add(person.getName());
       return PlacementResult.full;
     }
+    // Update given classes
     if (firstChoice) {
-      _data[course]!.firstChoices.add(person.getName());
+      _data[course]!.givenFirstChoices.add(person.getName());
     } else {
       _data[course]!.addFromBackup.add(person.getName());
     }
+    // Update occupied time slot for person
     if (time != -1) {
       hasClass[time] = true;
     }
@@ -341,6 +349,7 @@ class OverviewData {
 class CourseData {
   Set<String> firstChoices = {};
   List<Set<String>> backups = [{}, {}, {}, {}, {}];
+  Set<String> givenFirstChoices = {};
   Set<String> addFromBackup = {};
   Set<String> dropTime = {};
   Set<String> dropFull = {};
@@ -348,23 +357,24 @@ class CourseData {
 
   /// Reset course data to zeros
   void reset() {
-    addFromBackup.clear();
     firstChoices.clear();
-    dropTime.clear();
-    dropFull.clear();
-    dropDup.clear();
     for (var i = 0; i < backups.length; i++) {
       backups[i].clear();
     }
+    givenFirstChoices.clear();
+    addFromBackup.clear();
+    dropTime.clear();
+    dropFull.clear();
+    dropDup.clear();
   }
 
   /// Get the number of people in the resulting class
   int getResultingSize() {
-    return firstChoices.length + addFromBackup.length;
+    return givenFirstChoices.length + addFromBackup.length;
   }
 
   /// Get a set of people in the resulting class
   Set<String> getResultingClass() {
-    return firstChoices.union(addFromBackup);
+    return givenFirstChoices.union(addFromBackup);
   }
 }

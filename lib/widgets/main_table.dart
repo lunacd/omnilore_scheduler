@@ -2,6 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:tuple/tuple.dart';
 
+const overviewRows = <String>[
+  'First Choices',
+  'First backup',
+  'Second backup',
+  'Third backup',
+  'Add from BUs',
+  'Drop, bad time',
+  'Drop, dup class',
+  'Drop class full',
+  'Resulting Size'
+];
+
 /// This Widget takes the resulting data from tableData and timeTableData and
 /// produces the table widget displayed to the user by running buildInfo() and
 /// buildTimeInfo()
@@ -9,7 +21,8 @@ class MainTable extends StatelessWidget {
   const MainTable(
       {Key? key,
       required this.state,
-      required this.tableData,
+      required this.courses,
+      required this.overviewMatrix,
       required this.timeTableData,
       required this.droppedList,
       required this.scheduleData,
@@ -19,7 +32,8 @@ class MainTable extends StatelessWidget {
       : super(key: key);
 
   final StateOfProcessing state;
-  final Tuple2<List<String>, List<List<String>>> tableData;
+  final List<String> courses;
+  final List<List<int>> overviewMatrix;
   final Tuple2<List<String>, List<List<String>>> timeTableData;
   final List<bool> droppedList;
   final void Function(String, String) onCellPressed;
@@ -29,41 +43,30 @@ class MainTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var infoTable = tableData;
-    var timeTable = timeTableData;
-    return Table(
-      border: TableBorder.symmetric(
-          inside: const BorderSide(width: 1, color: Colors.black),
-          outside: const BorderSide(width: 1)),
-      columnWidths: const {0: IntrinsicColumnWidth()},
-      children: buildInfo(infoTable.item1, infoTable.item2) +
-          buildTimeInfo(timeTable.item1, timeTable.item2),
-    );
-  }
-
-  /// Generates the portion of the data table that contains class data returns
-  /// a list of TableRow objects
-  List<TableRow> buildInfo(
-      // builds the list of table rows. I had to do it in a function because for
-      // some reason state doesn't update if its done the other way
-      List<String> growableList,
-      List<List<String>> dataList) {
-    List<TableRow> result = [];
-    for (int i = 0; i < growableList.length; i++) {
-      result.add(TableRow(children: [
+    print('courses: ${courses.length}');
+    print('overviewrows: ${overviewRows[0].length}');
+    List<TableRow> rows = [];
+    rows.add(TableRow(children: [
+      const TableCell(child: Text('')),
+      for (int i = 0; i < courses.length; i++)
+        TextButton(
+          child: Text(_formatClassCode(courses[i], 0)),
+          onPressed: () => onCellPressed('', courses[i]),
+        )
+    ]));
+    for (int i = 0; i < overviewRows.length; i++) {
+      rows.add(TableRow(children: [
         TableCell(
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[Text(growableList[i].toString())])),
-        for (int j = 0; j < dataList[i].length; j++)
+                children: <Widget>[Text(overviewRows[i].toString())])),
+        for (int j = 0; j < overviewMatrix[i].length; j++)
           TextButton(
-            child: Text(_formatClassCode(dataList[i][j], i)),
-            //check if the course is dropped
-            onPressed: () => onCellPressed(growableList[i], dataList[0][j]),
-          )
+              onPressed: () => onCellPressed(overviewRows[i], courses[j]),
+              child: Text(overviewMatrix[i][j].toString()))
       ]));
     }
-    result.add(TableRow(children: [
+    rows.add(TableRow(children: [
       TableCell(
           child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -71,17 +74,33 @@ class MainTable extends StatelessWidget {
       for (int i = 0; i < droppedList.length; i++) droppedCheck(i)
     ]));
 
-    result.add(TableRow(children: [
-      TableCell(
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[Text(growableList[0].toString())])),
-      for (int j = 0; j < dataList[0].length; j++)
-        Text(
-          _formatClassCode(dataList[0][j], 0),
-          textAlign: TextAlign.center,
+    rows.add(TableRow(children: [
+      const TableCell(child: Text('')),
+      for (int i = 0; i < courses.length; i++)
+        TextButton(
+          child: Text(_formatClassCode(courses[i], 0)),
+          onPressed: () => onCellPressed('', courses[i]),
         )
     ]));
+    var timeTable = timeTableData;
+    print('reference: ${timeTableData.item2[0].length}');
+    return Table(
+      border: TableBorder.symmetric(
+          inside: const BorderSide(width: 1, color: Colors.black),
+          outside: const BorderSide(width: 1)),
+      columnWidths: const {0: IntrinsicColumnWidth()},
+      children: rows + buildTimeInfo(timeTable.item1, timeTable.item2),
+    );
+  }
+
+  /// Generates the portion of the data table that contains class data returns
+  /// a list of TableRow objects
+  List<TableRow> buildOverviewRows(
+      // builds the list of table rows. I had to do it in a function because for
+      // some reason state doesn't update if its done the other way
+      List<String> growableList,
+      List<List<String>> dataList) {
+    List<TableRow> result = [];
 
     return result;
   }
@@ -98,7 +117,9 @@ class MainTable extends StatelessWidget {
         checkColor: Colors.white,
         fillColor: null,
         value: droppedList[i],
-        onChanged: (_) {onDroppedChanged(i);});
+        onChanged: (_) {
+          onDroppedChanged(i);
+        });
   }
 
   /// translation function that will take a time slot and return the correct

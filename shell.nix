@@ -1,10 +1,25 @@
 { pkgs ? import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/8b3398bc7587ebb79f93dfeea1b8c574d3c6dba1.tar.gz") {}
 }:
 
-pkgs.mkShell {
+with pkgs;
+mkShell {
   buildInputs = [
-    pkgs.flutter
-    pkgs.dart
+    flutter
+    dart
+    unzip
+    cmake
+    ninja
+    clang
+    pkg-config
+    gtk3
+    pcre
+    libepoxy
+    mount
+    gnome.zenity
   ];
+
+  shellHook = ''
+    export LD_LIBRARY_PATH=${libepoxy}/lib
+  '';
 }
 

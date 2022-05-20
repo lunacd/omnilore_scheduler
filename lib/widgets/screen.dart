@@ -13,7 +13,7 @@ import 'package:omnilore_scheduler/widgets/main_table.dart';
 import 'package:omnilore_scheduler/widgets/overview_data.dart';
 import 'package:tuple/tuple.dart';
 
-const List<String> stateDescriptions = [
+const stateDescriptions = <String>[
   'Need Courses',
   'Need People',
   'Inconsistent',
@@ -22,6 +22,17 @@ const List<String> stateDescriptions = [
   'Schedule',
   'Coordinator',
   'Output'
+];
+const overviewRows = <String>[
+  'First Choices',
+  'First backup',
+  'Second backup',
+  'Third backup',
+  'Add from BUs',
+  'Drop, bad time',
+  'Drop, dup class',
+  'Drop class full',
+  'Resulting Size'
 ];
 
 class Screen extends StatefulWidget {
@@ -60,9 +71,7 @@ class _ScreenState extends State<Screen> {
   Map<Set<String>, Color> clustColors = <Set<String>, Color>{};
   bool resultingClass = false;
   bool classCodes = false;
-  List<bool> droppedList = List<bool>.filled(14, false,
-      growable:
-          true); // list that corresponds to each column of the table. will be true when column box is checked, otherwise false
+  List<bool> droppedList = List<bool>.filled(14, false, growable: true);
   Map<String, int> scheduleData = <String, int>{};
 
   Color masterBackgroundColor = themeColors['WhiteBlue'];
@@ -74,6 +83,10 @@ class _ScreenState extends State<Screen> {
   late int placesGiven = schedule.overviewData.getNbrPlacesGiven();
   late int unmetWants = schedule.overviewData.getNbrUnmetWants();
   late int onLeave = schedule.overviewData.getNbrOnLeave();
+
+  List<String> courses = [];
+  late var overviewMatrix = List<List<int>>.generate(overviewRows.length,
+      (i) => List<int>.generate(numCourses ?? 14, (j) => 0));
 
   /// Generates the information needed for buildTimeInfo()
   /// returns a touple where the first item is a list of strings repersenting
@@ -234,105 +247,8 @@ class _ScreenState extends State<Screen> {
     return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
   }
 
-  /// Generates the information needed for buildInfo()
-  /// returns a touple where the first item is a list of strings repersenting
-  /// the names of each row and the second item is a 2D array of strings that
-  /// hold the value of each cell
-  Tuple2<List<String>, List<List<String>>> tableData() {
-    // courseCodes = schedule.getCourseCodes().toList();
-    final growableList = <String>[
-      '  ',
-      'First Choices',
-      'First backup',
-      'Second backup',
-      'Third backup',
-      'Add from BUs',
-      'Drop, bad time',
-      'Drop, dup class',
-      'Drop class full',
-      'Resulting Size'
-    ];
-    if (kDebugMode) {
-      print('num of course $numCourses');
-    }
-    int arrSize = numCourses ?? 14;
-
-    var firstChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var secondChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var thirdChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var fourthChoiceArr = List<int>.generate(arrSize, (index) => -1);
-    var fromBU = List<int>.generate(arrSize, (index) => -1);
-    var dropBT = List<int>.generate(arrSize, (index) => -1);
-    var dropDC = List<int>.generate(arrSize, (index) => -1);
-    var dropCF = List<int>.generate(arrSize, (index) => -1);
-    var resultingSize = List<int>.generate(arrSize, (index) => -1);
-    int idx = 0;
-    //creating the 2d array
-    var dataList = List<List<String>>.generate(
-        10, (i) => List<String>.generate(arrSize, (j) => ''));
-
-    //checking the values of the dropped list and updating the list accordingly
-    for (String code in schedule.getCourseCodes()) {
-      dataList[0][idx] = code;
-      idx++;
-    }
-
-    idx = 0;
-    for (String code in schedule.getCourseCodes()) {
-      firstChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 0).size;
-
-      secondChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 1).size;
-      thirdChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 2).size;
-      fourthChoiceArr[idx] =
-          schedule.overviewData.getNbrForClassRank(code, 3).size;
-      fromBU[idx] = schedule.overviewData.getNbrAddFromBackup(code);
-      dropBT[idx] = schedule.overviewData.getNbrDropTime(code);
-      dropDC[idx] = schedule.overviewData.getNbrDropDup(code);
-      dropCF[idx] = schedule.overviewData.getNbrDropFull(code);
-      resultingSize[idx] =
-          schedule.overviewData.getResultingClassSize(code).size;
-      // dataList[0][idx] = code;
-      droppedList[idx]
-          ? dataList[1][idx] = firstChoiceArr[idx].toString()
-          : dataList[1][idx] = firstChoiceArr[idx].toString();
-      droppedList[idx]
-          ? dataList[2][idx] = secondChoiceArr[idx].toString()
-          : dataList[2][idx] = secondChoiceArr[idx].toString();
-      droppedList[idx]
-          ? dataList[3][idx] = thirdChoiceArr[idx].toString()
-          : dataList[3][idx] = thirdChoiceArr[idx].toString();
-      droppedList[idx]
-          ? dataList[4][idx] = fourthChoiceArr[idx].toString()
-          : dataList[4][idx] = fourthChoiceArr[idx].toString();
-      droppedList[idx]
-          ? dataList[5][idx] = fromBU[idx].toString()
-          : dataList[5][idx] = fromBU[idx].toString();
-      droppedList[idx]
-          ? dataList[6][idx] = dropBT[idx].toString()
-          : dataList[6][idx] = dropBT[idx].toString();
-      droppedList[idx]
-          ? dataList[7][idx] = dropDC[idx].toString()
-          : dataList[7][idx] = dropDC[idx].toString();
-      droppedList[idx]
-          ? dataList[8][idx] = dropCF[idx].toString()
-          : dataList[8][idx] = dropCF[idx].toString();
-      droppedList[idx]
-          ? dataList[9][idx] = resultingSize[idx].toString()
-          : dataList[9][idx] = resultingSize[idx].toString();
-      idx++;
-    }
-    if (kDebugMode) {
-      print(growableList.length);
-      print(dataList.length);
-    }
-    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
-  }
-
   /// Helper function to update all of overviewData
-  void _updateOverViewData() {
+  void _updateOverviewData() {
     courseTakers = schedule.overviewData.getNbrCourseTakers();
     goCourses = schedule.overviewData.getNbrGoCourses();
     placesAsked = schedule.overviewData.getNbrPlacesAsked();
@@ -341,6 +257,7 @@ class _ScreenState extends State<Screen> {
     onLeave = schedule.overviewData.getNbrOnLeave();
   }
 
+  /// Helper function to update course schedule data
   void _updateScheduleData() {
     var courses = schedule.getCourseCodes();
     for (var course in scheduleData.keys) {
@@ -350,6 +267,33 @@ class _ScreenState extends State<Screen> {
     }
     for (var course in courses) {
       scheduleData[course] = schedule.scheduleControl.scheduledTimeFor(course);
+    }
+  }
+
+  /// Helper function to update courses
+  void _updateCourses() {
+    courses = schedule.getCourseCodes().toList();
+  }
+
+  /// Helper function to update the overview table data
+  void _updateOverviewMatrix() {
+    if (courses.length != overviewMatrix[0].length) {
+      for (int i = 0; i < overviewMatrix.length; i++) {
+        overviewMatrix[i] = List<int>.filled(courses.length, 0);
+      }
+    }
+    for (int i = 0; i < overviewMatrix[0].length; i++) {
+      var course = courses[i];
+      for (int rank = 0; rank < 4; rank++) {
+        overviewMatrix[rank][i] =
+            schedule.overviewData.getNbrForClassRank(course, rank).size;
+      }
+      overviewMatrix[4][i] = schedule.overviewData.getNbrAddFromBackup(course);
+      overviewMatrix[5][i] = schedule.overviewData.getNbrDropTime(course);
+      overviewMatrix[6][i] = schedule.overviewData.getNbrDropDup(course);
+      overviewMatrix[7][i] = schedule.overviewData.getNbrDropFull(course);
+      overviewMatrix[8][i] =
+          schedule.overviewData.getResultingClassSize(course).size;
     }
   }
 
@@ -431,7 +375,7 @@ class _ScreenState extends State<Screen> {
         minVal = '';
         maxVal = '';
       }
-      _updateOverViewData();
+      _updateOverviewData();
     });
   }
 
@@ -533,6 +477,8 @@ class _ScreenState extends State<Screen> {
                         mainCoordinatorSelected[name] = false;
                         coCoordinatorSelected[name] = false;
                       }
+                      _updateCourses();
+                      _updateOverviewMatrix();
                     } catch (e) {
                       _showMyDialog(e.toString(), 'courses');
                     }
@@ -543,7 +489,7 @@ class _ScreenState extends State<Screen> {
                   }
                 }
                 setState(() {
-                  _updateOverViewData();
+                  _updateOverviewData();
                 });
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
@@ -579,7 +525,8 @@ class _ScreenState extends State<Screen> {
                   // User canceled the picker
                 }
                 setState(() {
-                  _updateOverViewData();
+                  _updateOverviewData();
+                  _updateOverviewMatrix();
                 });
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyP, ctrl: true),
@@ -601,7 +548,7 @@ class _ScreenState extends State<Screen> {
                   //file picker canceled
                 }
                 setState(() {
-                  _updateOverViewData();
+                  _updateOverviewData();
                 });
               },
             ),
@@ -631,7 +578,7 @@ class _ScreenState extends State<Screen> {
 
                           numCourses = schedule.getCourseCodes().length;
                           updateDropped();
-                          _updateOverViewData();
+                          _updateOverviewData();
                         });
                         if (kDebugMode) {
                           print('LOADINGGGGGGGGGGG\n');
@@ -673,7 +620,7 @@ class _ScreenState extends State<Screen> {
                     //file picker canceled
                   }
                   setState(() {
-                    _updateOverViewData();
+                    _updateOverviewData();
                   });
                 }
               },
@@ -695,7 +642,7 @@ class _ScreenState extends State<Screen> {
                     //file picker canceled
                   }
                   setState(() {
-                    _updateOverViewData();
+                    _updateOverviewData();
                   });
                 }),
             MenuListItem(
@@ -717,7 +664,7 @@ class _ScreenState extends State<Screen> {
                     //file picker canceled
                   }
                   setState(() {
-                    _updateOverViewData();
+                    _updateOverviewData();
                   });
                 }),
             MenuListItem(
@@ -737,7 +684,7 @@ class _ScreenState extends State<Screen> {
                   //file picker canceled
                 }
                 setState(() {
-                  _updateOverViewData();
+                  _updateOverviewData();
                 });
               },
             ),
@@ -780,7 +727,10 @@ class _ScreenState extends State<Screen> {
               screen1(),
               MainTable(
                   state: schedule.getStateOfProcessing(),
-                  tableData: tableData(),
+                  courses: numCourses == null
+                      ? List<String>.filled(14, '')
+                      : courses,
+                  overviewMatrix: overviewMatrix,
                   timeTableData: tableTimeData(),
                   droppedList: droppedList,
                   scheduleData: scheduleData,
@@ -854,7 +804,7 @@ class _ScreenState extends State<Screen> {
                       if (kDebugMode) {
                         print(curClassRoster);
                       }
-                      _updateOverViewData();
+                      _updateOverviewData();
                     });
                   },
                   onDroppedChanged: (int i) {
@@ -871,7 +821,8 @@ class _ScreenState extends State<Screen> {
                         print(
                             'dropped list index: $i drop list value: ${droppedList[i]}');
                       }
-                      _updateOverViewData();
+                      _updateOverviewData();
+                      _updateOverviewMatrix();
                     });
                   },
                   onSchedule: (String course, String time) {
@@ -895,7 +846,7 @@ class _ScreenState extends State<Screen> {
                       if (kDebugMode) {
                         print(curClassRoster);
                       }
-                      _updateOverViewData();
+                      _updateOverviewData();
                       _updateScheduleData();
                     });
                   })
@@ -1010,7 +961,7 @@ class _ScreenState extends State<Screen> {
                           curSelected.forEach((key, value) {
                             curSelected[key] = false;
                           });
-                          _updateOverViewData();
+                          _updateOverviewData();
                         });
                       }
                     : null,
@@ -1032,7 +983,7 @@ class _ScreenState extends State<Screen> {
                           if (kDebugMode) {
                             print(result);
                           }
-                          _updateOverViewData();
+                          _updateOverviewData();
                         });
                       }
                     : null,
@@ -1096,7 +1047,7 @@ class _ScreenState extends State<Screen> {
                         curSelected[val] = true;
                       }
                       if (classCodes) {}
-                      _updateOverViewData();
+                      _updateOverviewData();
                     });
                   },
                   child: Text(
@@ -1213,7 +1164,7 @@ class _ScreenState extends State<Screen> {
                       } else {
                         mode = 'limiting';
                       }
-                      _updateOverViewData();
+                      _updateOverviewData();
                     }));
                   },
                   child: Text(mode),
@@ -1269,7 +1220,9 @@ class _ScreenState extends State<Screen> {
                         schedule.splitControl.resetState();
                         curCell = '';
                         curClassRoster = [];
-                        _updateOverViewData();
+                        _updateCourses();
+                        _updateOverviewData();
+                        _updateOverviewMatrix();
                       });
                     }
                   : null,
@@ -1299,7 +1252,7 @@ class _ScreenState extends State<Screen> {
                             // }
                           }
                         }
-                        _updateOverViewData();
+                        _updateOverviewData();
                       });
                     }
                   : null, //(() {
@@ -1343,7 +1296,7 @@ class _ScreenState extends State<Screen> {
                           //   print('Error: Must select only one name');
                           // }
                         }
-                        _updateOverViewData();
+                        _updateOverviewData();
                       });
                     }
                   : null,
@@ -1385,7 +1338,7 @@ class _ScreenState extends State<Screen> {
                           //   print('Error: Must select only one name');
                           // }
                         }
-                        _updateOverViewData();
+                        _updateOverviewData();
                       });
                     }
                   : null,
@@ -1481,7 +1434,7 @@ class _ScreenState extends State<Screen> {
                   .getMinClassSize(dropDownVal)
                   .toString();
             }
-            _updateOverViewData();
+            _updateOverviewData();
           });
         });
   }
