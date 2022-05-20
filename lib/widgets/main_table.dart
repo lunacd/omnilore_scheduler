@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:omnilore_scheduler/model/state_of_processing.dart';
-import 'package:tuple/tuple.dart';
 
 const overviewRows = <String>[
   'First Choices',
@@ -14,6 +13,29 @@ const overviewRows = <String>[
   'Resulting Size'
 ];
 
+const scheduleRows = <String>[
+  '1st/3rd Mon AM',
+  '1st/3rd Mon PM',
+  '1st/3rd Tue AM',
+  '1st/3rd Tue PM',
+  '1st/3rd Wed AM',
+  '1st/3rd Wed PM',
+  '1st/3rd Thu AM',
+  '1st/3rd Thu PM',
+  '1st/3rd Fri AM',
+  '1st/3rd Fri PM',
+  '2nd/4th Mon AM',
+  '2nd/4th Mon PM',
+  '2nd/4th Tue AM',
+  '2nd/4th Tue PM',
+  '2nd/4th Wed AM',
+  '2nd/4th Wed PM',
+  '2nd/4th Thu AM',
+  '2nd/4th Thu PM',
+  '2nd/4th Fri AM',
+  '2nd/4th Fri PM'
+];
+
 /// This Widget takes the resulting data from tableData and timeTableData and
 /// produces the table widget displayed to the user by running buildInfo() and
 /// buildTimeInfo()
@@ -23,7 +45,7 @@ class MainTable extends StatelessWidget {
       required this.state,
       required this.courses,
       required this.overviewMatrix,
-      required this.timeTableData,
+      required this.scheduleMatrix,
       required this.droppedList,
       required this.scheduleData,
       required this.onCellPressed,
@@ -34,7 +56,7 @@ class MainTable extends StatelessWidget {
   final StateOfProcessing state;
   final List<String> courses;
   final List<List<int>> overviewMatrix;
-  final Tuple2<List<String>, List<List<String>>> timeTableData;
+  final List<List<int>> scheduleMatrix;
   final List<bool> droppedList;
   final void Function(String, String) onCellPressed;
   final void Function(int) onDroppedChanged;
@@ -43,8 +65,6 @@ class MainTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('courses: ${courses.length}');
-    print('overviewrows: ${overviewRows[0].length}');
     List<TableRow> rows = [];
     rows.add(TableRow(children: [
       const TableCell(child: Text('')),
@@ -82,27 +102,42 @@ class MainTable extends StatelessWidget {
           onPressed: () => onCellPressed('', courses[i]),
         )
     ]));
-    var timeTable = timeTableData;
-    print('reference: ${timeTableData.item2[0].length}');
+
+    for (int i = 0; i < scheduleRows.length; i++) {
+      rows.add(TableRow(children: [
+        TableCell(
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[Text(scheduleRows[i])])),
+        for (int j = 0; j < scheduleMatrix[i].length; j++)
+          TextButton(
+            child: Text(scheduleMatrix[i][j].toString()),
+            onPressed: droppedList[j] == false &&
+                    (state == StateOfProcessing.schedule ||
+                        state == StateOfProcessing.coordinator ||
+                        state == StateOfProcessing.output)
+                ? () {
+                    onSchedule(courses[j], scheduleRows[i]);
+                  }
+                : null,
+            style: (() {
+              if (scheduleData[courses[j]] == i) {
+                return ElevatedButton.styleFrom(primary: Colors.red);
+              } else {
+                return ElevatedButton.styleFrom(primary: Colors.transparent);
+              }
+            }()),
+          )
+      ]));
+    }
+
     return Table(
       border: TableBorder.symmetric(
           inside: const BorderSide(width: 1, color: Colors.black),
           outside: const BorderSide(width: 1)),
       columnWidths: const {0: IntrinsicColumnWidth()},
-      children: rows + buildTimeInfo(timeTable.item1, timeTable.item2),
+      children: rows,
     );
-  }
-
-  /// Generates the portion of the data table that contains class data returns
-  /// a list of TableRow objects
-  List<TableRow> buildOverviewRows(
-      // builds the list of table rows. I had to do it in a function because for
-      // some reason state doesn't update if its done the other way
-      List<String> growableList,
-      List<List<String>> dataList) {
-    List<TableRow> result = [];
-
-    return result;
   }
 
   /// Creates a checkbox widget to be used in the class data portion of the main
@@ -178,34 +213,7 @@ class MainTable extends StatelessWidget {
       List<String> growableList,
       List<List<String>> dataList) {
     List<TableRow> result = [];
-    for (int i = 1; i < growableList.length; i++) {
-      result.add(TableRow(children: [
-        TableCell(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[Text(growableList[i].toString())])),
-        for (int j = 0; j < dataList[i].length; j++)
-          TextButton(
-            child: Text(dataList[i][j].toString()),
-            onPressed: droppedList[j] == false &&
-                    (state == StateOfProcessing.schedule ||
-                        state == StateOfProcessing.coordinator ||
-                        state == StateOfProcessing.output)
-                ? () {
-                    onSchedule(dataList[0][j], growableList[i]);
-                  }
-                : null,
-            style: (() {
-              if (scheduleData[dataList[0][j]] ==
-                  getTimeIndex(growableList[i])) {
-                return ElevatedButton.styleFrom(primary: Colors.red);
-              } else {
-                return ElevatedButton.styleFrom(primary: Colors.transparent);
-              }
-            }()),
-          )
-      ]));
-    }
+
     return result;
   }
 

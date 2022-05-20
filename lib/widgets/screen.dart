@@ -11,7 +11,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:omnilore_scheduler/theme.dart';
 import 'package:omnilore_scheduler/widgets/main_table.dart';
 import 'package:omnilore_scheduler/widgets/overview_data.dart';
-import 'package:tuple/tuple.dart';
 
 const stateDescriptions = <String>[
   'Need Courses',
@@ -22,17 +21,6 @@ const stateDescriptions = <String>[
   'Schedule',
   'Coordinator',
   'Output'
-];
-const overviewRows = <String>[
-  'First Choices',
-  'First backup',
-  'Second backup',
-  'Third backup',
-  'Add from BUs',
-  'Drop, bad time',
-  'Drop, dup class',
-  'Drop class full',
-  'Resulting Size'
 ];
 
 class Screen extends StatefulWidget {
@@ -86,166 +74,11 @@ class _ScreenState extends State<Screen> {
 
   List<String> courses = [];
   late var overviewMatrix = List<List<int>>.generate(overviewRows.length,
-      (i) => List<int>.generate(numCourses ?? 14, (j) => 0));
-
-  /// Generates the information needed for buildTimeInfo()
-  /// returns a touple where the first item is a list of strings repersenting
-  /// the names of each row and the second item is a 2D array of strings that
-  /// hold the value of each cell
-  Tuple2<List<String>, List<List<String>>> tableTimeData() {
-    final growableList = <String>[
-      '',
-      '1st/3rd Mon AM',
-      '1st/3rd Mon PM',
-      '1st/3rd Tue AM',
-      '1st/3rd Tue PM',
-      '1st/3rd Wed AM',
-      '1st/3rd Wed PM',
-      '1st/3rd Thu AM',
-      '1st/3rd Thu PM',
-      '1st/3rd Fri AM',
-      '1st/3rd Fri PM',
-      '2nd/4th Mon AM',
-      '2nd/4th Mon PM',
-      '2nd/4th Tue AM',
-      '2nd/4th Tue PM',
-      '2nd/4th Wed AM',
-      '2nd/4th Wed PM',
-      '2nd/4th Thu AM',
-      '2nd/4th Thu PM',
-      '2nd/4th Fri AM',
-      '2nd/4th Fri PM'
-    ];
-    if (kDebugMode) {
-      print('num of course $numCourses');
-    }
-    int arrSize = numCourses ?? 14;
-
-    var firstMonAM = List<int>.generate(arrSize, (index) => -1);
-    var firstMonPM = List<int>.generate(arrSize, (index) => -1);
-    var firstTueAM = List<int>.generate(arrSize, (index) => -1);
-    var firstTuePM = List<int>.generate(arrSize, (index) => -1);
-    var firstWedAM = List<int>.generate(arrSize, (index) => -1);
-    var firstWedPM = List<int>.generate(arrSize, (index) => -1);
-    var firstThuAM = List<int>.generate(arrSize, (index) => -1);
-    var firstThuPM = List<int>.generate(arrSize, (index) => -1);
-    var firstFriAM = List<int>.generate(arrSize, (index) => -1);
-    var firstFriPM = List<int>.generate(arrSize, (index) => -1);
-    var secondMonAM = List<int>.generate(arrSize, (index) => -1);
-    var secondMonPM = List<int>.generate(arrSize, (index) => -1);
-    var secondTueAM = List<int>.generate(arrSize, (index) => -1);
-    var secondTuePM = List<int>.generate(arrSize, (index) => -1);
-    var secondWedAM = List<int>.generate(arrSize, (index) => -1);
-    var secondWedPM = List<int>.generate(arrSize, (index) => -1);
-    var secondThuAM = List<int>.generate(arrSize, (index) => -1);
-    var secondThuPM = List<int>.generate(arrSize, (index) => -1);
-    var secondFriAM = List<int>.generate(arrSize, (index) => -1);
-    var secondFriPM = List<int>.generate(arrSize, (index) => -1);
-
-    int idx = 0;
-    //creating the 2d array
-    var dataList = List<List<String>>.generate(
-        21, (i) => List<String>.generate(arrSize, (j) => ''));
-
-    //checking the values of the dropped list and updating the list accordingly
-    for (String code in schedule.getCourseCodes()) {
-      dataList[0][idx] = code;
-      idx++;
-    }
-
-    idx = 0;
-    for (String code in schedule.getCourseCodes()) {
-      firstMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 0);
-      firstMonPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 1);
-      firstTueAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 2);
-      firstTuePM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 3);
-      firstWedAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 4);
-      firstWedPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 5);
-      firstThuAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 6);
-      firstThuPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 7);
-      firstFriAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 8);
-      firstFriPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 9);
-      secondMonAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 10);
-      secondMonPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 11);
-      secondTueAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 12);
-      secondTuePM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 13);
-      secondWedAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 14);
-      secondWedPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 15);
-      secondThuAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 16);
-      secondThuPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 17);
-      secondFriAM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 18);
-      secondFriPM[idx] = schedule.scheduleControl.getNbrUnavailable(code, 19);
-
-      dataList[0][idx] = code;
-      droppedList[idx]
-          ? dataList[1][idx] = ''
-          : dataList[1][idx] = firstMonAM[idx].toString();
-      droppedList[idx]
-          ? dataList[2][idx] = ''
-          : dataList[2][idx] = firstMonPM[idx].toString();
-      droppedList[idx]
-          ? dataList[3][idx] = ''
-          : dataList[3][idx] = firstTueAM[idx].toString();
-      droppedList[idx]
-          ? dataList[4][idx] = ''
-          : dataList[4][idx] = firstTuePM[idx].toString();
-      droppedList[idx]
-          ? dataList[5][idx] = ''
-          : dataList[5][idx] = firstWedAM[idx].toString();
-      droppedList[idx]
-          ? dataList[6][idx] = ''
-          : dataList[6][idx] = firstWedPM[idx].toString();
-      droppedList[idx]
-          ? dataList[7][idx] = ''
-          : dataList[7][idx] = firstThuAM[idx].toString();
-      droppedList[idx]
-          ? dataList[8][idx] = ''
-          : dataList[8][idx] = firstThuPM[idx].toString();
-      droppedList[idx]
-          ? dataList[9][idx] = ''
-          : dataList[9][idx] = firstFriAM[idx].toString();
-      droppedList[idx]
-          ? dataList[10][idx] = ''
-          : dataList[10][idx] = firstFriPM[idx].toString();
-      droppedList[idx]
-          ? dataList[11][idx] = ''
-          : dataList[11][idx] = secondMonAM[idx].toString();
-      droppedList[idx]
-          ? dataList[12][idx] = ''
-          : dataList[12][idx] = secondMonPM[idx].toString();
-      droppedList[idx]
-          ? dataList[13][idx] = ''
-          : dataList[13][idx] = secondTueAM[idx].toString();
-      droppedList[idx]
-          ? dataList[14][idx] = ''
-          : dataList[14][idx] = secondTuePM[idx].toString();
-      droppedList[idx]
-          ? dataList[15][idx] = ''
-          : dataList[15][idx] = secondWedAM[idx].toString();
-      droppedList[idx]
-          ? dataList[16][idx] = ''
-          : dataList[16][idx] = secondWedPM[idx].toString();
-      droppedList[idx]
-          ? dataList[17][idx] = ''
-          : dataList[17][idx] = secondThuAM[idx].toString();
-      droppedList[idx]
-          ? dataList[18][idx] = ''
-          : dataList[18][idx] = secondThuPM[idx].toString();
-      droppedList[idx]
-          ? dataList[19][idx] = ''
-          : dataList[19][idx] = secondFriAM[idx].toString();
-      droppedList[idx]
-          ? dataList[20][idx] = ''
-          : dataList[20][idx] = secondFriPM[idx].toString();
-      idx++;
-    }
-    if (kDebugMode) {
-      print(growableList.length);
-      print(dataList.length);
-    }
-
-    return Tuple2<List<String>, List<List<String>>>(growableList, dataList);
-  }
+      (i) => List<int>.filled(numCourses ?? 14, 0, growable: false),
+      growable: false);
+  late var scheduleMatrix = List<List<int>>.generate(scheduleRows.length,
+      (i) => List<int>.filled(numCourses ?? 14, 0, growable: false),
+      growable: false);
 
   /// Helper function to update all of overviewData
   void _updateOverviewData() {
@@ -294,6 +127,22 @@ class _ScreenState extends State<Screen> {
       overviewMatrix[7][i] = schedule.overviewData.getNbrDropFull(course);
       overviewMatrix[8][i] =
           schedule.overviewData.getResultingClassSize(course).size;
+    }
+  }
+
+  /// Helper function to update schedule data
+  void _updateScheduleMatrix() {
+    if (courses.length != scheduleMatrix[0].length) {
+      for (int i = 0; i < scheduleMatrix.length; i++) {
+        scheduleMatrix[i] = List<int>.filled(courses.length, 0);
+      }
+    }
+    for (int i = 0; i < scheduleMatrix[0].length; i++) {
+      var course = courses[i];
+      for (int time = 0; time < 20; time++) {
+        scheduleMatrix[time][i] =
+            schedule.scheduleControl.getNbrUnavailable(course, time);
+      }
     }
   }
 
@@ -479,6 +328,7 @@ class _ScreenState extends State<Screen> {
                       }
                       _updateCourses();
                       _updateOverviewMatrix();
+                      _updateScheduleMatrix();
                     } catch (e) {
                       _showMyDialog(e.toString(), 'courses');
                     }
@@ -527,6 +377,7 @@ class _ScreenState extends State<Screen> {
                 setState(() {
                   _updateOverviewData();
                   _updateOverviewMatrix();
+                  _updateScheduleMatrix();
                 });
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyP, ctrl: true),
@@ -731,7 +582,7 @@ class _ScreenState extends State<Screen> {
                       ? List<String>.filled(14, '')
                       : courses,
                   overviewMatrix: overviewMatrix,
-                  timeTableData: tableTimeData(),
+                  scheduleMatrix: scheduleMatrix,
                   droppedList: droppedList,
                   scheduleData: scheduleData,
                   onCellPressed: (String row, String course) {
@@ -804,7 +655,6 @@ class _ScreenState extends State<Screen> {
                       if (kDebugMode) {
                         print(curClassRoster);
                       }
-                      _updateOverviewData();
                     });
                   },
                   onDroppedChanged: (int i) {
@@ -823,6 +673,7 @@ class _ScreenState extends State<Screen> {
                       }
                       _updateOverviewData();
                       _updateOverviewMatrix();
+                      _updateScheduleMatrix();
                     });
                   },
                   onSchedule: (String course, String time) {
@@ -848,6 +699,8 @@ class _ScreenState extends State<Screen> {
                       }
                       _updateOverviewData();
                       _updateScheduleData();
+                      _updateOverviewMatrix();
+                      _updateScheduleMatrix();
                     });
                   })
             ],
@@ -1223,6 +1076,7 @@ class _ScreenState extends State<Screen> {
                         _updateCourses();
                         _updateOverviewData();
                         _updateOverviewMatrix();
+                        _updateScheduleMatrix();
                       });
                     }
                   : null,
