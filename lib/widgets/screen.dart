@@ -9,8 +9,10 @@ import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:omnilore_scheduler/theme.dart';
-import 'package:omnilore_scheduler/widgets/main_table.dart';
+import 'package:omnilore_scheduler/widgets/table/main_table.dart';
 import 'package:omnilore_scheduler/widgets/overview_data.dart';
+import 'package:omnilore_scheduler/widgets/table/overview_row.dart';
+import 'package:omnilore_scheduler/widgets/table/schedule_row.dart';
 
 const stateDescriptions = <String>[
   'Need Courses',
@@ -60,7 +62,7 @@ class _ScreenState extends State<Screen> {
   bool resultingClass = false;
   bool classCodes = false;
   List<bool> droppedList = List<bool>.filled(14, false, growable: true);
-  Map<String, int> scheduleData = <String, int>{};
+  List<int> scheduleData = List<int>.filled(14, -1, growable: false);
 
   Color masterBackgroundColor = themeColors['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
@@ -92,14 +94,11 @@ class _ScreenState extends State<Screen> {
 
   /// Helper function to update course schedule data
   void _updateScheduleData() {
-    var courses = schedule.getCourseCodes();
-    for (var course in scheduleData.keys) {
-      if (!courses.contains(course)) {
-        scheduleData.remove(course);
-      }
+    if (courses.length != scheduleData.length) {
+      scheduleData = List<int>.filled(courses.length, -1, growable: false);
     }
-    for (var course in courses) {
-      scheduleData[course] = schedule.scheduleControl.scheduledTimeFor(course);
+    for (int i = 0; i < courses.length; i++) {
+      scheduleData[i] = schedule.scheduleControl.scheduledTimeFor(courses[i]);
     }
   }
 
@@ -329,6 +328,7 @@ class _ScreenState extends State<Screen> {
                       _updateCourses();
                       _updateOverviewMatrix();
                       _updateScheduleMatrix();
+                      _updateScheduleData();
                     } catch (e) {
                       _showMyDialog(e.toString(), 'courses');
                     }
@@ -585,66 +585,81 @@ class _ScreenState extends State<Screen> {
                   scheduleMatrix: scheduleMatrix,
                   droppedList: droppedList,
                   scheduleData: scheduleData,
-                  onCellPressed: (String row, String course) {
+                  onCellPressed: (String course, int rowIndex) {
                     setState(() {
-                      if (row.isEmpty) {
-                        curClassRoster = schedule.overviewData
-                            .getPeopleForResultingClass(course);
-                        resultingClass = false;
-                        classCodes = true;
-                      } else if (row == 'First Choices') {
-                        curClassRoster = schedule.overviewData
-                            .getPeopleForClassRank(course, 0);
-                        resultingClass = false;
-                        classCodes = false;
-                      } else if (row == 'First backup') {
-                        curClassRoster = schedule.overviewData
-                            .getPeopleForClassRank(course, 1);
-                        resultingClass = false;
-                        classCodes = false;
-                      } else if (row == 'Second backup') {
-                        curClassRoster = schedule.overviewData
-                            .getPeopleForClassRank(course, 2);
-                        if (kDebugMode) {
-                          print(curClassRoster);
-                        }
-                        resultingClass = false;
-                        classCodes = false;
-                      } else if (row == 'Third backup') {
-                        curClassRoster = schedule.overviewData
-                            .getPeopleForClassRank(course, 3);
-                        resultingClass = false;
-                        classCodes = false;
-                      } else if (row == 'Add from BU\'s') {
-                        curClassRoster = schedule.overviewData
-                            .getPeopleAddFromBackup(course);
-                        resultingClass = false;
-                        classCodes = false;
-                      } else if (row == 'Drop, bad time') {
-                        curClassRoster =
-                            schedule.overviewData.getPeopleDropTime(course);
-                        resultingClass = false;
-                        classCodes = false;
-                      } else if (row == 'Drop, dup class') {
-                        curClassRoster = [];
-                        resultingClass = false;
-                        classCodes = false;
-                      } else if (row == 'Drop class full') {
-                        curClassRoster = [];
-                        resultingClass = false;
-                        classCodes = false;
-                      } else if (row == 'Resulting Size') {
-                        curClassRoster = schedule.overviewData
-                            .getPeopleForResultingClass(course);
-                        resultingClass = true;
-                        classCodes = false;
+                      switch (rowIndex) {
+                        case 0:
+                          curClassRoster = schedule.overviewData
+                              .getPeopleForResultingClass(course);
+                          resultingClass = false;
+                          classCodes = true;
+                          break;
+                        case 1:
+                          curClassRoster = schedule.overviewData
+                              .getPeopleForClassRank(course, 0);
+                          resultingClass = false;
+                          classCodes = false;
+                          break;
+                        case 2:
+                          curClassRoster = schedule.overviewData
+                              .getPeopleForClassRank(course, 1);
+                          resultingClass = false;
+                          classCodes = false;
+                          break;
+                        case 3:
+                          curClassRoster = schedule.overviewData
+                              .getPeopleForClassRank(course, 2);
+                          if (kDebugMode) {
+                            print(curClassRoster);
+                          }
+                          resultingClass = false;
+                          classCodes = false;
+                          break;
+                        case 4:
+                          curClassRoster = schedule.overviewData
+                              .getPeopleForClassRank(course, 3);
+                          resultingClass = false;
+                          classCodes = false;
+                          break;
+                        case 5:
+                          curClassRoster = schedule.overviewData
+                              .getPeopleAddFromBackup(course);
+                          resultingClass = false;
+                          classCodes = false;
+                          break;
+                        case 6:
+                          curClassRoster =
+                              schedule.overviewData.getPeopleDropTime(course);
+                          resultingClass = false;
+                          classCodes = false;
+                          break;
+                        case 7:
+                          curClassRoster = [];
+                          resultingClass = false;
+                          classCodes = false;
+                          break;
+                        case 8:
+                          curClassRoster = [];
+                          resultingClass = false;
+                          classCodes = false;
+                          break;
+                        case 9:
+                          curClassRoster = schedule.overviewData
+                              .getPeopleForResultingClass(course);
+                          resultingClass = true;
+                          classCodes = false;
+                          break;
                       }
 
                       curClass = course;
                       schedule.splitControl.resetState();
                       curSelected.clear();
                       clustColors.clear();
-                      curCell = row;
+                      if (rowIndex == 0) {
+                        curCell = '';
+                      } else {
+                        curCell = overviewRows[rowIndex - 1];
+                      }
                       List<String> tempList = curClassRoster.toList();
                       tempList.sort(
                           (a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
@@ -676,17 +691,15 @@ class _ScreenState extends State<Screen> {
                       _updateScheduleMatrix();
                     });
                   },
-                  onSchedule: (String course, String time) {
+                  onSchedule: (String course, int timeIndex) {
                     setState(() {
-                      int timeIndex = getTimeIndex(time);
-
                       curClass = course;
                       schedule.splitControl.resetState();
                       schedule.scheduleControl.schedule(curClass, timeIndex);
 
                       curSelected.clear();
                       clustColors.clear();
-                      curCell = time;
+                      curCell = scheduleRows[timeIndex];
                       List<String> tempList = curClassRoster.toList();
                       tempList.sort(
                           (a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
@@ -1077,6 +1090,7 @@ class _ScreenState extends State<Screen> {
                         _updateOverviewData();
                         _updateOverviewMatrix();
                         _updateScheduleMatrix();
+                        _updateScheduleData();
                       });
                     }
                   : null,
@@ -1321,56 +1335,56 @@ class _ScreenState extends State<Screen> {
     }
   }
 
-  /// translation function that will take a time slot and return the correct
-  /// index used by input files. Returns -1 on an unknown timeslot name
-  int getTimeIndex(String c) {
-    int timeIndex = -1;
-    if (c == '1st/3rd Mon AM') {
-      timeIndex = 0;
-    } else if (c == '1st/3rd Mon PM') {
-      timeIndex = 1;
-    } else if (c == '1st/3rd Tue AM') {
-      timeIndex = 2;
-      if (kDebugMode) {
-        print(curClassRoster);
-      }
-    } else if (c == '1st/3rd Tue PM') {
-      timeIndex = 3;
-    } else if (c == '1st/3rd Wed AM') {
-      timeIndex = 4;
-    } else if (c == '1st/3rd Wed PM') {
-      timeIndex = 5;
-    } else if (c == '1st/3rd Thu AM') {
-      timeIndex = 6;
-    } else if (c == '1st/3rd Thu PM') {
-      timeIndex = 7;
-    } else if (c == '1st/3rd Fri AM') {
-      timeIndex = 8;
-    } else if (c == '1st/3rd Fri PM') {
-      timeIndex = 9;
-    } else if (c == '2nd/4th Mon AM') {
-      timeIndex = 10;
-    } else if (c == '2nd/4th Mon PM') {
-      timeIndex = 11;
-    } else if (c == '2nd/4th Tue AM') {
-      timeIndex = 12;
-    } else if (c == '2nd/4th Tue PM') {
-      timeIndex = 13;
-    } else if (c == '2nd/4th Wed AM') {
-      timeIndex = 14;
-    } else if (c == '2nd/4th Wed PM') {
-      timeIndex = 15;
-    } else if (c == '2nd/4th Thu AM') {
-      timeIndex = 16;
-    } else if (c == '2nd/4th Thu PM') {
-      timeIndex = 17;
-    } else if (c == '2nd/4th Fri AM') {
-      timeIndex = 18;
-    } else if (c == '2nd/4th Fri PM') {
-      timeIndex = 19;
-    }
-    return timeIndex;
-  }
+  // /// translation function that will take a time slot and return the correct
+  // /// index used by input files. Returns -1 on an unknown timeslot name
+  // int getTimeIndex(String c) {
+  //   int timeIndex = -1;
+  //   if (c == '1st/3rd Mon AM') {
+  //     timeIndex = 0;
+  //   } else if (c == '1st/3rd Mon PM') {
+  //     timeIndex = 1;
+  //   } else if (c == '1st/3rd Tue AM') {
+  //     timeIndex = 2;
+  //     if (kDebugMode) {
+  //       print(curClassRoster);
+  //     }
+  //   } else if (c == '1st/3rd Tue PM') {
+  //     timeIndex = 3;
+  //   } else if (c == '1st/3rd Wed AM') {
+  //     timeIndex = 4;
+  //   } else if (c == '1st/3rd Wed PM') {
+  //     timeIndex = 5;
+  //   } else if (c == '1st/3rd Thu AM') {
+  //     timeIndex = 6;
+  //   } else if (c == '1st/3rd Thu PM') {
+  //     timeIndex = 7;
+  //   } else if (c == '1st/3rd Fri AM') {
+  //     timeIndex = 8;
+  //   } else if (c == '1st/3rd Fri PM') {
+  //     timeIndex = 9;
+  //   } else if (c == '2nd/4th Mon AM') {
+  //     timeIndex = 10;
+  //   } else if (c == '2nd/4th Mon PM') {
+  //     timeIndex = 11;
+  //   } else if (c == '2nd/4th Tue AM') {
+  //     timeIndex = 12;
+  //   } else if (c == '2nd/4th Tue PM') {
+  //     timeIndex = 13;
+  //   } else if (c == '2nd/4th Wed AM') {
+  //     timeIndex = 14;
+  //   } else if (c == '2nd/4th Wed PM') {
+  //     timeIndex = 15;
+  //   } else if (c == '2nd/4th Thu AM') {
+  //     timeIndex = 16;
+  //   } else if (c == '2nd/4th Thu PM') {
+  //     timeIndex = 17;
+  //   } else if (c == '2nd/4th Fri AM') {
+  //     timeIndex = 18;
+  //   } else if (c == '2nd/4th Fri PM') {
+  //     timeIndex = 19;
+  //   }
+  //   return timeIndex;
+  // }
 
   /// generic error pop up generator. Will produce a popup dialog box
   /// on the screen and show what error has been thrown to the user
