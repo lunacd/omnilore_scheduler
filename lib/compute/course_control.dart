@@ -36,7 +36,7 @@ class CourseControl {
 
   /// Compute state in response to changes
   void compute(Change change) {
-    if (change.course) {
+    if (change == Change.course) {
       _go.clear();
       var newCourses = _courses.getCodes();
       for (var course in newCourses) {
@@ -53,7 +53,7 @@ class CourseControl {
     _dropped.add(course);
     _go.remove(course);
     if (!noCompute) {
-      _scheduling.compute(Change(drop: true));
+      _scheduling.compute(Change.drop);
     }
   }
 
@@ -62,7 +62,7 @@ class CourseControl {
     _dropped.remove(course);
     _go.add(course);
     if (!noCompute) {
-      _scheduling.compute(Change(drop: true));
+      _scheduling.compute(Change.drop);
     }
   }
 
@@ -93,6 +93,7 @@ class CourseControl {
     _classMinSizeMap.clear();
     _classMaxSize = maxSize;
     _classMinSize = minSize;
+    compute(Change.schedule);
   }
 
   /// Get global min class size
@@ -125,6 +126,7 @@ class CourseControl {
     if (minSize != _classMinSize) {
       _classMinSizeMap[course] = minSize;
     }
+    compute(Change.schedule);
   }
 
   /// Determine whether the min class size is mixed for current classes
@@ -156,7 +158,7 @@ class CourseControl {
   /// Set split mode of a class to the given mode
   void setSplitMode(String course, SplitMode mode) {
     _classSplitModeMap[course] = mode;
-    _scheduling.compute(Change(schedule: true));
+    _scheduling.compute(Change.schedule);
   }
 
   /// Query the current split mode of a class

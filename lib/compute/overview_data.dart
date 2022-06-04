@@ -42,7 +42,7 @@ class OverviewData {
   /// Depends on course, people, drop
   void compute(Change change) {
     // Update course data
-    if (change.course) {
+    if (change == Change.course) {
       _data.clear();
       for (var course in _courses.getCodes()) {
         _data[course] = CourseData();
@@ -52,7 +52,7 @@ class OverviewData {
     var dropped = _scheduling.courseControl.getDropped();
 
     // Compute go courses
-    if (change.course || change.drop) {
+    if (change == Change.course || change == Change.drop) {
       _nbrGoCourse = 0;
       for (var course in _courses.getCodes()) {
         if (!dropped.contains(course)) {
@@ -62,54 +62,52 @@ class OverviewData {
     }
 
     // Compute all statistics
-    if (change.course || change.people || change.drop || change.schedule) {
-      // Clear data
-      for (var courseData in _data.values) {
-        courseData.reset();
-      }
-      _nbrUnmetWants = 0;
-      _nbrOnLeave = 0;
-      _nbrCourseTakers = 0;
-      _nbrRequested = 0;
-      _unmetPeople.clear();
+    // Clear data
+    for (var courseData in _data.values) {
+      courseData.reset();
+    }
+    _nbrUnmetWants = 0;
+    _nbrOnLeave = 0;
+    _nbrCourseTakers = 0;
+    _nbrRequested = 0;
+    _unmetPeople.clear();
 
-      // Compute people stats
-      var peopleData = _people.people.values.toList(growable: false);
-      peopleData.sort((Person a, Person b) =>
-          a.submissionOrder.compareTo(b.submissionOrder));
-      for (var person in peopleData) {
-        var hasClass = List<bool>.filled(20, false, growable: false);
-        var wanted = person.nbrClassWanted;
-        _nbrRequested += wanted;
-        if (wanted == 0) {
-          _nbrOnLeave += 1;
-        } else {
-          _nbrCourseTakers += 1;
+    // Compute people stats
+    var peopleData = _people.people.values.toList(growable: false);
+    peopleData.sort(
+        (Person a, Person b) => a.submissionOrder.compareTo(b.submissionOrder));
+    for (var person in peopleData) {
+      var hasClass = List<bool>.filled(20, false, growable: false);
+      var wanted = person.nbrClassWanted;
+      _nbrRequested += wanted;
+      if (wanted == 0) {
+        _nbrOnLeave += 1;
+      } else {
+        _nbrCourseTakers += 1;
+      }
+      // Count backups
+      for (var i = 0; i < person.backups.length; i++) {
+        _data[person.backups[i]]!.backups[i].add(person.getName());
+      }
+      // Count first choices
+      for (var course in person.firstChoices) {
+        if (_placePersonInCourse(person, course, dropped, true, hasClass) ==
+            PlacementResult.success) {
+          wanted -= 1;
         }
-        // Count backups
-        for (var i = 0; i < person.backups.length; i++) {
-          _data[person.backups[i]]!.backups[i].add(person.getName());
+      }
+      // Count add from backup
+      for (var i = 0; i < person.backups.length && wanted > 0; i++) {
+        if (_placePersonInCourse(
+                person, person.backups[i], dropped, false, hasClass) ==
+            PlacementResult.success) {
+          wanted -= 1;
         }
-        // Count first choices
-        for (var course in person.firstChoices) {
-          if (_placePersonInCourse(person, course, dropped, true, hasClass) ==
-              PlacementResult.success) {
-            wanted -= 1;
-          }
-        }
-        // Count add from backup
-        for (var i = 0; i < person.backups.length && wanted > 0; i++) {
-          if (_placePersonInCourse(
-                  person, person.backups[i], dropped, false, hasClass) ==
-              PlacementResult.success) {
-            wanted -= 1;
-          }
-        }
-        // Count unmet wants
-        if (wanted > 0) {
-          _nbrUnmetWants += wanted;
-          _unmetPeople.add(person.getName());
-        }
+      }
+      // Count unmet wants
+      if (wanted > 0) {
+        _nbrUnmetWants += wanted;
+        _unmetPeople.add(person.getName());
       }
     }
   }

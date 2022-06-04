@@ -146,7 +146,7 @@ class SplitControl {
     _courses.splitCourse(course, result.length);
 
     if (!noCompute) {
-      _scheduling.compute(Change(course: true));
+      _scheduling.compute(Change.course);
     }
   }
 

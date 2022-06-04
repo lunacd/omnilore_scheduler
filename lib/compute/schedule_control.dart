@@ -27,13 +27,13 @@ class ScheduleControl {
   /// Update internal states in response to changes
   void compute(Change change) {
     // If courses have changed, clear all scheduled times
-    if (change.course) {
+    if (change == Change.course) {
       for (var i = 0; i < _schedule.length; i++) {
         _schedule[i].clear();
       }
     }
     // If people or course has changed, compute unavailables
-    if (change.course || change.people) {
+    if (change == Change.course || change == Change.people) {
       _unavailables.clear();
       for (var course in _courses.getCodes()) {
         _unavailables[course] = List<int>.filled(20, 0);
@@ -125,7 +125,7 @@ class ScheduleControl {
     _schedule[timeIndex].add(course);
     _scheduled.add(course);
     if (!noCompute) {
-      _scheduling.compute(Change(schedule: true));
+      _scheduling.compute(Change.schedule);
     }
   }
 

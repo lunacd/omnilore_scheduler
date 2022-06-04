@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
 import 'package:omnilore_scheduler/main.dart';
+import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/coordinators.dart';
-import 'package:omnilore_scheduler/compute/course_control.dart';
-import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:omnilore_scheduler/theme.dart';
+import 'package:omnilore_scheduler/widgets/class_size_control.dart';
 import 'package:omnilore_scheduler/widgets/table/main_table.dart';
 import 'package:omnilore_scheduler/widgets/overview_data.dart';
 import 'package:omnilore_scheduler/widgets/table/overview_row.dart';
@@ -36,25 +36,14 @@ class _ScreenState extends State<Screen> {
   /// this is the main scheduling data structure that holds back end computation
   Scheduling schedule = Scheduling();
 
-  /// The current state that the program is in
-  StateOfProcessing curState = StateOfProcessing.needCourses;
   bool coursesImported = false;
   bool peopleImported = false;
   int? numCourses;
   int? numPeople;
   Map mainCoordinatorSelected = <String, bool>{};
   Map coCoordinatorSelected = <String, bool>{};
-  final minTextField = TextEditingController();
-  final maxTextField = TextEditingController();
-  String hintMax = 'Max';
-  String hintMin = 'Min';
-  String minVal = '';
-  String maxVal = '';
   String curClass = '';
   String curCell = '';
-  String dropDownVal = '';
-  String minMaxError = '';
-  String mode = 'splitting';
   Iterable<String> curClassRoster = [];
   Map curSelected = <String, bool>{};
   List<List<String>> curClusters = [];
@@ -82,6 +71,21 @@ class _ScreenState extends State<Screen> {
       (i) => List<int>.filled(numCourses ?? 14, 0, growable: false),
       growable: false);
 
+  void compute(Change change) {
+    setState(() {
+      _updateOverviewData();
+      _updateOverviewMatrix();
+      _updateScheduleMatrix();
+      if (change == Change.course) _updateCourses();
+      if (change == Change.schedule) _updateScheduleData();
+    });
+  }
+
+  /// Helper function to update courses
+  void _updateCourses() {
+    courses = schedule.getCourseCodes().toList();
+  }
+
   /// Helper function to update all of overviewData
   void _updateOverviewData() {
     courseTakers = schedule.overviewData.getNbrCourseTakers();
@@ -90,21 +94,6 @@ class _ScreenState extends State<Screen> {
     placesGiven = schedule.overviewData.getNbrPlacesGiven();
     unmetWants = schedule.overviewData.getNbrUnmetWants();
     onLeave = schedule.overviewData.getNbrOnLeave();
-  }
-
-  /// Helper function to update course schedule data
-  void _updateScheduleData() {
-    if (courses.length != scheduleData.length) {
-      scheduleData = List<int>.filled(courses.length, -1, growable: false);
-    }
-    for (int i = 0; i < courses.length; i++) {
-      scheduleData[i] = schedule.scheduleControl.scheduledTimeFor(courses[i]);
-    }
-  }
-
-  /// Helper function to update courses
-  void _updateCourses() {
-    courses = schedule.getCourseCodes().toList();
   }
 
   /// Helper function to update the overview table data
@@ -145,86 +134,14 @@ class _ScreenState extends State<Screen> {
     }
   }
 
-  /// This class is a private computation function that sets the min and max class
-  /// size for each class
-  void _setMinMaxClass() {
-    if (kDebugMode) {
-      print(schedule.courseControl.getSplitMode(dropDownVal).toString());
+  /// Helper function to update course schedule data
+  void _updateScheduleData() {
+    if (courses.length != scheduleData.length) {
+      scheduleData = List<int>.filled(courses.length, -1, growable: false);
     }
-    setState(() {
-      if (kDebugMode) {
-        print('Current class selected $dropDownVal $minVal $maxVal');
-      }
-      if (minVal != '' && maxVal != '' && coursesImported) {
-        try {
-          int minV = int.parse(minVal);
-          int maxV = int.parse(maxVal);
-          if (dropDownVal == 'ALL') {
-            schedule.courseControl.setGlobalMinMaxClassSize(minV, maxV);
-
-            schedule.courseControl.isMaxSizeMixed()
-                ? hintMax = 'Mix'
-                : hintMax = schedule.courseControl
-                    .getMaxClassSize(dropDownVal)
-                    .toString();
-            schedule.courseControl.isMinSizeMixed()
-                ? hintMin = 'Mix'
-                : hintMin = schedule.courseControl
-                    .getMinClassSize(dropDownVal)
-                    .toString();
-          } else {
-            schedule.courseControl
-                .setMinMaxClassSizeForClass(dropDownVal, minV, maxV);
-            hintMax =
-                schedule.courseControl.getMaxClassSize(dropDownVal).toString();
-            hintMin =
-                schedule.courseControl.getMinClassSize(dropDownVal).toString();
-          }
-          minVal = maxVal = '';
-          minTextField.clear();
-          maxTextField.clear();
-
-          if (kDebugMode) {
-            print('Min and max set with vals $minV $maxV');
-          }
-
-          //split and limit toggle goes here!
-          SplitMode currmode;
-
-          if (mode == 'splitting') {
-            currmode = SplitMode.split;
-          } else {
-            currmode = SplitMode.limit;
-          }
-
-          schedule.courseControl.setSplitMode(dropDownVal, currmode);
-        } on Exception {
-          // ignore: todo
-          //TODO: Add the pop up alert to show the error
-          if (kDebugMode) {
-            print('Error parsing the int');
-          }
-          minTextField.clear();
-          maxTextField.clear();
-        }
-      } else {
-        if (minVal == '' && maxVal == '') {
-          minMaxError = 'Please enter a value for min and max';
-        } else if (minVal == '') {
-          minMaxError = 'Please enter a value for min';
-        } else if (maxVal == '') {
-          minMaxError = 'Please enter a value for max';
-        } else {
-          minMaxError = 'Please import courses';
-        }
-        popUp();
-        minTextField.clear();
-        maxTextField.clear();
-        minVal = '';
-        maxVal = '';
-      }
-      _updateOverviewData();
-    });
+    for (int i = 0; i < courses.length; i++) {
+      scheduleData[i] = schedule.scheduleControl.scheduledTimeFor(courses[i]);
+    }
   }
 
   Future<void> customPopUp(String message) async {
@@ -238,35 +155,6 @@ class _ScreenState extends State<Screen> {
             child: ListBody(
               children: <Widget>[
                 Text(message),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  /// creates an error popup for class sizing
-  Future<void> popUp() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // must be dismissed
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error setting class size'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                const Text('Hint'),
-                Text(minMaxError),
               ],
             ),
           ),
@@ -307,17 +195,6 @@ class _ScreenState extends State<Screen> {
                       numCourses = await schedule.loadCourses(path);
                       droppedList =
                           List<bool>.filled(numCourses!, false, growable: true);
-                      dropDownVal = 'ALL';
-                      hintMax = schedule.courseControl
-                          .getMaxClassSize('ALL')
-                          .toString();
-                      hintMin = schedule.courseControl
-                          .getMinClassSize('ALL')
-                          .toString();
-                      minVal = '';
-                      maxVal = '';
-                      minTextField.clear();
-                      maxTextField.clear();
                       coursesImported = true;
                       //Setting the boolean map to check if main or coordinator
                       //has been set
@@ -361,15 +238,6 @@ class _ScreenState extends State<Screen> {
                       _showMyDialog(e.toString(), 'people');
                     }
                   }
-                  dropDownVal = 'ALL';
-                  hintMax =
-                      schedule.courseControl.getMaxClassSize('ALL').toString();
-                  hintMin =
-                      schedule.courseControl.getMinClassSize('ALL').toString();
-                  minVal = '';
-                  maxVal = '';
-                  minTextField.clear();
-                  maxTextField.clear();
                   peopleImported = true;
                 } else {
                   // User canceled the picker
@@ -428,7 +296,6 @@ class _ScreenState extends State<Screen> {
                           schedule.loadState(path);
 
                           numCourses = schedule.getCourseCodes().length;
-                          updateDropped();
                           _updateOverviewData();
                         });
                         if (kDebugMode) {
@@ -437,17 +304,6 @@ class _ScreenState extends State<Screen> {
                       } catch (e) {
                         _showMyDialog(e.toString(), 'load');
                       }
-                      dropDownVal = 'ALL';
-                      hintMax = schedule.courseControl
-                          .getMaxClassSize('ALL')
-                          .toString();
-                      hintMin = schedule.courseControl
-                          .getMinClassSize('ALL')
-                          .toString();
-                      minVal = '';
-                      maxVal = '';
-                      minTextField.clear();
-                      maxTextField.clear();
                       peopleImported = true;
                       //Coordinator code for load state
                       for (var name in schedule.getCourseCodes()) {
@@ -758,7 +614,8 @@ class _ScreenState extends State<Screen> {
             width: MediaQuery.of(context).size.width / 4,
             child: Column(
               children: [
-                classSizeControl(),
+                ClassSizeControl(
+                    schedule: schedule, courses: courses, onChange: compute),
                 Expanded(
                   child: namesDisplayMode(),
                 )
@@ -953,100 +810,6 @@ class _ScreenState extends State<Screen> {
       }
     }
     return Colors.yellow;
-  }
-
-  /// Creates widget that allows for viewing and modifying of class sizes
-  Widget classSizeControl() {
-    return Container(
-      color: themeColors['LightBlue'],
-      child: Column(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            child: const Text('CLASS SIZE CONTROL',
-                style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
-          ),
-          Container(
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const Text('Limit ', style: TextStyle(fontSize: 15)),
-                classDropDownMenu(),
-                const Text('courses to', style: TextStyle(fontSize: 15))
-              ],
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(
-                  width: 100,
-                  child: TextField(
-                      onChanged: (value) => minVal = value,
-                      decoration: InputDecoration(
-                        enabledBorder: const OutlineInputBorder(),
-                        hintText: hintMin,
-                      ),
-                      controller: minTextField,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0,
-                        height: 1.25,
-                        color: Colors.black,
-                      ))),
-              SizedBox(
-                  width: 100,
-                  child: TextField(
-                      onChanged: (value) => maxVal = value,
-                      decoration: InputDecoration(
-                        enabledBorder: const OutlineInputBorder(),
-                        hintText: hintMax,
-                      ),
-                      controller: maxTextField,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.0,
-                          height: 1.25,
-                          color: Colors.black))),
-            ],
-          ),
-          Row(
-            children: const [
-              SizedBox(height: 10),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(
-                height: 25.0,
-                width: 100.0,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState((() {
-                      if (mode == 'limiting') {
-                        mode = 'splitting';
-                      } else {
-                        mode = 'limiting';
-                      }
-                      _updateOverviewData();
-                    }));
-                  },
-                  child: Text(mode),
-                ),
-              ),
-              SizedBox(
-                height: 25.0,
-                width: 100.0,
-                child: ElevatedButton(
-                    onPressed: _setMinMaxClass, child: const Text('   set   ')),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 
   /// Creates the name display mode set of buttons. This includes show splits,
@@ -1262,51 +1025,6 @@ class _ScreenState extends State<Screen> {
         ));
   }
 
-  /// Widget that creates a drop down menu of courses used to display class size
-  /// maximums and minimums
-  Widget classDropDownMenu() {
-    //String dropDownVal = schedule.getCourseCodes().take(1).toString();
-    return DropdownButton(
-        hint: Text(dropDownVal),
-        items: (schedule.getCourseCodes().isEmpty
-                ? schedule.getCourseCodes()
-                : <String>['ALL'].followedBy(schedule.getCourseCodes()))
-            .map((String value)
-                // schedule.getCourseCodes().map((String value)
-                {
-          return DropdownMenuItem(
-            child: Text(value),
-            value: value,
-          );
-        }).toList(),
-        onChanged: (String? newValue) {
-          setState(() {
-            dropDownVal = newValue!;
-            if (dropDownVal == 'ALL') {
-              // minVal = maxVal = '';
-              schedule.courseControl.isMaxSizeMixed()
-                  ? hintMax = 'Mix'
-                  : hintMax = schedule.courseControl
-                      .getMaxClassSize(dropDownVal)
-                      .toString();
-              schedule.courseControl.isMinSizeMixed()
-                  ? hintMin = 'Mix'
-                  : hintMin = schedule.courseControl
-                      .getMinClassSize(dropDownVal)
-                      .toString();
-            } else {
-              hintMax = schedule.courseControl
-                  .getMaxClassSize(dropDownVal)
-                  .toString();
-              hintMin = schedule.courseControl
-                  .getMinClassSize(dropDownVal)
-                  .toString();
-            }
-            _updateOverviewData();
-          });
-        });
-  }
-
   /// This is a helper function that will compute the number of new colums needed
   /// in the table if a given course were to be split.
   int computeSplitSize(String course) {
@@ -1316,75 +1034,6 @@ class _ScreenState extends State<Screen> {
 
     return numSplits - 1;
   }
-
-  /// This is a helper function ran after a save state is imported. The function
-  /// will update the front end to reflect the new information on the back end
-  /// regarding which classes are dropped
-  void updateDropped() {
-    while (droppedList.length != numCourses) {
-      droppedList.add(false);
-    }
-    for (var i = 0; i < droppedList.length; i++) {
-      droppedList[i] = false;
-    }
-    List<String> classes = schedule.getCourseCodes().toList();
-    for (var i = 0; i < classes.length; i++) {
-      if (schedule.courseControl.isDropped(classes[i])) {
-        droppedList[i] = true;
-      }
-    }
-  }
-
-  // /// translation function that will take a time slot and return the correct
-  // /// index used by input files. Returns -1 on an unknown timeslot name
-  // int getTimeIndex(String c) {
-  //   int timeIndex = -1;
-  //   if (c == '1st/3rd Mon AM') {
-  //     timeIndex = 0;
-  //   } else if (c == '1st/3rd Mon PM') {
-  //     timeIndex = 1;
-  //   } else if (c == '1st/3rd Tue AM') {
-  //     timeIndex = 2;
-  //     if (kDebugMode) {
-  //       print(curClassRoster);
-  //     }
-  //   } else if (c == '1st/3rd Tue PM') {
-  //     timeIndex = 3;
-  //   } else if (c == '1st/3rd Wed AM') {
-  //     timeIndex = 4;
-  //   } else if (c == '1st/3rd Wed PM') {
-  //     timeIndex = 5;
-  //   } else if (c == '1st/3rd Thu AM') {
-  //     timeIndex = 6;
-  //   } else if (c == '1st/3rd Thu PM') {
-  //     timeIndex = 7;
-  //   } else if (c == '1st/3rd Fri AM') {
-  //     timeIndex = 8;
-  //   } else if (c == '1st/3rd Fri PM') {
-  //     timeIndex = 9;
-  //   } else if (c == '2nd/4th Mon AM') {
-  //     timeIndex = 10;
-  //   } else if (c == '2nd/4th Mon PM') {
-  //     timeIndex = 11;
-  //   } else if (c == '2nd/4th Tue AM') {
-  //     timeIndex = 12;
-  //   } else if (c == '2nd/4th Tue PM') {
-  //     timeIndex = 13;
-  //   } else if (c == '2nd/4th Wed AM') {
-  //     timeIndex = 14;
-  //   } else if (c == '2nd/4th Wed PM') {
-  //     timeIndex = 15;
-  //   } else if (c == '2nd/4th Thu AM') {
-  //     timeIndex = 16;
-  //   } else if (c == '2nd/4th Thu PM') {
-  //     timeIndex = 17;
-  //   } else if (c == '2nd/4th Fri AM') {
-  //     timeIndex = 18;
-  //   } else if (c == '2nd/4th Fri PM') {
-  //     timeIndex = 19;
-  //   }
-  //   return timeIndex;
-  // }
 
   /// generic error pop up generator. Will produce a popup dialog box
   /// on the screen and show what error has been thrown to the user
@@ -1416,81 +1065,4 @@ class _ScreenState extends State<Screen> {
       },
     );
   }
-}
-
-/// checks to see if the current state is set to drop and split
-
-bool validSchedule(Scheduling sched) {
-  return stateDescriptions[sched.getStateOfProcessing().index] ==
-      'Drop and Split';
-}
-
-/// Deprecated function
-/// deleting this from source code causes an error  ¯\_(ツ)_/¯
-Widget auxData(Scheduling scheduling) {
-  return SizedBox(
-    height: 200,
-    child: DataTable(
-      columns: const <DataColumn>[
-        DataColumn(
-          label: Text(
-            'Auxiliary Data',
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            '',
-            softWrap: true,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-      ],
-      rows: <DataRow>[
-        DataRow(
-          cells: <DataCell>[
-            const DataCell(Text('Course Takers')),
-            DataCell(Text('${scheduling.overviewData.getNbrCourseTakers()}')),
-          ],
-        ),
-        DataRow(
-          cells: <DataCell>[
-            const DataCell(Text('Go Courses')),
-            DataCell(Text('${scheduling.overviewData.getNbrGoCourses()}')),
-          ],
-        ),
-        DataRow(
-          cells: <DataCell>[
-            const DataCell(Text('places asked')),
-            DataCell(Text('${scheduling.overviewData.getNbrPlacesAsked()}')),
-          ],
-        ),
-        DataRow(
-          cells: <DataCell>[
-            const DataCell(Text('places given')),
-            DataCell(Text('${scheduling.overviewData.getNbrPlacesGiven()}')),
-          ],
-        ),
-        DataRow(
-          cells: <DataCell>[
-            const DataCell(Text('un-met wants')),
-            DataCell(Text('${scheduling.overviewData.getNbrUnmetWants()}')),
-          ],
-        ),
-        DataRow(
-          cells: <DataCell>[
-            const DataCell(Text('on leave')),
-            DataCell(Text('${scheduling.overviewData.getNbrOnLeave()}')),
-          ],
-        ),
-        const DataRow(
-          cells: <DataCell>[
-            DataCell(Text('Missing')),
-            DataCell(Text('0')),
-          ],
-        ),
-      ],
-    ),
-  );
 }

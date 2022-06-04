@@ -79,7 +79,7 @@ class Scheduling {
     int numCourses;
     numCourses = await _courses.loadCourses(inputFile);
     if (numCourses != 0) {
-      compute(Change(course: true));
+      compute(Change.course);
     }
     return numCourses;
   }
@@ -127,7 +127,7 @@ class Scheduling {
       if (result != null) {
         throw InconsistentCourseAndPeopleException(message: result);
       }
-      compute(Change(people: true));
+      compute(Change.people);
     }
     return numPeople;
   }
@@ -450,7 +450,7 @@ class Scheduling {
       courseControl.drop(course, noCompute: true);
       i += 1;
     }
-    compute(Change(drop: true));
+    compute(Change.drop);
 
     // Limit
     while (true) {
@@ -488,7 +488,7 @@ class Scheduling {
       }
       splitControl.split(course, noCompute: true);
     }
-    compute(Change(course: true));
+    compute(Change.course);
 
     // Schedule
     while (true) {
@@ -508,7 +508,7 @@ class Scheduling {
       }
       i += 1;
     }
-    compute(Change(schedule: true));
+    compute(Change.schedule);
 
     // Coordinator
     while (i < lines.length) {
