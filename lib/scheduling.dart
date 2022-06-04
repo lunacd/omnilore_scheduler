@@ -37,11 +37,14 @@ class Scheduling {
   late SplitControl splitControl;
   late ScheduleControl scheduleControl;
 
+  StateOfProcessing _state = StateOfProcessing.needCourses;
+
   /// Compute all submodules
   void compute(Change change) {
     overviewData.compute(change);
     scheduleControl.compute(change);
     courseControl.compute(change);
+    _updateStateOfProcessing();
   }
 
   /// Get an iterable list of course codes
@@ -134,28 +137,27 @@ class Scheduling {
 
   /// Get the current state of processing
   StateOfProcessing getStateOfProcessing() {
+    return _state;
+  }
+
+  void _updateStateOfProcessing() {
     if (!_validate.isValid()) {
-      return StateOfProcessing.inconsistent;
+      _state = StateOfProcessing.inconsistent;
+    } else if (_courses.getNumCourses() == 0) {
+      _state = StateOfProcessing.needCourses;
+    } else if (_people.people.isEmpty) {
+      _state = StateOfProcessing.needPeople;
+    } else if (overviewData.hasUndersizeClasses(_courses)) {
+      _state = StateOfProcessing.drop;
+    } else if (overviewData.hasOversizeClasses(_courses)) {
+      _state = StateOfProcessing.split;
+    } else if (!scheduleControl.allClassScheduled()) {
+      _state = StateOfProcessing.schedule;
+    } else if (!courseControl.allCourseHasCoordinators()) {
+      _state = StateOfProcessing.coordinator;
+    } else {
+      _state = StateOfProcessing.output;
     }
-    if (_courses.getNumCourses() == 0) {
-      return StateOfProcessing.needCourses;
-    }
-    if (_people.people.isEmpty) {
-      return StateOfProcessing.needPeople;
-    }
-    if (overviewData.hasUndersizeClasses(_courses)) {
-      return StateOfProcessing.drop;
-    }
-    if (overviewData.hasOversizeClasses(_courses)) {
-      return StateOfProcessing.split;
-    }
-    if (!scheduleControl.allClassScheduled()) {
-      return StateOfProcessing.schedule;
-    }
-    if (!courseControl.allCourseHasCoordinators()) {
-      return StateOfProcessing.coordinator;
-    }
-    return StateOfProcessing.output;
   }
 
   /// Output roster with CC information
