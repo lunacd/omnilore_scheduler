@@ -13,6 +13,7 @@ import 'package:omnilore_scheduler/widgets/table/main_table.dart';
 import 'package:omnilore_scheduler/widgets/overview_data.dart';
 import 'package:omnilore_scheduler/widgets/table/overview_row.dart';
 import 'package:omnilore_scheduler/widgets/table/schedule_row.dart';
+import 'package:omnilore_scheduler/widgets/utils.dart';
 
 const stateDescriptions = <String>[
   'Need Courses',
@@ -76,8 +77,12 @@ class _ScreenState extends State<Screen> {
       _updateOverviewData();
       _updateOverviewMatrix();
       _updateScheduleMatrix();
-      if (change == Change.course) _updateCourses();
-      if (change == Change.schedule) _updateScheduleData();
+      if (change == Change.course || change == Change.all) {
+        _updateCourses();
+      }
+      if (change == Change.schedule || change == Change.all) {
+        _updateScheduleData();
+      }
     });
   }
 
@@ -144,33 +149,6 @@ class _ScreenState extends State<Screen> {
     }
   }
 
-  Future<void> customPopUp(String message) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // must be dismissed
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Invalid Choice'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(message),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,10 +180,7 @@ class _ScreenState extends State<Screen> {
                         mainCoordinatorSelected[name] = false;
                         coCoordinatorSelected[name] = false;
                       }
-                      _updateCourses();
-                      _updateOverviewMatrix();
-                      _updateScheduleMatrix();
-                      _updateScheduleData();
+                      compute(Change.course);
                     } catch (e) {
                       _showMyDialog(e.toString(), 'courses');
                     }
@@ -215,9 +190,6 @@ class _ScreenState extends State<Screen> {
                     //user canceled
                   }
                 }
-                setState(() {
-                  _updateOverviewData();
-                });
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
@@ -242,11 +214,7 @@ class _ScreenState extends State<Screen> {
                 } else {
                   // User canceled the picker
                 }
-                setState(() {
-                  _updateOverviewData();
-                  _updateOverviewMatrix();
-                  _updateScheduleMatrix();
-                });
+                compute(Change.people);
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyP, ctrl: true),
             ),
@@ -266,9 +234,6 @@ class _ScreenState extends State<Screen> {
                 } else {
                   //file picker canceled
                 }
-                setState(() {
-                  _updateOverviewData();
-                });
               },
             ),
             MenuListItem(
@@ -296,7 +261,6 @@ class _ScreenState extends State<Screen> {
                           schedule.loadState(path);
 
                           numCourses = schedule.getCourseCodes().length;
-                          _updateOverviewData();
                         });
                         if (kDebugMode) {
                           print('LOADINGGGGGGGGGGG\n');
@@ -326,9 +290,7 @@ class _ScreenState extends State<Screen> {
                   } else {
                     //file picker canceled
                   }
-                  setState(() {
-                    _updateOverviewData();
-                  });
+                  compute(Change.all);
                 }
               },
             ),
@@ -410,7 +372,7 @@ class _ScreenState extends State<Screen> {
             MenuListItem(title: 'Goodbye'),
           ]),
         ],
-        masterPane: masterPane(),
+        masterPane: _masterPane(),
         detailPaneMinWidth: 0,
       ),
     );
@@ -418,7 +380,7 @@ class _ScreenState extends State<Screen> {
 
   /// This function builds the entire user interface which is split into the main
   /// datatable and screen1
-  Builder masterPane() {
+  Builder _masterPane() {
     if (kDebugMode) {
       print('BUILD: masterPane');
     }
@@ -431,7 +393,7 @@ class _ScreenState extends State<Screen> {
           child: SingleChildScrollView(
               child: Column(
             children: [
-              screen1(),
+              _screen1(),
               MainTable(
                   state: schedule.getStateOfProcessing(),
                   courses: numCourses == null
@@ -580,7 +542,7 @@ class _ScreenState extends State<Screen> {
   }
 
   /// This is the base widget that holds everything in the UI that is not the datatable
-  Widget screen1() {
+  Widget _screen1() {
     // ignore: sized_box_for_whitespace
     return Container(
       height: 400,
@@ -603,7 +565,7 @@ class _ScreenState extends State<Screen> {
                           fontSize: 25, fontWeight: FontWeight.bold)),
                 ),
                 Expanded(
-                  child: classNameDisplay(),
+                  child: _classNameDisplay(),
                 )
               ],
             ),
@@ -617,7 +579,7 @@ class _ScreenState extends State<Screen> {
                 ClassSizeControl(
                     schedule: schedule, courses: courses, onChange: compute),
                 Expanded(
-                  child: namesDisplayMode(),
+                  child: _namesDisplayMode(),
                 )
               ],
             ),
@@ -628,7 +590,7 @@ class _ScreenState extends State<Screen> {
             width: MediaQuery.of(context).size.width / 4 - 5,
             child: Column(
               children: [
-                selectProcess(),
+                _selectProcess(),
                 Expanded(
                     child: OverviewData(
                         placesAsked: placesAsked,
@@ -656,7 +618,7 @@ class _ScreenState extends State<Screen> {
 
   /// Creates the class name display portion of the User interface. buttons referencing
   /// clustering and current class roster is displayed here
-  Widget classNameDisplay() {
+  Widget _classNameDisplay() {
     return Container(
       color: themeColors['MoreBlue'],
       child: Column(children: [
@@ -684,7 +646,6 @@ class _ScreenState extends State<Screen> {
                           curSelected.forEach((key, value) {
                             curSelected[key] = false;
                           });
-                          _updateOverviewData();
                         });
                       }
                     : null,
@@ -699,14 +660,13 @@ class _ScreenState extends State<Screen> {
                             result.add(item);
                           }
                           schedule.splitControl.addCluster(result);
-                          clustColors[result.toSet()] = randomColor();
+                          clustColors[result.toSet()] = _randomColor();
                           curSelected.forEach((key, value) {
                             curSelected[key] = false;
                           });
                           if (kDebugMode) {
                             print(result);
                           }
-                          _updateOverviewData();
                         });
                       }
                     : null,
@@ -755,7 +715,7 @@ class _ScreenState extends State<Screen> {
                     } else {
                       if (schedule.splitControl.isClustured(val.toString()) ==
                           true) {
-                        Color r = getColorKey(val);
+                        Color r = _getColorKey(val);
                         return ElevatedButton.styleFrom(primary: r);
                       } else {
                         return ElevatedButton.styleFrom(primary: Colors.white);
@@ -770,14 +730,13 @@ class _ScreenState extends State<Screen> {
                         curSelected[val] = true;
                       }
                       if (classCodes) {}
-                      _updateOverviewData();
                     });
                   },
                   child: Text(
                     val.toString(),
                     style: (() {
                       if (schedule.splitControl.isClustured(val) == true &&
-                          getColorKey(val) == Colors.brown) {
+                          _getColorKey(val) == Colors.brown) {
                         return const TextStyle(color: Colors.white);
                       } else {
                         const TextStyle(color: Colors.black);
@@ -794,14 +753,14 @@ class _ScreenState extends State<Screen> {
   }
 
   /// Returns a random color from the cluster colors list
-  Color randomColor() {
+  Color _randomColor() {
     colorNum++;
     return clusterColors[colorNum % clusterColors.length];
   }
 
   /// given a person return its given clustering color. If this person is not in
   /// a cluster it will return yellow
-  Color getColorKey(String person) {
+  Color _getColorKey(String person) {
     Set<String> test =
         schedule.splitControl.getClustByPerson(person) ?? <String>{};
     for (Set<String> item in clustColors.keys) {
@@ -814,7 +773,7 @@ class _ScreenState extends State<Screen> {
 
   /// Creates the name display mode set of buttons. This includes show splits,
   /// show BU & CA, Implement splits, Show Coord(s), Set C and CC, Set CC1 and CC2
-  Widget namesDisplayMode() {
+  Widget _namesDisplayMode() {
     return Container(
         // height: double.infinity,
         color: themeColors['KindaBlue'],
@@ -831,7 +790,7 @@ class _ScreenState extends State<Screen> {
               onPressed: resultingClass == true && curClass != ''
                   ? () {
                       setState(() {
-                        int splitNum = computeSplitSize(curClass);
+                        int splitNum = _computeSplitSize(curClass);
                         if (kDebugMode) {
                           print(splitNum);
                         }
@@ -849,17 +808,13 @@ class _ScreenState extends State<Screen> {
                         schedule.splitControl.resetState();
                         curCell = '';
                         curClassRoster = [];
-                        _updateCourses();
-                        _updateOverviewData();
-                        _updateOverviewMatrix();
-                        _updateScheduleMatrix();
-                        _updateScheduleData();
                       });
+                      compute(Change.all);
                     }
                   : null,
               child: const Text('Imp. Splits')),
           ElevatedButton(
-              onPressed: updateAndShowCO()
+              onPressed: _updateAndShowCO()
                   ? () {
                       setState(() {
                         Coordinators? coordinator =
@@ -883,12 +838,9 @@ class _ScreenState extends State<Screen> {
                             // }
                           }
                         }
-                        _updateOverviewData();
                       });
                     }
-                  : null, //(() {
-
-              //}),
+                  : null,
               child: const Text('Show Coord(s)')),
           ElevatedButton(
               onPressed: classCodes == true &&
@@ -922,12 +874,9 @@ class _ScreenState extends State<Screen> {
                             curSelected[key] = false;
                           });
                         } else {
-                          customPopUp('Error: Must select only one name');
-                          // if (kDebugMode) {
-                          //   print('Error: Must select only one name');
-                          // }
+                          Utils.showPopUp(context, 'Set coordinator error',
+                              'Must select only one name at a time');
                         }
-                        _updateOverviewData();
                       });
                     }
                   : null,
@@ -945,18 +894,14 @@ class _ScreenState extends State<Screen> {
                         Iterable keysSelected = curSelected.keys
                             .where((element) => curSelected[element] == true);
                         if (keysSelected.length == 1) {
-                          // ignore: todo
-                          // TODO: Add pop up box to indicate error
-                          // ignore: avoid_print
                           for (var item in keysSelected) {
                             try {
                               schedule.courseControl
                                   .setEqualCoCoordinator(curClass, item);
                             } on Exception catch (ex) {
-                              // ignore: todo
-                              //TODO: print out exception
-                              // ignore: avoid_print
-                              print(ex);
+                              if (kDebugMode) {
+                                print(ex);
+                              }
                             }
                           }
                           coCoordinatorSelected[curClass] = true;
@@ -964,12 +909,9 @@ class _ScreenState extends State<Screen> {
                             curSelected[key] = false;
                           });
                         } else {
-                          customPopUp('Error: Must select only one name');
-                          // if (kDebugMode) {
-                          //   print('Error: Must select only one name');
-                          // }
+                          Utils.showPopUp(context, 'Select coordinator error',
+                              'Must select only one name at a time');
                         }
-                        _updateOverviewData();
                       });
                     }
                   : null,
@@ -977,18 +919,15 @@ class _ScreenState extends State<Screen> {
         ]));
   }
 
-  bool updateAndShowCO() {
-    // print("****************HELLO***********");
+  bool _updateAndShowCO() {
     List<String> classes = schedule.getCourseCodes().toList();
     if (stateDescriptions[schedule.getStateOfProcessing().index] ==
         'Schedule') {
-      // if (mainCoordinatorSelected.length != classes.length) {
       mainCoordinatorSelected.clear();
       coCoordinatorSelected.clear();
       for (var name in classes) {
         mainCoordinatorSelected[name] = false;
         coCoordinatorSelected[name] = false;
-        // }
       }
     }
 
@@ -1000,7 +939,7 @@ class _ScreenState extends State<Screen> {
         (mainCoordinatorSelected[curClass] || coCoordinatorSelected[curClass]);
   }
 
-  Widget selectProcess() {
+  Widget _selectProcess() {
     return Container(
         color: themeColors['KindaBlue'],
         child: Column(
@@ -1027,7 +966,7 @@ class _ScreenState extends State<Screen> {
 
   /// This is a helper function that will compute the number of new colums needed
   /// in the table if a given course were to be split.
-  int computeSplitSize(String course) {
+  int _computeSplitSize(String course) {
     int courseSize = schedule.overviewData.getResultingClassSize(course).size;
     int maxSize = schedule.courseControl.getMaxClassSize(course);
     int numSplits = (courseSize / maxSize).ceil();
