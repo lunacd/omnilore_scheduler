@@ -37,8 +37,6 @@ class _ScreenState extends State<Screen> {
   /// this is the main scheduling data structure that holds back end computation
   Scheduling schedule = Scheduling();
 
-  bool coursesImported = false;
-  bool peopleImported = false;
   int? numCourses;
   int? numPeople;
   Map mainCoordinatorSelected = <String, bool>{};
@@ -173,9 +171,8 @@ class _ScreenState extends State<Screen> {
                       numCourses = await schedule.loadCourses(path);
                       droppedList =
                           List<bool>.filled(numCourses!, false, growable: true);
-                      coursesImported = true;
-                      //Setting the boolean map to check if main or coordinator
-                      //has been set
+                      // Setting the boolean map to check if main or coordinator
+                      // has been set
                       for (var name in schedule.getCourseCodes()) {
                         mainCoordinatorSelected[name] = false;
                         coCoordinatorSelected[name] = false;
@@ -210,7 +207,6 @@ class _ScreenState extends State<Screen> {
                       _showMyDialog(e.toString(), 'people');
                     }
                   }
-                  peopleImported = true;
                 } else {
                   // User canceled the picker
                 }
@@ -240,58 +236,55 @@ class _ScreenState extends State<Screen> {
               title: 'Load',
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, ctrl: true),
               onPressed: () async {
-                if (peopleImported == true) {
-                  FilePickerResult? result =
-                      await FilePicker.platform.pickFiles();
-                  if (kDebugMode) {
-                    print('FILE PICKED');
-                  }
-
-                  if (result != null) {
-                    String path = result.files.single.path ?? '';
-                    if (kDebugMode) {
-                      print(path);
-                    }
-                    if (path != '') {
-                      try {
-                        if (kDebugMode) {
-                          print('its about to load');
-                        }
-                        setState(() {
-                          schedule.loadState(path);
-
-                          numCourses = schedule.getCourseCodes().length;
-                        });
-                        if (kDebugMode) {
-                          print('LOADINGGGGGGGGGGG\n');
-                        }
-                      } catch (e) {
-                        _showMyDialog(e.toString(), 'load');
-                      }
-                      peopleImported = true;
-                      //Coordinator code for load state
-                      for (var name in schedule.getCourseCodes()) {
-                        Coordinators? coordinator =
-                            schedule.courseControl.getCoordinators(name);
-                        if (coordinator != null) {
-                          if (coordinator.equal) {
-                            coCoordinatorSelected[name] = true;
-                            mainCoordinatorSelected[name] = false;
-                          } else {
-                            mainCoordinatorSelected[name] = true;
-                            coCoordinatorSelected[name] = false;
-                          }
-                          continue;
-                        }
-                        mainCoordinatorSelected[name] = false;
-                        coCoordinatorSelected[name] = false;
-                      }
-                    }
-                  } else {
-                    //file picker canceled
-                  }
-                  compute(Change.all);
+                FilePickerResult? result =
+                    await FilePicker.platform.pickFiles();
+                if (kDebugMode) {
+                  print('FILE PICKED');
                 }
+
+                if (result != null) {
+                  String path = result.files.single.path ?? '';
+                  if (kDebugMode) {
+                    print(path);
+                  }
+                  if (path != '') {
+                    try {
+                      if (kDebugMode) {
+                        print('its about to load');
+                      }
+                      setState(() {
+                        schedule.loadState(path);
+
+                        numCourses = schedule.getCourseCodes().length;
+                      });
+                      if (kDebugMode) {
+                        print('LOADINGGGGGGGGGGG\n');
+                      }
+                    } catch (e) {
+                      _showMyDialog(e.toString(), 'load');
+                    }
+                    //Coordinator code for load state
+                    for (var name in schedule.getCourseCodes()) {
+                      Coordinators? coordinator =
+                          schedule.courseControl.getCoordinators(name);
+                      if (coordinator != null) {
+                        if (coordinator.equal) {
+                          coCoordinatorSelected[name] = true;
+                          mainCoordinatorSelected[name] = false;
+                        } else {
+                          mainCoordinatorSelected[name] = true;
+                          coCoordinatorSelected[name] = false;
+                        }
+                        continue;
+                      }
+                      mainCoordinatorSelected[name] = false;
+                      coCoordinatorSelected[name] = false;
+                    }
+                  }
+                } else {
+                  //file picker canceled
+                }
+                compute(Change.all);
               },
             ),
             MenuListItem(
