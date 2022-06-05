@@ -179,7 +179,8 @@ class _ScreenState extends State<Screen> {
                       }
                       compute(Change.course);
                     } catch (e) {
-                      _showMyDialog(e.toString(), 'courses');
+                      Utils.showPopUp(
+                          context, 'Error loading courses', e.toString());
                     }
                   } else {
                     // ignore: todo
@@ -203,8 +204,8 @@ class _ScreenState extends State<Screen> {
                     try {
                       numPeople = await schedule.loadPeople(path);
                     } catch (e) {
-                      //FormatException s = e.source;
-                      _showMyDialog(e.toString(), 'people');
+                      Utils.showPopUp(
+                          context, 'Error loading people', e.toString());
                     }
                   }
                 } else {
@@ -224,7 +225,8 @@ class _ScreenState extends State<Screen> {
                     try {
                       schedule.exportState(path);
                     } catch (e) {
-                      _showMyDialog(e.toString(), 'save');
+                      Utils.showPopUp(
+                          context, 'Error saving state', e.toString());
                     }
                   }
                 } else {
@@ -261,7 +263,8 @@ class _ScreenState extends State<Screen> {
                         print('LOADINGGGGGGGGGGG\n');
                       }
                     } catch (e) {
-                      _showMyDialog(e.toString(), 'load');
+                      Utils.showPopUp(
+                          context, 'Error loading state', e.toString());
                     }
                     //Coordinator code for load state
                     for (var name in schedule.getCourseCodes()) {
@@ -297,7 +300,8 @@ class _ScreenState extends State<Screen> {
                       try {
                         schedule.outputRosterPhone(path);
                       } catch (e) {
-                        _showMyDialog(e.toString(), 'EarlyRoster');
+                        Utils.showPopUp(context, 'Error exporting early roster',
+                            e.toString());
                       }
                     }
                   } else {
@@ -319,7 +323,8 @@ class _ScreenState extends State<Screen> {
                         }
                         schedule.outputRosterCC(path);
                       } catch (e) {
-                        _showMyDialog(e.toString(), 'RosterCC');
+                        Utils.showPopUp(context,
+                            'Error exporting roster with CC', e.toString());
                       }
                     }
                   } else {
@@ -339,7 +344,8 @@ class _ScreenState extends State<Screen> {
                     try {
                       schedule.outputMM(path);
                     } catch (e) {
-                      _showMyDialog(e.toString(), 'MailMerge');
+                      Utils.showPopUp(
+                          context, 'Error exporting MailMerge', e.toString());
                     }
                   }
                 } else {
@@ -965,36 +971,5 @@ class _ScreenState extends State<Screen> {
     int numSplits = (courseSize / maxSize).ceil();
 
     return numSplits - 1;
-  }
-
-  /// generic error pop up generator. Will produce a popup dialog box
-  /// on the screen and show what error has been thrown to the user
-  Future<void> _showMyDialog(String error, String loadType) async {
-    // found at https://docs.flutter.dev/cookbook/forms/text-input
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('There was a problem loading the $loadType file'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('The following error was encountered: $error'),
-                const Text('make sure you have selected the correct file'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Ok'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }
