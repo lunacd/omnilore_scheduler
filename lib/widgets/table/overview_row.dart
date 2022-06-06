@@ -1,5 +1,19 @@
 import 'package:flutter/material.dart';
 
+enum RowType {
+  className,
+  firstChoice,
+  firstBackup,
+  secondBackup,
+  thirdBackup,
+  addFromBackup,
+  dropBadTime,
+  dropDup,
+  dropFull,
+  resultingClass,
+  none,
+}
+
 const overviewRows = <String>[
   'First Choices',
   'First backup',
@@ -14,7 +28,7 @@ const overviewRows = <String>[
 
 class OverviewRow extends TableRow {
   OverviewRow(int rowIndex, List<String> courses, List<int> data,
-      void Function(String, int) onCellPressed)
+      void Function(String, RowType) onCellPressed)
       : super(children: [
           TableCell(
               child: Row(
@@ -22,7 +36,8 @@ class OverviewRow extends TableRow {
                   children: <Widget>[Text(overviewRows[rowIndex])])),
           for (int i = 0; i < data.length; i++)
             TextButton(
-                onPressed: () => onCellPressed(courses[i], rowIndex + 1),
+                onPressed: () =>
+                    onCellPressed(courses[i], RowType.values[rowIndex+ 1]),
                 child: Text(data[i].toString()))
         ]);
 }

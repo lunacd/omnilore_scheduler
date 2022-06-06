@@ -27,7 +27,7 @@ class MainTable extends StatelessWidget {
   final List<List<int>> overviewMatrix;
   final List<List<int>> scheduleMatrix;
   final List<bool> droppedList;
-  final void Function(String, int) onCellPressed;
+  final void Function(String, RowType) onCellPressed;
   final void Function(int) onDroppedChanged;
   final void Function(String, int) onSchedule;
   final List<int> scheduleData;

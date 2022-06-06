@@ -93,7 +93,7 @@ class CourseControl {
     _classMinSizeMap.clear();
     _classMaxSize = maxSize;
     _classMinSize = minSize;
-    compute(Change.schedule);
+    _scheduling.compute(Change.schedule);
   }
 
   /// Get global min class size
@@ -126,7 +126,7 @@ class CourseControl {
     if (minSize != _classMinSize) {
       _classMinSizeMap[course] = minSize;
     }
-    compute(Change.schedule);
+    _scheduling.compute(Change.schedule);
   }
 
   /// Determine whether the min class size is mixed for current classes

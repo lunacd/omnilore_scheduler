@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:omnilore_scheduler/widgets/table/overview_row.dart';
 
 class ClassNameRow extends TableRow {
-  ClassNameRow(List<String> courses, void Function(String, int) onCellPressed)
+  ClassNameRow(
+      List<String> courses, void Function(String, RowType) onCellPressed)
       : super(children: [
           const TableCell(child: Text('')),
           for (int i = 0; i < courses.length; i++)
             TextButton(
               child: Text(_formatClassCode(courses[i], 0)),
-              onPressed: () => onCellPressed(courses[i], 0),
+              onPressed: () => onCellPressed(courses[i], RowType.className),
             )
         ]);
 
