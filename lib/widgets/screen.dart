@@ -76,12 +76,12 @@ class _ScreenState extends State<Screen> {
       if (change == Change.course) {
         _updateCourses();
       }
-      if (change == Change.course || change == Change.schedule) {
-        _updateScheduleData();
-      }
       _updateOverviewData();
       _updateOverviewMatrix();
       _updateScheduleMatrix();
+      if (change == Change.course || change == Change.schedule) {
+        _updateScheduleData();
+      }
     });
   }
 
@@ -162,7 +162,6 @@ class _ScreenState extends State<Screen> {
       body: AppScreen(
         masterPaneFixedWidth: true,
         detailPaneFlex: 0,
-        // TODO: Update the menuList
         menuList: [
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
@@ -315,9 +314,6 @@ class _ScreenState extends State<Screen> {
                   } else {
                     //file picker canceled
                   }
-                  setState(() {
-                    _updateOverviewData();
-                  });
                 }),
             MenuListItem(
                 title: 'Export Final Roster',
@@ -338,9 +334,6 @@ class _ScreenState extends State<Screen> {
                   } else {
                     //file picker canceled
                   }
-                  setState(() {
-                    _updateOverviewData();
-                  });
                 }),
             MenuListItem(
               title: 'Export MailMerge',
@@ -359,9 +352,6 @@ class _ScreenState extends State<Screen> {
                 } else {
                   //file picker canceled
                 }
-                setState(() {
-                  _updateOverviewData();
-                });
               },
             ),
           ]),
@@ -388,10 +378,6 @@ class _ScreenState extends State<Screen> {
   /// This function builds the entire user interface which is split into the main
   /// datatable and screen1
   Builder _masterPane() {
-    if (kDebugMode) {
-      print('BUILD: masterPane');
-    }
-
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -411,7 +397,6 @@ class _ScreenState extends State<Screen> {
                   droppedList: droppedList,
                   scheduleData: scheduleData,
                   onCellPressed: (String course, RowType row) {
-                    print(row);
                     setState(() {
                       switch (row) {
                         case RowType.className:
@@ -482,14 +467,8 @@ class _ScreenState extends State<Screen> {
                         schedule.courseControl
                             .undrop(schedule.getCourseCodes().toList()[i]);
                       }
-                      if (kDebugMode) {
-                        print(
-                            'dropped list index: $i drop list value: ${droppedList[i]}');
-                      }
-                      _updateOverviewData();
-                      _updateOverviewMatrix();
-                      _updateScheduleMatrix();
                     });
+                    compute(Change.drop);
                   },
                   onSchedule: (String course, int timeIndex) {
                     setState(() {
@@ -510,10 +489,7 @@ class _ScreenState extends State<Screen> {
                       if (kDebugMode) {
                         print(curClassRoster);
                       }
-                      _updateOverviewData();
-                      _updateScheduleData();
-                      _updateOverviewMatrix();
-                      _updateScheduleMatrix();
+                      compute(Change.schedule);
                     });
                   })
             ],
@@ -566,23 +542,14 @@ class _ScreenState extends State<Screen> {
                             currentClass != null
                         ? () {
                             setState(() {
-                              int splitNum = _computeSplitSize(currentClass!);
-                              if (kDebugMode) {
-                                print(splitNum);
-                              }
-                              numCourses = numCourses! + splitNum;
-                              Iterable<String> temp = schedule
-                                  .getCourseCodes(); // get list of courses
-                              List<String> res =
-                                  temp.toList(); // dumb type casting
-                              for (var i = 0; i < splitNum; i++) {
-                                droppedList.insert(
-                                    res.indexOf(currentClass!), false);
-                              } // insert "not dropped" value for new class
                               schedule.splitControl.split(currentClass!);
-                              schedule.splitControl.resetState();
+                              var newCourses = schedule.getCourseCodes();
+                              droppedList.insertAll(
+                                  courses.indexOf(currentClass!),
+                                  List<bool>.filled(
+                                      newCourses.length - courses.length,
+                                      false));
                               currentClass = null;
-                              schedule.splitControl.resetState();
                               currentRow = RowType.none;
                               curClassRoster = [];
                             });
@@ -597,22 +564,13 @@ class _ScreenState extends State<Screen> {
                               if (coordinator != null) {
                                 List<String> coordinatorsList =
                                     coordinator.coordinators;
-                                if (kDebugMode) {
-                                  print('**********got coordinators*********');
-                                }
                                 for (int i = 0;
                                     i < coordinatorsList.length;
                                     i++) {
-                                  // if (kDebugMode) {
-                                  if (kDebugMode) {
-                                    print(coordinatorsList[i]);
-                                  }
                                   if (coordinatorsList[i] != '') {
                                     curSelected[coordinatorsList[i]] =
                                         !curSelected[coordinatorsList[i]];
                                   }
-
-                                  // }
                                 }
                               }
                             });
@@ -630,18 +588,13 @@ class _ScreenState extends State<Screen> {
                               Iterable keysSelected = curSelected.keys.where(
                                   (element) => curSelected[element] == true);
                               if (keysSelected.length == 1) {
-                                // ignore: todo
-                                // TODO: Add pop up box to indicate error
-                                // ignore: avoid_print
                                 for (var item in keysSelected) {
                                   try {
                                     schedule.courseControl.setMainCoCoordinator(
                                         currentClass!, item);
-                                  } on Exception catch (ex) {
-                                    // ignore: todo
-                                    //TODO: print out exception
-                                    // ignore: avoid_print
-                                    print(ex);
+                                  } on Exception catch (e) {
+                                    Utils.showPopUp(context, 'Set C/CC error',
+                                        e.toString());
                                   }
                                 }
                                 mainCoordinatorSelected[currentClass!] = true;
@@ -885,15 +838,5 @@ class _ScreenState extends State<Screen> {
                 'Output') &&
         (mainCoordinatorSelected[currentClass!] ||
             coCoordinatorSelected[currentClass!]);
-  }
-
-  /// This is a helper function that will compute the number of new colums needed
-  /// in the table if a given course were to be split.
-  int _computeSplitSize(String course) {
-    int courseSize = schedule.overviewData.getResultingClassSize(course).size;
-    int maxSize = schedule.courseControl.getMaxClassSize(course);
-    int numSplits = (courseSize / maxSize).ceil();
-
-    return numSplits - 1;
   }
 }

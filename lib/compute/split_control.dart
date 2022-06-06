@@ -148,6 +148,7 @@ class SplitControl {
     if (!noCompute) {
       _scheduling.compute(Change.course);
     }
+    resetState();
   }
 
   /// Compute the result of splitting without implementing the split
