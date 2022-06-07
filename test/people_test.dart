@@ -19,8 +19,8 @@ void main() {
     expect(
         () => people.loadPeople('test/resources/malformed_people_columns.txt'),
         throwsA(allOf([
-          isA<MalformedPeopleFileException>(),
-          hasMessage('The people file is malformed: line 25')
+          isA<MalformedInputException>(),
+          hasMessage('Line 25: Expected 21 columns but got 20')
         ])));
   });
 

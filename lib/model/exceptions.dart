@@ -10,30 +10,6 @@ class DuplicateCourseCodeException implements Exception {
   }
 }
 
-/// Exception for incorrectly formatted course input file
-class MalformedCourseFileException implements Exception {
-  const MalformedCourseFileException({required this.malformedLine});
-
-  final int malformedLine;
-
-  @override
-  String toString() {
-    return 'The course file is malformed: line $malformedLine';
-  }
-}
-
-/// Exception for incorrectly formatted people input file
-class MalformedPeopleFileException implements Exception {
-  const MalformedPeopleFileException({required this.malformedLine});
-
-  final int malformedLine;
-
-  @override
-  String toString() {
-    return 'The people file is malformed: line $malformedLine';
-  }
-}
-
 /// Exception for unrecognized availability value
 class InvalidNumClassWantedException implements Exception {
   const InvalidNumClassWantedException(
@@ -155,7 +131,6 @@ class MinLargerThanMaxException implements Exception {
 }
 
 /// Exception for passing invalid argument
-// TODO: Move some of the above exceptions to invalid argument
 class InvalidArgument implements Exception {
   const InvalidArgument({required this.message});
 

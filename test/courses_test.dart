@@ -21,8 +21,8 @@ void main() {
         () =>
             courses.loadCourses('test/resources/malformed_course_columns.txt'),
         throwsA(allOf([
-          isA<MalformedCourseFileException>(),
-          hasMessage('The course file is malformed: line 1')
+          isA<MalformedInputException>(),
+          hasMessage('Line 1: expected 3 columns but got 2')
         ])));
   });
 
