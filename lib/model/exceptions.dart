@@ -177,3 +177,15 @@ class UnexpectedFatalException implements Exception {
   }
 // coverage:ignore-end
 }
+
+/// Exception for malformed inputs
+class MalformedInputException implements Exception {
+  MalformedInputException({required this.message});
+
+  final String message;
+
+  @override
+  String toString() {
+    return message;
+  }
+}

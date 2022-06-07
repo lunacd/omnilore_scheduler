@@ -15,8 +15,6 @@ class People {
   /// Load people from a text file
   ///
   /// Throws a [FileSystemException] when the given input file does not exist.
-  /// Throws a [MalformedPeopleFileException] when the input file has wrong
-  /// number of columns.
   /// Throws a [InvalidNumClassWantedException] when the input file specifies a
   /// number of classes wanted less than 0 or more than 6.
   /// Throws a [UnrecognizedAvailabilityException] when the input file specifies an
@@ -27,6 +25,7 @@ class People {
   /// than they listed.
   /// Throws a [ListingWhenWantingZeroException] when a member still listed
   /// classes when they want 0.
+  /// Throws a [MalformedInputException] when the input is malformed.
   ///
   /// Asynchronously returns the number of people successfully read.
   ///
@@ -45,7 +44,9 @@ class People {
       var tokens = line.split('\t').map((e) => e.trim()).toList();
       if (tokens.length != 21) {
         people.clear();
-        throw MalformedPeopleFileException(malformedLine: numLines + 1);
+        throw MalformedInputException(
+            message:
+                'Line ${numLines + 1}: Expected 21 columns but got ${tokens.length}');
       }
       var lName = tokens[0];
       var fName = tokens[1];

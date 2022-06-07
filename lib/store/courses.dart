@@ -37,10 +37,9 @@ class Courses {
   /// Loads courses from a text file
   ///
   /// Throws a [FileSystemException] when the given input file does not exist.
-  /// Throws a [MalformedCourseFileException] when the input file is incorrectly
-  /// formatted.
   /// Throws a [DuplicateCourseCodeException] when the input file specifies a
   /// course code more than once.
+  /// Throws a [MalformedInputException] when the input is malformed.
   ///
   /// Asynchronously returns the number of courses successfully read.
   ///
@@ -58,7 +57,9 @@ class Courses {
       var tokens = line.split('\t').map((e) => e.trim()).toList();
       if (tokens.length != 3) {
         _courses.clear();
-        throw MalformedCourseFileException(malformedLine: numLines + 1);
+        throw MalformedInputException(
+            message:
+                'Line ${numLines + 1}: expected 3 columns but got ${tokens.length}');
       }
       var code = tokens[0];
       var name = tokens[1];
