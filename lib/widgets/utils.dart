@@ -13,7 +13,6 @@ class Utils {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                const Text('Hint'),
                 Text(message),
               ],
             ),
