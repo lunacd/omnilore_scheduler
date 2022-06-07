@@ -189,7 +189,7 @@ class Scheduling {
           content += '${person.getReversedName()}\n';
         }
       }
-      if (course != courseControl.getGo().last) {
+      if (course != goCourses.last) {
         content += '\n\n';
       }
     }
@@ -224,7 +224,9 @@ class Scheduling {
         content += person.phone;
         content += '\n';
       }
-      content += '\n\n';
+      if (course != goCourses.last) {
+        content += '\n\n';
+      }
     }
     var output = File(path);
     output.writeAsStringSync(content);

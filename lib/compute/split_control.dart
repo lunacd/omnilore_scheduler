@@ -208,30 +208,14 @@ class SplitControl {
     return result;
   }
 
-  bool isClustured(String person) {
-    for (var clust in _clusters) {
-      if (clust.contains(person)) {
-        return true;
+  /// Get cluster index given a person's name
+  int getClusterIndex(String person) {
+    for (int i = 0; i < _clusters.length; i++) {
+      if (_clusters[i].contains(person)) {
+        return i;
       }
     }
-    return false;
-  }
-
-  bool validCluster(Set<String> cluster) {
-    return _clusters.contains(cluster);
-  }
-
-  Set<String>? getClustByPerson(String person) {
-    for (var cluster in _clusters) {
-      if (cluster.contains(person)) {
-        return cluster;
-      }
-    }
-    return null;
-  }
-
-  bool noClusters() {
-    return _clusters.isEmpty;
+    return -1;
   }
 
   /// Initializes _splitMatrix with people's can't attends

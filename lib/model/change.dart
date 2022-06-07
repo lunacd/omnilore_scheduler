@@ -1,1 +1,1 @@
-enum Change { course, people, drop, schedule }
+enum Change { course, people, drop, schedule, misc }

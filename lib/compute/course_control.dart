@@ -180,6 +180,7 @@ class CourseControl {
       _coordinatorsMap[course] = Coordinators(equal: false);
       _coordinatorsMap[course]!.coordinators[0] = name;
     }
+    _scheduling.compute(Change.misc);
   }
 
   /// Set equal coordinators
@@ -196,6 +197,7 @@ class CourseControl {
       _coordinatorsMap[course] = Coordinators(equal: true);
       _coordinatorsMap[course]!.coordinators[0] = name;
     }
+    _scheduling.compute(Change.misc);
   }
 
   /// Get coordinator for a course

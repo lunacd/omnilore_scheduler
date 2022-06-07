@@ -2,12 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
-import 'package:omnilore_scheduler/main.dart';
 import 'package:omnilore_scheduler/model/change.dart';
 import 'package:omnilore_scheduler/model/coordinators.dart';
+import 'package:omnilore_scheduler/model/state_of_processing.dart';
 import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:omnilore_scheduler/theme.dart';
+import 'package:omnilore_scheduler/widgets/class_name_display.dart';
 import 'package:omnilore_scheduler/widgets/class_size_control.dart';
 import 'package:omnilore_scheduler/widgets/names_display_mode.dart';
 import 'package:omnilore_scheduler/widgets/select_process.dart';
@@ -39,16 +40,16 @@ class _ScreenState extends State<Screen> {
   /// this is the main scheduling data structure that holds back end computation
   Scheduling schedule = Scheduling();
 
+  final GlobalKey<ClassNameDisplayState> _classNameDisplayKey = GlobalKey();
+
   int? numCourses;
   int? numPeople;
-  Map mainCoordinatorSelected = <String, bool>{};
-  Map coCoordinatorSelected = <String, bool>{};
-  Iterable<String> curClassRoster = [];
-  Map curSelected = <String, bool>{};
+  List<String> curClassRoster = [];
   List<List<String>> curClusters = [];
-  Map<Set<String>, Color> clustColors = <Set<String>, Color>{};
   List<bool> droppedList = List<bool>.filled(14, false, growable: true);
   List<int> scheduleData = List<int>.filled(14, -1, growable: false);
+  int mainSelected = 0;
+  int coSelected = 0;
 
   Color masterBackgroundColor = themeColors['WhiteBlue'];
   Color detailBackgroundColor = Colors.blueGrey[300] as Color;
@@ -148,14 +149,6 @@ class _ScreenState extends State<Screen> {
     }
   }
 
-  /// Get the description of a row
-  String _getRowDescription(RowType row) {
-    if (row == RowType.className) {
-      return _getRowDescription(RowType.resultingClass);
-    }
-    return overviewRows[row.index - 1];
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,21 +171,11 @@ class _ScreenState extends State<Screen> {
                       numCourses = await schedule.loadCourses(path);
                       droppedList =
                           List<bool>.filled(numCourses!, false, growable: true);
-                      // Setting the boolean map to check if main or coordinator
-                      // has been set
-                      for (var name in schedule.getCourseCodes()) {
-                        mainCoordinatorSelected[name] = false;
-                        coCoordinatorSelected[name] = false;
-                      }
                       compute(Change.course);
                     } catch (e) {
                       Utils.showPopUp(
                           context, 'Error loading courses', e.toString());
                     }
-                  } else {
-                    // ignore: todo
-                    //TODO: Add pop up box to show that the user canceled
-                    //user canceled
                   }
                 }
               },
@@ -236,8 +219,6 @@ class _ScreenState extends State<Screen> {
                           context, 'Error saving state', e.toString());
                     }
                   }
-                } else {
-                  //file picker canceled
                 }
               },
             ),
@@ -257,44 +238,22 @@ class _ScreenState extends State<Screen> {
                     print(path);
                   }
                   if (path != '') {
-                    try {
-                      if (kDebugMode) {
-                        print('its about to load');
-                      }
-                      setState(() {
+                    setState(() {
+                      try {
                         schedule.loadState(path);
-
-                        numCourses = schedule.getCourseCodes().length;
-                      });
-                      if (kDebugMode) {
-                        print('LOADINGGGGGGGGGGG\n');
+                        courses = schedule.getCourseCodes().toList();
+                        numCourses = courses.length;
+                        var dropped = schedule.courseControl.getDropped();
+                        droppedList = List<bool>.generate(
+                            numCourses!, (i) => dropped.contains(courses[i]));
+                      } catch (e) {
+                        Utils.showPopUp(
+                            context, 'Error loading state', e.toString());
                       }
-                    } catch (e) {
-                      Utils.showPopUp(
-                          context, 'Error loading state', e.toString());
-                    }
-                    //Coordinator code for load state
-                    for (var name in schedule.getCourseCodes()) {
-                      Coordinators? coordinator =
-                          schedule.courseControl.getCoordinators(name);
-                      if (coordinator != null) {
-                        if (coordinator.equal) {
-                          coCoordinatorSelected[name] = true;
-                          mainCoordinatorSelected[name] = false;
-                        } else {
-                          mainCoordinatorSelected[name] = true;
-                          coCoordinatorSelected[name] = false;
-                        }
-                        continue;
-                      }
-                      mainCoordinatorSelected[name] = false;
-                      coCoordinatorSelected[name] = false;
-                    }
+                    });
+                    compute(Change.course);
                   }
-                } else {
-                  //file picker canceled
                 }
-                compute(Change.course);
               },
             ),
             MenuListItem(
@@ -401,43 +360,77 @@ class _ScreenState extends State<Screen> {
                       switch (row) {
                         case RowType.className:
                           curClassRoster = schedule.overviewData
-                              .getPeopleForResultingClass(course);
+                              .getPeopleForResultingClass(course)
+                              .toList();
+                          // Update coordinator data
+                          Coordinators? coordinators =
+                              schedule.courseControl.getCoordinators(course);
+                          setState(() {
+                            if (coordinators == null) {
+                              mainSelected = 0;
+                              coSelected = 0;
+                            } else if (coordinators.equal) {
+                              mainSelected = 0;
+                              if (coordinators.coordinators[1].isNotEmpty) {
+                                coSelected = 2;
+                              } else {
+                                coSelected = 1;
+                              }
+                            } else {
+                              coSelected = 0;
+                              if (coordinators.coordinators[1].isNotEmpty) {
+                                mainSelected = 2;
+                              } else {
+                                mainSelected = 1;
+                              }
+                            }
+                          });
                           break;
                         case RowType.firstChoice:
                           curClassRoster = schedule.overviewData
-                              .getPeopleForClassRank(course, 0);
+                              .getPeopleForClassRank(course, 0)
+                              .toList();
                           break;
                         case RowType.firstBackup:
                           curClassRoster = schedule.overviewData
-                              .getPeopleForClassRank(course, 1);
+                              .getPeopleForClassRank(course, 1)
+                              .toList();
                           break;
                         case RowType.secondBackup:
                           curClassRoster = schedule.overviewData
-                              .getPeopleForClassRank(course, 2);
+                              .getPeopleForClassRank(course, 2)
+                              .toList();
                           break;
                         case RowType.thirdBackup:
                           curClassRoster = schedule.overviewData
-                              .getPeopleForClassRank(course, 3);
+                              .getPeopleForClassRank(course, 3)
+                              .toList();
                           break;
                         case RowType.addFromBackup:
                           curClassRoster = schedule.overviewData
-                              .getPeopleAddFromBackup(course);
+                              .getPeopleAddFromBackup(course)
+                              .toList();
                           break;
                         case RowType.dropBadTime:
-                          curClassRoster =
-                              schedule.overviewData.getPeopleDropTime(course);
+                          curClassRoster = schedule.overviewData
+                              .getPeopleDropTime(course)
+                              .toList();
                           break;
                         case RowType.dropDup:
-                          curClassRoster =
-                              schedule.overviewData.getPeopleDropDup(course);
+                          curClassRoster = schedule.overviewData
+                              .getPeopleDropDup(course)
+                              .toList();
                           break;
                         case RowType.dropFull:
-                          curClassRoster =
-                              schedule.overviewData.getPeopleDropFull(course);
+                          curClassRoster = schedule.overviewData
+                              .getPeopleDropFull(course)
+                              .toList();
                           break;
                         case RowType.resultingClass:
                           curClassRoster = schedule.overviewData
-                              .getPeopleForResultingClass(course);
+                              .getPeopleForResultingClass(course)
+                              .toList();
+                          schedule.splitControl.resetState();
                           break;
                         default:
                           break;
@@ -445,16 +438,11 @@ class _ScreenState extends State<Screen> {
 
                       currentClass = course;
                       schedule.splitControl.resetState();
-                      curSelected.clear();
-                      clustColors.clear();
                       currentRow = row;
                       List<String> tempList = curClassRoster.toList();
                       tempList.sort(
                           (a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
                       curClassRoster = tempList;
-                      for (var name in curClassRoster) {
-                        curSelected[name] = false;
-                      }
                     });
                   },
                   onDroppedChanged: (int i) {
@@ -477,18 +465,10 @@ class _ScreenState extends State<Screen> {
                       schedule.scheduleControl
                           .schedule(currentClass!, timeIndex);
 
-                      curSelected.clear();
-                      clustColors.clear();
                       List<String> tempList = curClassRoster.toList();
                       tempList.sort(
                           (a, b) => a.split(' ')[1].compareTo(b.split(' ')[1]));
                       curClassRoster = tempList;
-                      for (var name in curClassRoster) {
-                        curSelected[name] = false;
-                      }
-                      if (kDebugMode) {
-                        print(curClassRoster);
-                      }
                       compute(Change.schedule);
                     });
                   })
@@ -501,19 +481,15 @@ class _ScreenState extends State<Screen> {
 
   /// This is the base widget that holds everything in the UI that is not the datatable
   Widget _screen1() {
-    // ignore: sized_box_for_whitespace
-    return Container(
+    return SizedBox(
       height: 400,
       child: Row(
         children: [
           // State of processing widget and class name display widget
-          // ignore: sized_box_for_whitespace
-          Container(
+          SizedBox(
             width: MediaQuery.of(context).size.width / 2,
             child: Column(
               children: [
-                // ignore: todo
-                // TODO: Update this to a string that changes based on the state
                 Container(
                   width: double.infinity,
                   color: themeColors['MediumBlue'],
@@ -523,7 +499,12 @@ class _ScreenState extends State<Screen> {
                           fontSize: 25, fontWeight: FontWeight.bold)),
                 ),
                 Expanded(
-                  child: _classNameDisplay(),
+                  child: ClassNameDisplay(
+                      key: _classNameDisplayKey,
+                      currentClass: currentClass,
+                      currentRow: currentRow,
+                      people: curClassRoster,
+                      schedule: schedule),
                 )
               ],
             ),
@@ -556,93 +537,42 @@ class _ScreenState extends State<Screen> {
                             compute(Change.course);
                           }
                         : null,
-                    onShowCoords: _updateAndShowCO()
+                    onShowCoords: currentRow == RowType.className &&
+                            (schedule.getStateOfProcessing() ==
+                                    StateOfProcessing.coordinator ||
+                                schedule.getStateOfProcessing() ==
+                                    StateOfProcessing.output)
                         ? () {
-                            setState(() {
-                              Coordinators? coordinator = schedule.courseControl
-                                  .getCoordinators(currentClass!);
-                              if (coordinator != null) {
-                                List<String> coordinatorsList =
-                                    coordinator.coordinators;
-                                for (int i = 0;
-                                    i < coordinatorsList.length;
-                                    i++) {
-                                  if (coordinatorsList[i] != '') {
-                                    curSelected[coordinatorsList[i]] =
-                                        !curSelected[coordinatorsList[i]];
-                                  }
-                                }
-                              }
-                            });
+                            ClassNameDisplayState state =
+                                _classNameDisplayKey.currentState!;
+                            state.showCoordinators();
                           }
                         : null,
                     onSetC: currentRow == RowType.className &&
-                            stateDescriptions[
-                                    schedule.getStateOfProcessing().index] ==
-                                'Coordinator' &&
-                            (coCoordinatorSelected.containsKey(currentClass!)
-                                ? !coCoordinatorSelected[currentClass!]
-                                : false)
+                            schedule.getStateOfProcessing() ==
+                                StateOfProcessing.coordinator &&
+                            coSelected == 0 &&
+                            mainSelected < 2
                         ? () {
+                            ClassNameDisplayState state =
+                                _classNameDisplayKey.currentState!;
+                            state.setMainCoordinator();
                             setState(() {
-                              Iterable keysSelected = curSelected.keys.where(
-                                  (element) => curSelected[element] == true);
-                              if (keysSelected.length == 1) {
-                                for (var item in keysSelected) {
-                                  try {
-                                    schedule.courseControl.setMainCoCoordinator(
-                                        currentClass!, item);
-                                  } on Exception catch (e) {
-                                    Utils.showPopUp(context, 'Set C/CC error',
-                                        e.toString());
-                                  }
-                                }
-                                mainCoordinatorSelected[currentClass!] = true;
-                                curSelected.forEach((key, value) {
-                                  curSelected[key] = false;
-                                });
-                              } else {
-                                Utils.showPopUp(
-                                    context,
-                                    'Set coordinator error',
-                                    'Must select only one name at a time');
-                              }
+                              mainSelected += 1;
                             });
                           }
                         : null,
                     onSetCC: currentRow == RowType.className &&
-                            stateDescriptions[
-                                    schedule.getStateOfProcessing().index] ==
-                                'Coordinator' &&
-                            (mainCoordinatorSelected.containsKey(currentClass!)
-                                ? !mainCoordinatorSelected[currentClass!]
-                                : false)
+                            schedule.getStateOfProcessing() ==
+                                StateOfProcessing.coordinator &&
+                            mainSelected == 0 &&
+                            coSelected < 2
                         ? () {
+                            ClassNameDisplayState state =
+                                _classNameDisplayKey.currentState!;
+                            state.setCoCoordinator();
                             setState(() {
-                              Iterable keysSelected = curSelected.keys.where(
-                                  (element) => curSelected[element] == true);
-                              if (keysSelected.length == 1) {
-                                for (var item in keysSelected) {
-                                  try {
-                                    schedule.courseControl
-                                        .setEqualCoCoordinator(
-                                            currentClass!, item);
-                                  } on Exception catch (ex) {
-                                    if (kDebugMode) {
-                                      print(ex);
-                                    }
-                                  }
-                                }
-                                coCoordinatorSelected[currentClass!] = true;
-                                curSelected.forEach((key, value) {
-                                  curSelected[key] = false;
-                                });
-                              } else {
-                                Utils.showPopUp(
-                                    context,
-                                    'Select coordinator error',
-                                    'Must select only one name at a time');
-                              }
+                              coSelected += 1;
                             });
                           }
                         : null,
@@ -667,11 +597,9 @@ class _ScreenState extends State<Screen> {
                         courseTakers: courseTakers,
                         onUnmetWantsClicked: () {
                           setState(() {
-                            curClassRoster =
-                                schedule.overviewData.getPeopleUnmetWants();
-                            schedule.splitControl.resetState();
-                            curSelected.clear();
-                            clustColors.clear();
+                            curClassRoster = schedule.overviewData
+                                .getPeopleUnmetWants()
+                                .toList();
                           });
                         })),
               ],
@@ -680,163 +608,5 @@ class _ScreenState extends State<Screen> {
         ],
       ),
     );
-  }
-
-  /// Creates the class name display portion of the User interface. buttons referencing
-  /// clustering and current class roster is displayed here
-  Widget _classNameDisplay() {
-    return Container(
-      color: themeColors['MoreBlue'],
-      child: Column(children: [
-        Container(
-          alignment: Alignment.center,
-          child: const Text('CLASS NAMES DISPLAY',
-              style: TextStyle(fontStyle: FontStyle.normal, fontSize: 25)),
-        ),
-        Container(
-          alignment: Alignment.center,
-          child: const Text('Show constituents by clicking a desired cell.',
-              style: TextStyle(fontSize: 15)),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-                onPressed: currentRow == RowType.resultingClass
-                    ? () {
-                        setState(() {
-                          for (var item in curSelected.keys.where(
-                              (element) => curSelected[element] == true)) {
-                            schedule.splitControl.removeCluster(item);
-                          }
-                          curSelected.forEach((key, value) {
-                            curSelected[key] = false;
-                          });
-                        });
-                      }
-                    : null,
-                child: const Text('Dec Clust')),
-            ElevatedButton(
-                onPressed: currentRow == RowType.resultingClass
-                    ? () {
-                        setState(() {
-                          Set<String> result = <String>{};
-                          for (var item in curSelected.keys.where(
-                              (element) => curSelected[element] == true)) {
-                            result.add(item);
-                          }
-                          schedule.splitControl.addCluster(result);
-                          clustColors[result.toSet()] = _randomColor();
-                          curSelected.forEach((key, value) {
-                            curSelected[key] = false;
-                          });
-                          if (kDebugMode) {
-                            print(result);
-                          }
-                        });
-                      }
-                    : null,
-                child: const Text('Inc Clust')),
-            const ElevatedButton(onPressed: null, child: Text('Back')),
-            const ElevatedButton(onPressed: null, child: Text('Forward')),
-          ],
-        ),
-        Row(
-          children: [
-            if (currentRow != RowType.none)
-              Text(
-                '${_getRowDescription(currentRow)} of $currentClass',
-                style:
-                    const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-              )
-          ],
-          mainAxisAlignment: MainAxisAlignment.start,
-        ),
-        Wrap(
-          direction: Axis.horizontal,
-          children: [
-            for (var val in curClassRoster)
-              ElevatedButton(
-                  style: (() {
-                    if (curSelected[val] == true) {
-                      return ElevatedButton.styleFrom(
-                          primary: Colors.red, onPrimary: Colors.white);
-                    } else {
-                      if (schedule.splitControl.isClustured(val.toString()) ==
-                          true) {
-                        Color r = _getColorKey(val);
-                        return ElevatedButton.styleFrom(primary: r);
-                      } else {
-                        return ElevatedButton.styleFrom(primary: Colors.white);
-                      }
-                    }
-                  }()),
-                  onPressed: () {
-                    setState(() {
-                      if (curSelected[val]) {
-                        curSelected[val] = false;
-                      } else {
-                        curSelected[val] = true;
-                      }
-                    });
-                  },
-                  child: Text(
-                    val.toString(),
-                    style: (() {
-                      if (schedule.splitControl.isClustured(val) == true &&
-                          _getColorKey(val) == Colors.brown) {
-                        return const TextStyle(color: Colors.white);
-                      } else {
-                        const TextStyle(color: Colors.black);
-                      }
-                    }()),
-                  ))
-          ],
-        ),
-        Container(
-          color: Colors.white,
-        )
-      ]),
-    );
-  }
-
-  /// Returns a random color from the cluster colors list
-  Color _randomColor() {
-    colorNum++;
-    return clusterColors[colorNum % clusterColors.length];
-  }
-
-  /// given a person return its given clustering color. If this person is not in
-  /// a cluster it will return yellow
-  Color _getColorKey(String person) {
-    Set<String> test =
-        schedule.splitControl.getClustByPerson(person) ?? <String>{};
-    for (Set<String> item in clustColors.keys) {
-      if (item.length == test.length && test.containsAll(item)) {
-        return clustColors[item] ?? Colors.grey;
-      }
-    }
-    return Colors.yellow;
-  }
-
-  bool _updateAndShowCO() {
-    List<String> classes = schedule.getCourseCodes().toList();
-    if (stateDescriptions[schedule.getStateOfProcessing().index] ==
-        'Schedule') {
-      mainCoordinatorSelected.clear();
-      coCoordinatorSelected.clear();
-      for (var name in classes) {
-        mainCoordinatorSelected[name] = false;
-        coCoordinatorSelected[name] = false;
-      }
-    }
-
-    return currentRow == RowType.className &&
-        (stateDescriptions[schedule.getStateOfProcessing().index] ==
-                'Coordinator' ||
-            stateDescriptions[schedule.getStateOfProcessing().index] ==
-                'Output') &&
-        (mainCoordinatorSelected[currentClass!] ||
-            coCoordinatorSelected[currentClass!]);
   }
 }
