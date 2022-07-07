@@ -25,6 +25,11 @@ jobs:
       - run:
           name: Run build
           command: "flutter build macos"
+      - run:
+          name: Compress Artifacts
+          command: tar -cvzf macos.tar.gz build/macos/x64/release/bundle
+      - store_artifacts:
+          path: macos.tar.gz
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
