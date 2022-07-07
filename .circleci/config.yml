@@ -26,11 +26,8 @@ jobs:
           name: Run build
           command: "flutter build macos"
       - run:
-          name: Prob dir
-          command: ls build && ls build/macos && ls build/macos/x64 ls build/macos/x64/release
-      - run:
           name: Compress Artifacts
-          command: tar -cvzf macos.tar.gz build/macos/x64/release/bundle
+          command: tar -cvzf macos.tar.gz build/macos/Build
       - store_artifacts:
           path: macos.tar.gz
 
