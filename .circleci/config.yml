@@ -3,12 +3,13 @@
 version: 2.1
 
 orbs:
+  win: circleci/windows@4.1.1
   flutter: circleci/flutter@1.1
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build:
+  build_macos:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     macos:
@@ -21,19 +22,40 @@ jobs:
           flutter_version: 2.10.5
       - run:
           name: Enable desktop
-          command: "flutter config --enable-macos-desktop"
+          command: flutter config --enable-macos-desktop
       - run:
           name: Run build
-          command: "flutter build macos"
+          command: flutter build macos
       - run:
           name: Compress Artifacts
-          command: tar -cvzf macos.tar.gz build/macos/Build
+          command: tar -C build/macos/Build/Products/Release -cvzf macos.tar.gz .
       - store_artifacts:
           path: macos.tar.gz
+  build_windows:
+    executor: win/default
+    steps:
+      - checkout
+      - flutter/install_sdk_and_pub:
+          flutter_version: 2.10.5
+      - run:
+          name: Enable desktop
+          command: flutter config --enable-windows-desktop
+      - run:
+          name: Run build
+          command: flutter build windows
+      - run:
+          name: Prob dir
+          command: ls build && ls build/windows && ls build/windows/x64
+      # - run:
+      #     name: Compress Artifacts
+      #     command: tar -C build/macos/Build/Products/Release -cvzf macos.tar.gz .
+      # - store_artifacts:
+      #     path: macos.tar.gz
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   build:
     jobs:
-      - build
+      - build_macos
+      - build_windows
