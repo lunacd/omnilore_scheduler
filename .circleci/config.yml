@@ -27,6 +27,16 @@ jobs:
           key: flutter-2.10.5-{{ arch }}
           paths:
             - ~/development
+      - restore_cache:
+          keys:
+            - 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
+      - run:
+          name: Install Dependencies
+          command: flutter pub get
+      - save_cache:
+          paths:
+            - ./.dart_tool
+          key: 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
       - run:
           name: Enable desktop
           command: flutter config --enable-macos-desktop
@@ -42,8 +52,34 @@ jobs:
     executor: win/default
     steps:
       - checkout
-      - flutter/install_sdk_and_pub:
-          flutter_version: 2.10.5
+      - restore_cache:
+          keys:
+            - flutter-2.10.5-{{ arch }}
+      - run:
+          name: Install Flutter SDK if not exists
+          command: |
+            if [ ! -d ~/development/flutter ]; then
+              mkdir -p ~/development
+              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.10.5-stable.zip
+              unzip -qq flutter_sdk.zip -d ~/development
+            fi
+            echo 'export PATH=~/development/flutter/bin:$PATH' >> $BASH_ENV
+      - run: flutter doctor
+      - save_cache:
+          key: flutter-2.10.5-{{ arch }}
+          paths:
+            - ~/development
+      - restore_cache:
+          keys:
+            - 'pub-<<parameters.cache-version>>-{{ checksum "<< parameters.app-dir >>/pubspec.lock" }}-{{ arch }}'
+      - run:
+          name: Install Dependencies
+          command: flutter pub get
+          working_directory: <<parameters.app-dir>>
+      - save_cache:
+          paths:
+            - <<parameters.app-dir>>/.dart_tool
+          key: 'pub-<<parameters.cache-version>>-{{ checksum "<< parameters.app-dir >>/pubspec.lock" }}-{{ arch }}'
       - run:
           name: Enable desktop
           command: flutter config --enable-windows-desktop
