@@ -76,7 +76,7 @@ jobs:
             - ~\development
       - restore_cache:
           keys:
-            - 'pub-{{ checksum ".\pubspec.lock" }}-{{ arch }}'
+            - 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
       - run:
           name: Install Dependencies
           command: flutter pub get
@@ -84,7 +84,7 @@ jobs:
       - save_cache:
           paths:
             - .\.dart_tool
-          key: 'pub-{{ checksum ".\pubspec.lock" }}-{{ arch }}'
+          key: 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
       - run:
           name: Enable desktop
           command: flutter config --enable-windows-desktop
@@ -96,6 +96,7 @@ jobs:
       - run:
           name: Prob dir
           command: ls build && ls build\windows && ls build\windows\x64
+          shell: bash.exe
       # - run:
       #     name: Compress Artifacts
       #     command: tar -C build/macos/Build/Products/Release -cvzf macos.tar.gz .
