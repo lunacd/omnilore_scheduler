@@ -59,36 +59,38 @@ jobs:
       - run:
           name: Install Flutter SDK if not exists
           command: |
-            if (!(Test-Path ~\development\flutter -PathType Container)) {
-              New-Item ~\development -ItemType Directory
-              Invoke-WebRequest -Uri https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_2.10.5-stable.zip -OutFile flutter_sdk.zip
-              Expand-Archive -LiteralPath flutter_sdk.zip -DestinationPath ~/development
-              Remove-Item flutter_sdk.zip
-            }
-      - run: ~/development/flutter/bin/flutter doctor
+            if [ ! -d ~/development/flutter ]; then
+              mkdir -p ~/development
+              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_2.10.5-stable.zip
+              unzip -qq flutter_sdk.zip -d ~/development
+              rm flutter_sdk.zip
+            fi
+            echo 'export PATH=~/development/flutter/bin:$PATH' >> $BASH_ENV
+          shell: bash.exe
+      - run: ~\development\flutter\bin\flutter.exe doctor
       - save_cache:
           key: flutter-2.10.5-{{ arch }}
           paths:
-            - ~/development
+            - ~\development
       - restore_cache:
           keys:
-            - 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
+            - 'pub-{{ checksum ".\pubspec.lock" }}-{{ arch }}'
       - run:
           name: Install Dependencies
-          command: flutter pub get
+          command: ~\development\flutter\bin\flutter.exe pub get
       - save_cache:
           paths:
-            - ./.dart_tool
-          key: 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
+            - .\.dart_tool
+          key: 'pub-{{ checksum ".\pubspec.lock" }}-{{ arch }}'
       - run:
           name: Enable desktop
-          command: flutter config --enable-windows-desktop
+          command: ~\development\flutter\bin\flutter.exe config --enable-windows-desktop
       - run:
           name: Run build
-          command: flutter build windows
+          command: ~\development\flutter\bin\flutter.exe build windows
       - run:
           name: Prob dir
-          command: ls build && ls build/windows && ls build/windows/x64
+          command: ls build && ls build\windows && ls build\windows\x64
       # - run:
       #     name: Compress Artifacts
       #     command: tar -C build/macos/Build/Products/Release -cvzf macos.tar.gz .
