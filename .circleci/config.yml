@@ -95,7 +95,7 @@ jobs:
           shell: bash.exe
       - run:
           name: Compress Artifacts
-          command: tar -C build\windows -cvzf windows.tar.gz .
+          command: tar -C build\windows\runner\Release -cvzf windows.tar.gz .
       - store_artifacts:
           path: windows.tar.gz
 
@@ -104,4 +104,5 @@ jobs:
 workflows:
   build:
     jobs:
+      - build_macos
       - build_windows
