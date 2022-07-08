@@ -20,6 +20,7 @@ jobs:
               mkdir -p ~/development
               curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.10.5-stable.zip
               unzip -qq flutter_sdk.zip -d ~/development
+              rm flutter_sdk.zip
             fi
             echo 'export PATH=~/development/flutter/bin:$PATH' >> $BASH_ENV
       - run: flutter doctor
@@ -58,28 +59,27 @@ jobs:
       - run:
           name: Install Flutter SDK if not exists
           command: |
-            if [ ! -d ~/development/flutter ]; then
-              mkdir -p ~/development
-              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.10.5-stable.zip
-              unzip -qq flutter_sdk.zip -d ~/development
-            fi
-            echo 'export PATH=~/development/flutter/bin:$PATH' >> $BASH_ENV
-      - run: flutter doctor
+            if (Test-Path ~\development\flutter -PathType Container ) {
+              New-Item ~\development -ItemType Directory
+              Invoke-WebRequest -Uri https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_2.10.5-stable.zip -OutFile flutter_sdk.zip            
+              Expand-Archive -LiteralPath flutter_sdk.zip -DestinationPath ~/development
+              Remove-Item flutter_sdk.zip
+            }
+      - run: ~/development/flutter/bin/flutter doctor
       - save_cache:
           key: flutter-2.10.5-{{ arch }}
           paths:
             - ~/development
       - restore_cache:
           keys:
-            - 'pub-<<parameters.cache-version>>-{{ checksum "<< parameters.app-dir >>/pubspec.lock" }}-{{ arch }}'
+            - 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
       - run:
           name: Install Dependencies
           command: flutter pub get
-          working_directory: <<parameters.app-dir>>
       - save_cache:
           paths:
-            - <<parameters.app-dir>>/.dart_tool
-          key: 'pub-<<parameters.cache-version>>-{{ checksum "<< parameters.app-dir >>/pubspec.lock" }}-{{ arch }}'
+            - ./.dart_tool
+          key: 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
       - run:
           name: Enable desktop
           command: flutter config --enable-windows-desktop
@@ -101,3 +101,4 @@ workflows:
   build:
     jobs:
       - build_macos
+      - build_windows
