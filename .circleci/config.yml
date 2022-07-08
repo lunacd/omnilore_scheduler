@@ -1,0 +1,108 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@4.1.1
+
+jobs:
+  build_macos:
+    macos:
+      xcode: 12.5.1
+    steps:
+      - checkout
+      # Steps adapted from the official flutter orb
+      - restore_cache:
+          keys:
+            - flutter-2.10.5-{{ arch }}
+      - run:
+          name: Install Flutter SDK if not exists
+          command: |
+            if [ ! -d ~/development/flutter ]; then
+              mkdir -p ~/development
+              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.10.5-stable.zip
+              unzip -qq flutter_sdk.zip -d ~/development
+              rm flutter_sdk.zip
+            fi
+            echo 'export PATH=~/development/flutter/bin:$PATH' >> $BASH_ENV
+      - run: flutter doctor
+      - save_cache:
+          key: flutter-2.10.5-{{ arch }}
+          paths:
+            - ~/development
+      - restore_cache:
+          keys:
+            - 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
+      - run:
+          name: Install Dependencies
+          command: flutter pub get
+      - save_cache:
+          paths:
+            - ./.dart_tool
+          key: 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
+      - run:
+          name: Enable desktop
+          command: flutter config --enable-macos-desktop
+      - run:
+          name: Run build
+          command: flutter build macos
+      - run:
+          name: Compress Artifacts
+          command: tar -C build/macos/Build/Products/Release -cvzf macos.tar.gz .
+      - store_artifacts:
+          path: macos.tar.gz
+  build_windows:
+    executor: win/default
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - flutter-2.10.5-{{ arch }}
+      - run:
+          name: Install Flutter SDK if not exists
+          command: |
+            if [ ! -d ~/development/flutter ]; then
+              mkdir -p ~/development
+              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_2.10.5-stable.zip
+              unzip -qq flutter_sdk.zip -d ~/development
+              rm flutter_sdk.zip
+            fi
+            echo 'export PATH=~/development/flutter/bin:$PATH' >> $BASH_ENV
+          shell: bash.exe
+      - run:
+          command: flutter doctor
+          shell: bash.exe
+      - save_cache:
+          key: flutter-2.10.5-{{ arch }}
+          paths:
+            - ~\development
+      - restore_cache:
+          keys:
+            - 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
+      - run:
+          name: Install Dependencies
+          command: flutter pub get
+          shell: bash.exe
+      - save_cache:
+          paths:
+            - .\.dart_tool
+          key: 'pub-{{ checksum "./pubspec.lock" }}-{{ arch }}'
+      - run:
+          name: Enable desktop
+          command: flutter config --enable-windows-desktop
+          shell: bash.exe
+      - run:
+          name: Run build
+          command: flutter build windows
+          shell: bash.exe
+      - run:
+          name: Compress Artifacts
+          command: tar -C build\windows\runner\Release -cvzf windows.tar.gz .
+      - store_artifacts:
+          path: windows.tar.gz
+
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  build:
+    jobs:
+      - build_macos
+      - build_windows
