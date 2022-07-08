@@ -94,14 +94,10 @@ jobs:
           command: flutter build windows
           shell: bash.exe
       - run:
-          name: Prob dir
-          command: ls build && ls build\windows && ls build\windows\x64
-          shell: bash.exe
-      # - run:
-      #     name: Compress Artifacts
-      #     command: tar -C build/macos/Build/Products/Release -cvzf macos.tar.gz .
-      # - store_artifacts:
-      #     path: macos.tar.gz
+          name: Compress Artifacts
+          command: tar -C build\windows -cvzf windows.tar.gz .
+      - store_artifacts:
+          path: windows.tar.gz
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
