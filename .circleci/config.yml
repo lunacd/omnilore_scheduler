@@ -67,7 +67,9 @@ jobs:
             fi
             echo 'export PATH=~/development/flutter/bin:$PATH' >> $BASH_ENV
           shell: bash.exe
-      - run: ~\development\flutter\bin\flutter.exe doctor
+      - run:
+          command: flutter doctor
+          shell: bash.exe
       - save_cache:
           key: flutter-2.10.5-{{ arch }}
           paths:
@@ -77,17 +79,20 @@ jobs:
             - 'pub-{{ checksum ".\pubspec.lock" }}-{{ arch }}'
       - run:
           name: Install Dependencies
-          command: ~\development\flutter\bin\flutter.exe pub get
+          command: flutter pub get
+          shell: bash.exe
       - save_cache:
           paths:
             - .\.dart_tool
           key: 'pub-{{ checksum ".\pubspec.lock" }}-{{ arch }}'
       - run:
           name: Enable desktop
-          command: ~\development\flutter\bin\flutter.exe config --enable-windows-desktop
+          command: flutter config --enable-windows-desktop
+          shell: bash.exe
       - run:
           name: Run build
-          command: ~\development\flutter\bin\flutter.exe build windows
+          command: flutter build windows
+          shell: bash.exe
       - run:
           name: Prob dir
           command: ls build && ls build\windows && ls build\windows\x64
