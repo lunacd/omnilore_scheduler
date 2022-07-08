@@ -72,6 +72,7 @@ class People {
             firstChoices: firstChoices,
             backups: backups,
             submissionOrder: submissionOrder));
+        continue;
       }
       if (numClassWanted < 0 || numClassWanted > 6) {
         throw InvalidNumClassWantedException(
