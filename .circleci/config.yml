@@ -61,7 +61,7 @@ jobs:
           command: |
             if (!(Test-Path ~\development\flutter -PathType Container)) {
               New-Item ~\development -ItemType Directory
-              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_2.10.5-stable.zip
+              Invoke-WebRequest -Uri https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_2.10.5-stable.zip -OutFile flutter_sdk.zip
               Expand-Archive -LiteralPath flutter_sdk.zip -DestinationPath ~/development
               Remove-Item flutter_sdk.zip
             }
