@@ -236,7 +236,11 @@ class Scheduling {
   void outputMM(String path) {
     if (getStateOfProcessing() != StateOfProcessing.output) return;
     Map<String, List<String>> coursesGiven = {};
-    for (var person in _people.people.keys) {
+    var entriesSorted = _people.people.entries.toList(growable: false);
+    entriesSorted.sort((a, b) =>
+        a.value.getReversedName().compareTo(b.value.getReversedName()));
+    var peopleSorted = entriesSorted.map((entry) => entry.key);
+    for (var person in peopleSorted) {
       coursesGiven[person] = <String>[];
     }
     for (var course in courseControl.getGo()) {
@@ -250,7 +254,7 @@ class Scheduling {
     output.writeAsStringSync('');
 
     // Output one line for each person
-    for (var person in _people.people.keys) {
+    for (var person in peopleSorted) {
       var line = List<String>.generate(33, (_) => '');
       line[0] = person;
       var personData = _people.people[person]!;
@@ -296,7 +300,7 @@ class Scheduling {
         }
         line[17 + i * 3] = courseData.reading;
       }
-      output.writeAsStringSync(line.join('\t'), mode: FileMode.append);
+      output.writeAsStringSync(line.join('\t') + '\n', mode: FileMode.append);
     }
   }
 
