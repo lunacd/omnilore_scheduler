@@ -249,6 +249,7 @@ class Scheduling {
         coursesGiven[person]!.add(course);
       }
     }
+    var dropped = courseControl.getDropped();
     var output = File(path);
     // This truncates existing file
     output.writeAsStringSync('');
@@ -279,7 +280,14 @@ class Scheduling {
           line[4 + i * 2] = 'OK';
           countGot += 1;
         } else if (countGot < personData.nbrClassWanted) {
-          line[4 + i * 2] = 'Dropped';
+          if (dropped.contains(course)) {
+            line[4 + i * 2] = 'Dropped';
+          } else if (!personData
+              .availability[scheduleControl.scheduledTimeFor(course)]) {
+            line[4 + i * 2] = 'Time Conflict';
+          } else {
+            line[4 + i * 2] = 'Class Conflict';
+          }
         } else {
           line[4 + i * 2] = 'Not needed';
         }
