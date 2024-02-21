@@ -30,6 +30,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.PA_TOKEN }}
-          external_repository: andyliuhaowen/omnilore_documentation
+          external_repository: lunacd/omnilore_documentation
           publish_branch: main
           publish_dir: ./doc/api
