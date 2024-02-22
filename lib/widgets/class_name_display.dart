@@ -172,6 +172,7 @@ class ClassNameDisplayState extends State<ClassNameDisplay> {
           ],
         ),
         Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             if (widget.currentRow != RowType.none)
               Text(
@@ -180,7 +181,6 @@ class ClassNameDisplayState extends State<ClassNameDisplay> {
                     const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
               )
           ],
-          mainAxisAlignment: MainAxisAlignment.start,
         ),
         Wrap(
           direction: Axis.horizontal,
@@ -190,15 +190,17 @@ class ClassNameDisplayState extends State<ClassNameDisplay> {
                   style: (() {
                     if (_selected[i] == true) {
                       return ElevatedButton.styleFrom(
-                          primary: Colors.red, onPrimary: Colors.white);
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.red);
                     } else {
                       int clusterIndex = widget.schedule.splitControl
                           .getClusterIndex(widget.people[i]);
                       if (clusterIndex == -1) {
-                        return ElevatedButton.styleFrom(primary: Colors.white);
+                        return ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white);
                       } else {
                         return ElevatedButton.styleFrom(
-                            primary: clusterColors[
+                            backgroundColor: clusterColors[
                                 clusterIndex % clusterColors.length]);
                       }
                     }

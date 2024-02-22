@@ -27,9 +27,10 @@ class OverviewData extends StatelessWidget {
       color: themeColors['LightBlue'],
       constraints: const BoxConstraints.expand(),
       child: DefaultTextStyle(
+        style: const TextStyle(fontSize: 20, color: Colors.black),
         child: Column(
           children: [
-            Text('\nCourse Takers $courseTakers'),
+            Text('Course Takers $courseTakers'),
             Text('Go Courses $goCourses'),
             Text('Places Asked $placesAsked'),
             Text('Places Given $placesGiven'),
@@ -43,7 +44,6 @@ class OverviewData extends StatelessWidget {
             const Text('Missing 0'),
           ],
         ),
-        style: const TextStyle(fontSize: 20, color: Colors.black),
       ),
     );
   }

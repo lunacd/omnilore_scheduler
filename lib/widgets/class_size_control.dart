@@ -6,7 +6,7 @@ import 'package:omnilore_scheduler/scheduling.dart';
 import 'package:omnilore_scheduler/theme.dart';
 import 'package:omnilore_scheduler/widgets/utils.dart';
 
-const modeDescriptions = <String>['spliting', 'limiting'];
+const modeDescriptions = <String>['splitting', 'limiting'];
 
 class ClassSizeControl extends StatefulWidget {
   const ClassSizeControl(
@@ -90,8 +90,8 @@ class ClassSizeControlState extends State<ClassSizeControl> {
                           color: Colors.black))),
             ],
           ),
-          Row(
-            children: const [
+          const Row(
+            children: [
               SizedBox(height: 10),
             ],
           ),
@@ -134,8 +134,8 @@ class ClassSizeControlState extends State<ClassSizeControl> {
         hint: Text(course),
         items: (<String>['ALL'].followedBy(widget.courses)).map((String value) {
           return DropdownMenuItem(
-            child: Text(value),
             value: value,
+            child: Text(value),
           );
         }).toList(),
         onChanged: (String? newValue) {
@@ -198,7 +198,7 @@ class ClassSizeControlState extends State<ClassSizeControl> {
       } else {
         String error;
         if (minValue == '' || maxValue == '') {
-          error = 'Please enter a value for bothmin and max';
+          error = 'Please enter a value for both min and max';
         } else {
           error = 'Please import courses first';
         }

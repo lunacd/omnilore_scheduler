@@ -308,7 +308,7 @@ class Scheduling {
         }
         line[17 + i * 3] = courseData.reading;
       }
-      output.writeAsStringSync(line.join('\t') + '\n', mode: FileMode.append);
+      output.writeAsStringSync('${line.join('\t')}\n', mode: FileMode.append);
     }
   }
 

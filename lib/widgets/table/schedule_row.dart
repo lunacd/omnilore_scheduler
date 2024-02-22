@@ -40,7 +40,6 @@ class ScheduleRow extends TableRow {
                   children: <Widget>[Text(scheduleRows[timeIndex])])),
           for (int i = 0; i < data.length; i++)
             TextButton(
-              child: Text(data[i].toString()),
               onPressed: droppedList[i] == false &&
                       (state == StateOfProcessing.schedule ||
                           state == StateOfProcessing.coordinator ||
@@ -51,11 +50,12 @@ class ScheduleRow extends TableRow {
                   : null,
               style: (() {
                 if (scheduleData[i] == timeIndex) {
-                  return ElevatedButton.styleFrom(primary: Colors.red);
+                  return ElevatedButton.styleFrom(backgroundColor: Colors.red);
                 } else {
-                  return ElevatedButton.styleFrom(primary: Colors.transparent);
+                  return ElevatedButton.styleFrom(backgroundColor: Colors.transparent);
                 }
               }()),
+              child: Text(data[i].toString()),
             )
         ]);
 }

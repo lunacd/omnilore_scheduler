@@ -33,7 +33,7 @@ class Screen extends StatefulWidget {
   const Screen({Key? key}) : super(key: key);
 
   @override
-  _ScreenState createState() => _ScreenState();
+  State<Screen> createState() => _ScreenState();
 }
 
 class _ScreenState extends State<Screen> {
@@ -173,8 +173,10 @@ class _ScreenState extends State<Screen> {
                           List<bool>.filled(numCourses!, false, growable: true);
                       compute(Change.course);
                     } catch (e) {
-                      Utils.showPopUp(
-                          context, 'Error loading courses', e.toString());
+                      if (context.mounted) {
+                        Utils.showPopUp(
+                            context, 'Error loading courses', e.toString());
+                      }
                     }
                   }
                 }
@@ -194,8 +196,10 @@ class _ScreenState extends State<Screen> {
                     try {
                       numPeople = await schedule.loadPeople(path);
                     } catch (e) {
-                      Utils.showPopUp(
-                          context, 'Error loading people', e.toString());
+                      if (context.mounted) {
+                        Utils.showPopUp(
+                            context, 'Error loading people', e.toString());
+                      }
                     }
                   }
                 } else {
@@ -215,8 +219,10 @@ class _ScreenState extends State<Screen> {
                     try {
                       schedule.exportState(path);
                     } catch (e) {
-                      Utils.showPopUp(
-                          context, 'Error saving state', e.toString());
+                      if (context.mounted) {
+                        Utils.showPopUp(
+                            context, 'Error saving state', e.toString());
+                      }
                     }
                   }
                 }
@@ -266,8 +272,10 @@ class _ScreenState extends State<Screen> {
                       try {
                         schedule.outputRosterPhone(path);
                       } catch (e) {
-                        Utils.showPopUp(context, 'Error exporting early roster',
-                            e.toString());
+                        if (context.mounted) {
+                          Utils.showPopUp(context,
+                              'Error exporting early roster', e.toString());
+                        }
                       }
                     }
                   } else {
@@ -286,8 +294,10 @@ class _ScreenState extends State<Screen> {
                         }
                         schedule.outputRosterCC(path);
                       } catch (e) {
-                        Utils.showPopUp(context,
-                            'Error exporting roster with CC', e.toString());
+                        if (context.mounted) {
+                          Utils.showPopUp(context,
+                              'Error exporting roster with CC', e.toString());
+                        }
                       }
                     }
                   } else {
@@ -304,8 +314,10 @@ class _ScreenState extends State<Screen> {
                     try {
                       schedule.outputMM(path);
                     } catch (e) {
-                      Utils.showPopUp(
-                          context, 'Error exporting MailMerge', e.toString());
+                      if (context.mounted) {
+                        Utils.showPopUp(
+                            context, 'Error exporting MailMerge', e.toString());
+                      }
                     }
                   }
                 } else {

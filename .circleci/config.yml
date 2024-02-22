@@ -12,20 +12,20 @@ jobs:
       # Steps adapted from the official flutter orb
       - restore_cache:
           keys:
-            - flutter-2.10.5-{{ arch }}
+            - flutter-3.19.1-{{ arch }}
       - run:
           name: Install Flutter SDK if not exists
           command: |
             if [ ! -d ~/development/flutter ]; then
               mkdir -p ~/development
-              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.10.5-stable.zip
+              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.19.1-stable.zip
               unzip -qq flutter_sdk.zip -d ~/development
               rm flutter_sdk.zip
             fi
             echo 'export PATH=~/development/flutter/bin:$PATH' >> $BASH_ENV
       - run: flutter doctor
       - save_cache:
-          key: flutter-2.10.5-{{ arch }}
+          key: flutter-3.19.1-{{ arch }}
           paths:
             - ~/development
       - restore_cache:
@@ -55,13 +55,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - flutter-2.10.5-{{ arch }}
+            - flutter-3.19.1-{{ arch }}
       - run:
           name: Install Flutter SDK if not exists
           command: |
             if [ ! -d ~/development/flutter ]; then
               mkdir -p ~/development
-              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_2.10.5-stable.zip
+              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_3.19.1-stable.zip
               unzip -qq flutter_sdk.zip -d ~/development
               rm flutter_sdk.zip
             fi
@@ -71,7 +71,7 @@ jobs:
           command: flutter doctor
           shell: bash.exe
       - save_cache:
-          key: flutter-2.10.5-{{ arch }}
+          key: flutter-3.19.1-{{ arch }}
           paths:
             - ~\development
       - restore_cache:
@@ -95,7 +95,7 @@ jobs:
           shell: bash.exe
       - run:
           name: Compress Artifacts
-          command: tar -C build\windows\runner\Release -cvzf windows.tar.gz .
+          command: tar -C build\windows\x64\runner\Release -cvzf windows.tar.gz .
       - store_artifacts:
           path: windows.tar.gz
 
