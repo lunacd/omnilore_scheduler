@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
@@ -161,8 +160,8 @@ class _ScreenState extends State<Screen> {
               icon: Icons.open_in_new,
               title: 'Import Course',
               onPressed: () async {
-                FilePickerResult? result =
-                    await FilePicker.platform.pickFiles();
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom, allowedExtensions: ['txt']);
 
                 if (result != null) {
                   String path = result.files.single.path ?? '';
@@ -187,8 +186,8 @@ class _ScreenState extends State<Screen> {
               title: 'Import People',
               icon: Icons.open_in_new,
               onPressed: () async {
-                FilePickerResult? result =
-                    await FilePicker.platform.pickFiles();
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom, allowedExtensions: ['txt']);
 
                 if (result != null) {
                   String path = result.files.single.path ?? '';
@@ -212,7 +211,8 @@ class _ScreenState extends State<Screen> {
             MenuListItem(
               title: 'Save',
               onPressed: () async {
-                String? path = await FilePicker.platform.saveFile();
+                String? path = await FilePicker.platform.saveFile(
+                    type: FileType.custom, allowedExtensions: ['txt']);
 
                 if (path != null) {
                   if (path != '') {
@@ -232,17 +232,11 @@ class _ScreenState extends State<Screen> {
               title: 'Load',
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, ctrl: true),
               onPressed: () async {
-                FilePickerResult? result =
-                    await FilePicker.platform.pickFiles();
-                if (kDebugMode) {
-                  print('FILE PICKED');
-                }
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom, allowedExtensions: ['txt']);
 
                 if (result != null) {
                   String path = result.files.single.path ?? '';
-                  if (kDebugMode) {
-                    print(path);
-                  }
                   if (path != '') {
                     setState(() {
                       try {
@@ -265,7 +259,8 @@ class _ScreenState extends State<Screen> {
             MenuListItem(
                 title: 'Export Early Roster',
                 onPressed: () async {
-                  String? path = await FilePicker.platform.saveFile();
+                  String? path = await FilePicker.platform.saveFile(
+                      type: FileType.custom, allowedExtensions: ['txt']);
 
                   if (path != null) {
                     if (path != '') {
@@ -285,29 +280,24 @@ class _ScreenState extends State<Screen> {
             MenuListItem(
                 title: 'Export Final Roster',
                 onPressed: () async {
-                  String? path = await FilePicker.platform.saveFile();
-                  if (path != null) {
-                    if (path != '') {
-                      try {
-                        if (kDebugMode) {
-                          print('name of file $path');
-                        }
-                        schedule.outputRosterCC(path);
-                      } catch (e) {
-                        if (context.mounted) {
-                          Utils.showPopUp(context,
-                              'Error exporting roster with CC', e.toString());
-                        }
+                  String? path = await FilePicker.platform.saveFile(
+                      type: FileType.custom, allowedExtensions: ['txt']);
+                  if (path != null && path.isNotEmpty) {
+                    try {
+                      schedule.outputRosterCC(path);
+                    } catch (e) {
+                      if (context.mounted) {
+                        Utils.showPopUp(context,
+                            'Error exporting roster with CC', e.toString());
                       }
                     }
-                  } else {
-                    //file picker canceled
                   }
                 }),
             MenuListItem(
               title: 'Export MailMerge',
               onPressed: () async {
-                String? path = await FilePicker.platform.saveFile();
+                String? path = await FilePicker.platform.saveFile(
+                    type: FileType.custom, allowedExtensions: ['txt']);
 
                 if (path != null) {
                   if (path != '') {

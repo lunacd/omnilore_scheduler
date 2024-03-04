@@ -37,10 +37,13 @@ const List<Color> clusterColors = [
 int colorNum = 0;
 
 void main() async {
+  // Initialize widgets
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
     await DesktopWindow.setMinWindowSize(const Size(1400, 500));
   }
+
+  // Start app
   runApp(const MyApp());
 }
 
@@ -52,7 +55,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Omnilore Demo',
+      title: 'Omnilore Scheduler',
       theme: ThemeData(
         primarySwatch: primaryBlack,
         textButtonTheme: TextButtonThemeData(
