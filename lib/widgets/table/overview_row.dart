@@ -11,6 +11,7 @@ enum RowType {
   dropDup,
   dropFull,
   resultingClass,
+  unmetWants,
   none,
 }
 

@@ -174,11 +174,16 @@ class ClassNameDisplayState extends State<ClassNameDisplay> {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            if (widget.currentRow != RowType.none)
+            if (widget.currentRow == RowType.unmetWants)
+              const Text(
+                'Unmet Wants',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              )
+            else if (widget.currentRow != RowType.none)
               Text(
                 '${_getRowDescription(widget.currentRow)} of ${widget.currentClass}',
                 style:
-                    const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               )
           ],
         ),

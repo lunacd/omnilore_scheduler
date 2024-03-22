@@ -602,6 +602,7 @@ class _ScreenState extends State<Screen> {
                             curClassRoster = schedule.overviewData
                                 .getPeopleUnmetWants()
                                 .toList();
+                            currentRow = RowType.unmetWants;
                           });
                         })),
               ],
