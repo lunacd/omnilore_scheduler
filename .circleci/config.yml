@@ -18,7 +18,7 @@ jobs:
           command: |
             if [ ! -d ~/development/flutter ]; then
               mkdir -p ~/development
-              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.19.2-stable.zip
+              curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_arm64_3.19.2-stable.zip
               unzip -qq flutter_sdk.zip -d ~/development
               rm flutter_sdk.zip
             fi
