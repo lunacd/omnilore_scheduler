@@ -6,7 +6,7 @@ orbs:
 jobs:
   build_macos:
     macos:
-      xcode: 12.5.1
+      xcode: 16.4.0
     steps:
       - checkout
       # Steps adapted from the official flutter orb
