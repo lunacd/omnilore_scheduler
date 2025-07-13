@@ -8,6 +8,7 @@ jobs:
     macos:
       xcode: 16.4.0
     steps:
+      - macos/install-rosetta
       - checkout
       # Steps adapted from the official flutter orb
       - restore_cache:
